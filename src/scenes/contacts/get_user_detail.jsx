@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Box, CircularProgress, Snackbar, Alert, Grid, Typography, Paper, Tabs, Tab, AppBar } from "@mui/material";
-import { getProfile } from '../../api/controller/user_controller'; 
-import { getAddBalanceDataByUser } from '../../api/controller/add_balance_data_controller'; 
-import { fetchAllWithdrawById } from '../../api/controller/withdraw_controller'; 
+import { getProfile } from '../../api/controller/user_controller';
+import { getAddBalanceDataByUser } from '../../api/controller/add_balance_data_controller';
+import { fetchAllWithdrawById } from '../../api/controller/withdraw_controller';
 import { useParams } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -19,7 +19,7 @@ const UserDetail = () => {
 
   const fetchUserDetails = async () => {
     try {
-      const response = await getProfile(id); 
+      const response = await getProfile(id);
       if (response && response.data) {
         setUserDetails(response.data);
       } else {
@@ -28,13 +28,13 @@ const UserDetail = () => {
 
       const balanceResponse = await getAddBalanceDataByUser(id);
       const withdrawResponse = await fetchAllWithdrawById(id);
-      
+
       if (balanceResponse && balanceResponse.data && balanceResponse.data.data.length > 0) {
         setBalanceAddHistory(balanceResponse.data.data);
       } else {
         setBalanceAddHistory([]);
       }
-      
+
       if (withdrawResponse && withdrawResponse.length > 0) {
         setWithdrawHistory(withdrawResponse);
       } else {
@@ -122,10 +122,10 @@ const UserDetail = () => {
         <Grid item xs={12} md={8}>
           <Paper sx={{ padding: 3, boxShadow: 3 }}>
             <AppBar position="static" sx={{ bgcolor: '#f5f5f5', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
-              <Tabs 
-                value={activeTab} 
-                onChange={handleTabChange} 
-                aria-label="user history tabs" 
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                aria-label="user history tabs"
                 textColor="primary"
                 indicatorColor="primary"
                 sx={{

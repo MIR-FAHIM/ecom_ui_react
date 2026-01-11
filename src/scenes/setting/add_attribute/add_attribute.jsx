@@ -65,8 +65,9 @@ const AddAttribute = () => {
     try {
       // Call the addAttribute function from the controller
       const response = await addAttribute({
-        "attribute_name":attributeName, 
-        "isActive":isActive});
+        "attribute_name": attributeName,
+        "isActive": isActive
+      });
 
       if (response.status === 200) {
         setSuccess(true);
@@ -90,9 +91,10 @@ const AddAttribute = () => {
 
     try {
       const response = await addAttributeValue({
-        "attribute_value":attributeValue,
-         "attribute_id":selectedAttributeID,
-        "isActive":1});
+        "attribute_value": attributeValue,
+        "attribute_id": selectedAttributeID,
+        "isActive": 1
+      });
 
       if (response.status === 200) {
         setAttributeValue(''); // Clear input

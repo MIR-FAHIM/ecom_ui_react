@@ -110,13 +110,12 @@ const Calendar = () => {
             headerToolbar={{
               left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
               center: "title",
-              right: `${
-                isXsDevices
-                  ? ""
-                  : isSmDevices
+              right: `${isXsDevices
+                ? ""
+                : isSmDevices
                   ? "dayGridMonth,listMonth"
                   : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
-              }`,
+                }`,
             }}
             initialView="dayGridMonth"
             editable={true}

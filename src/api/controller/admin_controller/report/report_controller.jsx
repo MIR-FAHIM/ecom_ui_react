@@ -14,10 +14,11 @@ export const getReportText = async () => {
   }
   try {
     const response = await axiosInstance.get(`/api/report-text`,
-        {
-            headers: {
-              'token': localStorage.getItem("authToken"),// Add the token in Authorization header
-            },}
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -36,10 +37,11 @@ export const fetchClients = async () => {
   }
   try {
     const response = await axiosInstance.get(`/api/clients`,
-        {
-            headers: {
-              'token': localStorage.getItem("authToken"),// Add the token in Authorization header
-            },}
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -56,10 +58,11 @@ export const addNotices = async (data) => {
   }
   try {
     const response = await axiosInstance.post(`/api/notice/add`, data,
-        {
-            headers: {
-              'token': localStorage.getItem("authToken"),// Add the token in Authorization header
-            },}
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -76,10 +79,11 @@ export const deleteNotice = async (data) => {
   }
   try {
     const response = await axiosInstance.post(`/api/delete-notice`, data,
-        {
-            headers: {
-              'token': localStorage.getItem("authToken"),// Add the token in Authorization header
-            },}
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -96,10 +100,11 @@ export const updateNotice = async (data) => {
   }
   try {
     const response = await axiosInstance.post(`/api/update-notice`, data,
-        {
-            headers: {
-              'token': localStorage.getItem("authToken"),// Add the token in Authorization header
-            },}
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -116,10 +121,11 @@ export const fetchNotices = async () => {
   }
   try {
     const response = await axiosInstance.get(`/api/notice/all`,
-        {
-            headers: {
-              'token': localStorage.getItem("authToken"),// Add the token in Authorization header
-            },}
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
     );
     return response.data;
   } catch (error) {

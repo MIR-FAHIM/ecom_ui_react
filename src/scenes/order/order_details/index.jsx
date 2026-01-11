@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from 'react-router-dom';
-import { getOrderDetail , changeOrderStatus} from "../../../api/controller/order_controller/order_controller";
+import { getOrderDetail, changeOrderStatus } from "../../../api/controller/order_controller/order_controller";
 import { useEffect, useState } from "react";
 
 const OrderDetailsPage = () => {
@@ -8,22 +8,22 @@ const OrderDetailsPage = () => {
     "Order Placed", "Order Validity Check", "Order Approved", "Packaging",
     "Package Complete", "Shipping Started", "Delivered", "Balance Added"
   ];
- const [orderDetail, setOrders] = useState({});
+  const [orderDetail, setOrders] = useState({});
   const [loading, setLoading] = useState(true);  // To handle loading state
   const [error, setError] = useState(null);      // To handle error state
   const [selectedStatus, setSelectedStatus] = useState("");
   const [isChanging, setIsChanging] = useState(false);
 
   const { id } = useParams();
-  
+
   useEffect(() => {
     const fetchOrdersDetail = async () => {
       try {
-         // Get Order ID
+        // Get Order ID
         console.log("id is:", id);
         const response = await getOrderDetail(id);
         console.log("Data is:", response);
-  
+
         if (response?.data) {
           setOrders(response.data?.data);
           setSelectedStatus(response.data?.data?.order_status);
@@ -35,7 +35,7 @@ const OrderDetailsPage = () => {
         setLoading(false);
       }
     };
-  
+
     fetchOrdersDetail();
   }, []);
 

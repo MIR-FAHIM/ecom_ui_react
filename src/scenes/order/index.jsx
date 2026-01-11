@@ -49,30 +49,30 @@ const AllOrders = () => {
     { field: "id", headerName: "Order ID", flex: 0.2 },
     { field: "customer_name", headerName: "Customer Name", flex: 0.5 },
     { field: "customer_phone", headerName: "Phone Number", flex: 0.5 },
-   
+
     { field: "isDhaka", headerName: "Is Dhaka", flex: 0.5, type: "boolean" },
-    { field: "total_cart", headerName: "Total Cart", flex: 0.5, type:"integer" },
+    { field: "total_cart", headerName: "Total Cart", flex: 0.5, type: "integer" },
     { field: "payment_recievable_from_cus", headerName: "Payment Recievable", flex: 0.7 },
-    { 
-      field: "order_status", 
-      headerName: "Order Status", 
-      flex: 0.5, 
+    {
+      field: "order_status",
+      headerName: "Order Status",
+      flex: 0.5,
       valueFormatter: ({ value }) => {
         // Adjust the formatter to return the correct status from the statusLabels array
         const statusLabels = [
           "Order Placed", "Order Validity Check", "Order Approved", "Packaging",
           "Package Complete", "Shipping Started", "Delivered", "Balance Added"
         ];
-    
+
         // Return the corresponding status label based on the order status
         return statusLabels[value] || "Unknown Status"; // Fallback to "Unknown Status" if no match
       }
     },
-    
+
     { field: "isDelivered", headerName: "Delivered", flex: 0.3, type: "boolean" },
-   
+
     { field: "created_at", headerName: "Created At", flex: 1, valueFormatter: (params) => new Date(params.value).toLocaleString() },
-    
+
     // Adding the View Details button column
     {
       field: "view_details",

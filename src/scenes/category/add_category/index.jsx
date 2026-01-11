@@ -127,7 +127,7 @@ const AddProductCategory = () => {
                 helperText={touched.bn_name && errors.bn_name}
                 sx={{ gridColumn: "span 4" }}
               />
-              
+
               {/* File input for image upload */}
               <Box sx={{ gridColumn: "span 4" }}>
                 <input

@@ -1,62 +1,33 @@
-import { Avatar, Box, IconButton, Typography, useTheme, Collapse } from "@mui/material";
-import { useContext, useState, useEffect } from "react";
+import { Box, IconButton, Typography, useTheme, Collapse } from "@mui/material";
+import { useContext, useState } from "react";
 import { tokens } from "../../../theme";
-import { getProfile, modulePermission } from "../../../api/controller/admin_controller/user_controller";
-import { base_url } from "../../../api/config/index";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import { useNavigate } from "react-router-dom";
-import { appname } from '../../../../src/api/config';
+import { appname } from '../../../api/config/index';
 
 import {
-  BarChartOutlined,
-  CalendarTodayOutlined,
-  ContactsOutlined,
-  DashboardOutlined,
-  HelpOutlineOutlined,
-  MapOutlined,
   MenuOutlined,
-  PeopleAltOutlined,
-  PersonOutlined,
+  DashboardOutlined,
+  LocalShippingOutlined,
+  ShoppingCartOutlined,
+  PeopleOutlined,
   ReceiptOutlined,
-  TimelineOutlined,
-  WavesOutlined,
+  StorefrontOutlined,
+  DeliveryDiningOutlined,
   SettingsOutlined,
-  AssignmentOutlined,
-  WorkOutlineOutlined,
-  ListAltOutlined,
-  EventNoteOutlined,
-  AddTaskOutlined,
-  EngineeringOutlined,
-  AccountCircleOutlined,
-  SupervisorAccountOutlined,
-  AssignmentIndOutlined,
-  PieChartOutlined,
-  SourceOutlined,
-  FaceOutlined,
-  CalculateOutlined,
-  ViewListOutlined,
-  AdminPanelSettingsOutlined,
-  TaskAltOutlined,
-  FolderSharedOutlined,
-
+  AccountBalanceOutlined,
 } from "@mui/icons-material";
 import logo from "../../../assets/images/logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 
 const SideBar = () => {
-  const userID = localStorage.getItem("userId");
   const [collapsed, setCollapsed] = useState(false);
-
-  const [user, setUser] = useState({});
   const [expandedCategory, setExpandedCategory] = useState(null);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const navigate = useNavigate();
   const colors = tokens(theme.palette.mode);
-  const [imageUrl, setImageUrl] = useState(null);
-
-  const [isAdmin, setIsAdmin] = useState(0);
 
   const iconStyle = {
     color: colors.blueAccent[500],
@@ -66,44 +37,6 @@ const SideBar = () => {
       transform: "scale(1.2)",
     },
   };
-  const [permissions, setPermissions] = useState({});
-  const handleGetModulePermission = async () => {
-    try {
-
-      const response = await modulePermission();
-      if (response.status === 'success') {
-        setPermissions(response.permissions); // Set the response data
-      } else {
-
-      }
-    } catch (error) {
-
-    } finally {
-
-    }
-  };
-
-
-  useEffect(() => {
-    handleGetModulePermission();
-
-    async function fetchUserProfile() {
-      try {
-        const response = await getProfile(userID, navigate);
-        if (response.status === "success") {
-          setUser(response.data);
-          setIsAdmin(response.data.role_id);
-         console.log("value is ", isAdmin)
-          setImageUrl(`${base_url}/storage/${response.data.photo}`);
-
-        }
-      } catch (error) {
-        console.error("Error fetching user profile", error);
-      }
-    }
-    fetchUserProfile();
-
-  }, []);
 
   const toggleCategory = (category) => {
     setExpandedCategory((prev) => (prev === category ? null : category));
@@ -136,7 +69,6 @@ const SideBar = () => {
                 <Typography variant="h6" fontWeight="bold" textTransform="capitalize" color={colors.blueAccent[500]}>
                   {appname}
                 </Typography>
-
               </Box>
             )}
             <IconButton onClick={() => setCollapsed(!collapsed)}>
@@ -147,31 +79,8 @@ const SideBar = () => {
       </Menu>
 
       <Box mb={5} pl={collapsed ? undefined : "5%"}>
-
-        {permissions.dashboard && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => navigate("/")}
-          >
-            <DashboardOutlined sx={iconStyle} />
-            {!collapsed ? "Dashboard" : ""}
-          </Typography>
-        )}
-
-
-        {/* Category - HRMS */}
-        {permissions.hrms && (<Typography
+        {/* Dashboard */}
+        <Typography
           variant="h6"
           color={colors.gray[300]}
           sx={{
@@ -184,13 +93,33 @@ const SideBar = () => {
               color: colors.blueAccent[700],
             },
           }}
-          onClick={() => toggleCategory("hrms")}
+          onClick={() => navigate("/")}
         >
-          <PeopleAltOutlined sx={iconStyle} />
-          {!collapsed ? "HRMS" : ""}
-        </Typography>)}
+          <DashboardOutlined sx={iconStyle} />
+          {!collapsed ? "Dashboard" : ""}
+        </Typography>
 
-        <Collapse in={expandedCategory === "hrms"}>
+        {/* Product */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("product")}
+        >
+          <LocalShippingOutlined sx={iconStyle} />
+          {!collapsed ? "Product" : ""}
+        </Typography>
+
+        <Collapse in={expandedCategory === "product"}>
           <Menu
             menuItemStyles={{
               button: {
@@ -202,34 +131,34 @@ const SideBar = () => {
               },
             }}
           >
-            <Item title="Employee" path="/employee-list-view" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-            <Item title="Department" path="/department-wise-emp" colors={colors} icon={<PersonOutlined sx={iconStyle} />} />
+            <Item title="Add Product" path="/ecom/product/add" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
+            <Item title="All Products" path="/ecom/product/all" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
+            <Item title="Stock Out Products" path="/ecom/product/stock-out" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
+            <Item title="Seller Products" path="/ecom/product/seller" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
 
-        {/* Category - Attendance */}
-        {permissions.attendance && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("attendance")}
-          >
-            <CalendarTodayOutlined sx={iconStyle} />
-            {!collapsed ? "Attendance" : ""}
-          </Typography>
-        )}
+        {/* Order */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("order")}
+        >
+          <ShoppingCartOutlined sx={iconStyle} />
+          {!collapsed ? "Order" : ""}
+        </Typography>
 
-        <Collapse in={expandedCategory === "attendance"}>
+        <Collapse in={expandedCategory === "order"}>
           <Menu
             menuItemStyles={{
               button: {
@@ -241,39 +170,33 @@ const SideBar = () => {
               },
             }}
           >
-            <Item title="Today Attendance" path="/check-in-out" colors={colors} icon={<EventNoteOutlined sx={iconStyle} />} />
-            <Item title="Attendance Report" path="/employee-attendance-report" colors={colors} icon={<ListAltOutlined sx={iconStyle} />} />
-            <Item title="Request Leave" path="/leave-manage-form" colors={colors} icon={<AddTaskOutlined sx={iconStyle} />} />
-            <Item title="My Leave Request" path="/user-leave-request" colors={colors} icon={<EngineeringOutlined sx={iconStyle} />} />
-            <Item title="Leave Manager" path="/admin-leave-manage" colors={colors} icon={<AccountCircleOutlined sx={iconStyle} />} />
-            <Item title="Attendance Adjustment" path="/attendance-adjustment" colors={colors} icon={<AccountCircleOutlined sx={iconStyle} />} />
+            <Item title="All Orders" path="/ecom/order/all" colors={colors} icon={<ShoppingCartOutlined sx={iconStyle} />} />
+            <Item title="Completed Orders" path="/ecom/order/completed" colors={colors} icon={<ShoppingCartOutlined sx={iconStyle} />} />
+            <Item title="Order Report" path="/ecom/order/report" colors={colors} icon={<ReceiptOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
 
+        {/* Seller */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("seller")}
+        >
+          <StorefrontOutlined sx={iconStyle} />
+          {!collapsed ? "Seller" : ""}
+        </Typography>
 
-        {permissions.attendance && (isAdmin === 1 ||  isAdmin === 2) &&(
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("notice")}
-          >
-            <SettingsOutlined sx={iconStyle} />
-            {!collapsed ? "Add Notices" : ""}
-          </Typography>
-        )}
-
-        <Collapse in={expandedCategory === "notice"}>
+        <Collapse in={expandedCategory === "seller"}>
           <Menu
             menuItemStyles={{
               button: {
@@ -285,34 +208,32 @@ const SideBar = () => {
               },
             }}
           >
-            <Item title="Add Notice" path="/add-notices" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-
-            {/* <Item title="Sale" path="/software-sale" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} /> */}
+            <Item title="Add Seller" path="/ecom/seller/add" colors={colors} icon={<StorefrontOutlined sx={iconStyle} />} />
+            <Item title="All Sellers" path="/ecom/seller/all" colors={colors} icon={<StorefrontOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
-        {/* Category - Task */}
-        {permissions.task && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("task")}
-          >
-            <AssignmentOutlined sx={iconStyle} />
-            {!collapsed ? "Task" : ""}
-          </Typography>
-        )}
 
-        <Collapse in={expandedCategory === "task"}>
+        {/* Customer */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("customer")}
+        >
+          <PeopleOutlined sx={iconStyle} />
+          {!collapsed ? "Customer" : ""}
+        </Typography>
+
+        <Collapse in={expandedCategory === "customer"}>
           <Menu
             menuItemStyles={{
               button: {
@@ -324,34 +245,32 @@ const SideBar = () => {
               },
             }}
           >
-            <Item title="My Tasks" path="/my-task-tab" colors={colors} icon={<TaskAltOutlined sx={iconStyle} />} />
-            <Item title="All Tasks" path="/all-task" colors={colors} icon={<FolderSharedOutlined sx={iconStyle} />} />
-            <Item title="Task Calendar" path="/task-by-calendar" colors={colors} icon={<FolderSharedOutlined sx={iconStyle} />} />
+            <Item title="Add Customer" path="/ecom/customer/add" colors={colors} icon={<PeopleOutlined sx={iconStyle} />} />
+            <Item title="All Customers" path="/ecom/customer/all" colors={colors} icon={<PeopleOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
-        {permissions.task && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("project")}
-          >
-            <WorkOutlineOutlined sx={iconStyle} />
-            {!collapsed ? "Project" : ""}
-          </Typography>
-        )}
-        {/* Category - Project */}
 
-        <Collapse in={expandedCategory === "project"}>
+        {/* Report */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("report")}
+        >
+          <ReceiptOutlined sx={iconStyle} />
+          {!collapsed ? "Report" : ""}
+        </Typography>
+
+        <Collapse in={expandedCategory === "report"}>
           <Menu
             menuItemStyles={{
               button: {
@@ -363,33 +282,32 @@ const SideBar = () => {
               },
             }}
           >
-            <Item title="Add Project" path="/add-project" colors={colors} icon={<AddTaskOutlined sx={iconStyle} />} />
-            <Item title="Projects List" path="/project-list" colors={colors} icon={<ViewListOutlined sx={iconStyle} />} />
+            <Item title="Today Report" path="/ecom/report/today" colors={colors} icon={<ReceiptOutlined sx={iconStyle} />} />
+            <Item title="Month Wise Report" path="/ecom/report/month-wise" colors={colors} icon={<ReceiptOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
-        {permissions.prospect && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("prospect")}
-          >
-            <SupervisorAccountOutlined sx={iconStyle} />
-            {!collapsed ? "Leads" : ""}
-          </Typography>
-        )}
-        {/* Category - Leads */}
 
-        <Collapse in={expandedCategory === "prospect"}>
+        {/* Delivery */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("delivery")}
+        >
+          <DeliveryDiningOutlined sx={iconStyle} />
+          {!collapsed ? "Delivery" : ""}
+        </Typography>
+
+        <Collapse in={expandedCategory === "delivery"}>
           <Menu
             menuItemStyles={{
               button: {
@@ -401,183 +319,51 @@ const SideBar = () => {
               },
             }}
           >
-            <Item title="Sales Pipeline" path="/prospect-list-by-stage" colors={colors} icon={<PieChartOutlined sx={iconStyle} />} />
-            <Item title="Facebook Leads" path="/facebook-leads" colors={colors} icon={<FaceOutlined sx={iconStyle} />} />
-            <Item title="Opportunity" path="/opportunity-by-stage" colors={colors} icon={<FaceOutlined sx={iconStyle} />} />
-            <Item title="Contact Form Leads" path="/contact-us" colors={colors} icon={<FaceOutlined sx={iconStyle} />} />
-            <Item title="Effort Calculation" path="/effort-calculation" colors={colors} icon={<CalculateOutlined sx={iconStyle} />} />
-            <Item title="Prospect Report" path="/prospect-report-monthwise" colors={colors} icon={<BarChartOutlined sx={iconStyle} />} />
-            <Item title="Sourcewise Report" path="/source-wise-prospect-report" colors={colors} icon={<SourceOutlined sx={iconStyle} />} />
-            <Item title="Warehouses" path="/map-markers" colors={colors} icon={<SourceOutlined sx={iconStyle} />} />
+            <Item title="Add Delivery Man" path="/ecom/delivery/add" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+            <Item title="All Delivery Mans" path="/ecom/delivery/all" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
-        {permissions.prospect && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("warehouse")}
-          >
-            <SupervisorAccountOutlined sx={iconStyle} />
-            {!collapsed ? "Warehouses" : ""}
-          </Typography>
-        )}
-        {/* Category - Leads */}
 
-        <Collapse in={expandedCategory === "warehouse"}>
-          <Menu
-            menuItemStyles={{
-              button: {
-                ":hover": {
-                  color: "#868dfb",
-                  background: "transparent",
-                  transition: ".4s ease",
-                },
-              },
-            }}
-          >
+        {/* Setting */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => navigate("/ecom/setting")}
+        >
+          <SettingsOutlined sx={iconStyle} />
+          {!collapsed ? "Setting" : ""}
+        </Typography>
 
-            <Item title="Warehouses Map" path="/map-markers" colors={colors} icon={<SourceOutlined sx={iconStyle} />} />
-            <Item title="Warehouses List" path="/warehouse-list" colors={colors} icon={<SourceOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-        {/* Category - Clients */}
-        {permissions.client && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("client")}
-          >
-            <AssignmentIndOutlined sx={iconStyle} />
-            {!collapsed ? "Clients" : ""}
-          </Typography>
-        )}
+        {/* Accounts */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => navigate("/ecom/accounts")}
+        >
+          <AccountBalanceOutlined sx={iconStyle} />
+          {!collapsed ? "Accounts" : ""}
+        </Typography>
 
-        <Collapse in={expandedCategory === "client"}>
-          <Menu
-            menuItemStyles={{
-              button: {
-                ":hover": {
-                  color: "#868dfb",
-                  background: "transparent",
-                  transition: ".4s ease",
-                },
-              },
-            }}
-          >
-            <Item title="Clients" path="/client-list" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-            {/* <Item title="Sale" path="/software-sale" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} /> */}
-          </Menu>
-        </Collapse>
-        {/* Sale - Product */}
-
-
-        {permissions.sale && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("setting")}
-          >
-            <SettingsOutlined sx={iconStyle} />
-            {!collapsed ? "Sale" : ""}
-          </Typography>
-        )}
-
-        <Collapse in={expandedCategory === "sale"}>
-          <Menu
-            menuItemStyles={{
-              button: {
-                ":hover": {
-                  color: "#868dfb",
-                  background: "transparent",
-                  transition: ".4s ease",
-                },
-              },
-            }}
-          >
-            <Item title="Stock List" path="/all-stock" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-            <Item title="Product List" path="/product-list" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-            <Item title="POS Manager" path="/pos-page" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-            <Item title="All Order" path="/all-order" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} />
-            {/* <Item title="Sale" path="/software-sale" colors={colors} icon={<ContactsOutlined sx={iconStyle} />} /> */}
-          </Menu>
-        </Collapse>
-        {permissions.setting && (
-          <Typography
-            variant="h6"
-            color={colors.gray[300]}
-            sx={{
-              m: "15px 0 5px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              ":hover": {
-                color: colors.blueAccent[700],
-              },
-            }}
-            onClick={() => toggleCategory("setting")}
-          >
-            <SettingsOutlined sx={iconStyle} />
-            {!collapsed ? "Setting" : ""}
-          </Typography>
-        )}
-        {/* Category - Setting */}
-
-        <Collapse in={expandedCategory === "setting"}>
-          <Menu
-            menuItemStyles={{
-              button: {
-                ":hover": {
-                  color: "#868dfb",
-                  background: "transparent",
-                  transition: ".4s ease",
-                },
-              },
-            }}
-          >
-            <Item title="Add Department" path="/department-view" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-            <Item title="Add Designation" path="/designation-view" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-            <Item title="Add Role" path="/role-view" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-            <Item title="Add Task Priority" path="/task-priority" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-            <Item title="Add Task Status" path="/task-status" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-            <Item title="Add Task Type" path="/task-type" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-            <Item title="Product Entry" path="/product-entry" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-
-
-            <Item title="Feature Permission" path="/user-feature-permission" colors={colors} icon={<AdminPanelSettingsOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
       </Box>
     </Sidebar>
   );

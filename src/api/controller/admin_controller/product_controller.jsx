@@ -1,14 +1,10 @@
 import axiosInstance from '../../axiosInstance.jsx'
 
 // Fetch posts from API
-export const getProduct = async (id) => {
+export const getProduct = async () => {
   try {
-    const response = await axiosInstance.get(`/api/product/active`,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
+    const response = await axiosInstance.get(`/api/products/list`,
+       
     );
     return response.data;
   } catch (error) {
@@ -76,9 +72,10 @@ export const getProductWithVariants = async (id) => {
     return [];
   }
 }
-export const addProduct = async (data) => {
+
+export const getAllVarients = async () => {
   try {
-    const response = await axiosInstance.post(`/api/product/add`, data,
+    const response = await axiosInstance.get(`/api/product-variant/get-all-varients`,
         {
             headers: {
               // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
@@ -87,10 +84,22 @@ export const addProduct = async (data) => {
     );
     return response.data;
   } catch (error) {
+    console.error("Error fetching product-variant/get-all-varients:", error);
+    return [];
+  }
+}
+export const addProduct = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/products/create`, data
+    );
+    return response.data;
+  } catch (error) {
     console.error("Error fetching addProduct:", error);
     return [];
   }
 }
+
+
 export const addVariant = async (data) => {
   try {
     const response = await axiosInstance.post(`/api/product-variant/add`, data,

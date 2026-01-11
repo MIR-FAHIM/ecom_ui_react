@@ -1,65 +1,62 @@
 import axiosInstance from '../../axiosInstance.jsx'
 
-// Fetch posts from API
-export const getOrder = async () => {
+// Fetch all orders with pagination
+export const getOrder = async (params = {}) => {
   try {
-    const response = await axiosInstance.get(`/api/product-orders/get-order`,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
-    );
+    const response = await axiosInstance.get('/api/orders/list', { params });
     return response.data;
   } catch (error) {
-    console.error("Error fetching get order:", error);
-    return [];
+    console.error("Error fetching orders:", error);
+    return { status: 'error', data: [] };
   }
 }
 
-export const getCategory = async () => {
+// Get order details by ID
+export const getOrderDetails = async (id) => {
   try {
-    const response = await axiosInstance.get(`/api/get-active-categories`,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
-    );
+    const response = await axiosInstance.get(`/api/orders/details/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching getCategory:", error);
-    return [];
-  }
-}
-export const getStock = async () => {
-  try {
-    const response = await axiosInstance.get(`/api/stock/list`,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching getStock:", error);
-    return [];
+    console.error("Error fetching order details:", error);
+    return { status: 'error', data: {} };
   }
 }
 
-export const addProduct = async (data) => {
+// Update order status (PATCH endpoint)
+export const updateOrderStatusPatch = async (id, status) => {
   try {
-    const response = await axiosInstance.post(`/api/product/add`, data,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
+    const formData = new FormData();
+    formData.append('status', status);
+    
+    const response = await axiosInstance.patch(
+      `/api/orders/status/${id}?status=${status}`,
+      formData
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching addProduct:", error);
-    return [];
+    console.error("Error updating order status:", error);
+    return { status: 'error', message: error.message };
+  }
+}
+
+// Update order status (PUT endpoint - fallback)
+export const updateOrderStatus = async (id, status) => {
+  try {
+    const response = await axiosInstance.put(`/api/orders/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return { status: 'error', message: error.message };
+  }
+}
+
+// Delete order
+export const deleteOrder = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/api/orders/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return { status: 'error', message: error.message };
   }
 }

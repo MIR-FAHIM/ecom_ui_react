@@ -26,11 +26,11 @@ import {
   SettingsOutlined,
 } from "@mui/icons-material";
 import { ToggledContext } from "../../../App";
-import { modulePermission } from "../../../api/controller/admin_controller/user_controller";
+
 
 const Navbar = () => {
   const userID = localStorage.getItem("userId");
-    const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
@@ -38,30 +38,18 @@ const Navbar = () => {
   const isMdDevices = useMediaQuery("(max-width:768px)");
   const isXsDevices = useMediaQuery("(max-width:466px)");
   const colors = tokens(theme.palette.mode);
-  
+
   const [openNotificationModal, setOpenNotificationModal] = useState(false);
 
-
-const [permissions, setPermissions] = useState({});
-  const handleGetModulePermission = async () => {
-    try {
-
-      const response = await modulePermission();
-      if (response.status === 'success') {
-        setPermissions(response.permissions); // Set the response data
-      } else {
-
-      }
-    } catch (error) {
-
-    } finally {
-
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    navigate('/login');
   };
+  const [permissions, setPermissions] = useState({});
+
   // Fetch notifications when the component mounts
   useEffect(() => {
-    handleGetModulePermission();
-    // Fetch notifications for the current user
+   
 
 
   }, [userID]);
@@ -76,7 +64,7 @@ const [permissions, setPermissions] = useState({});
   // Handle notification modal open/close
   const handleNotificationClick = () => {
     navigate(`notification-page`);
-    
+
     // setOpenNotificationModal(true);
   };
 
@@ -106,26 +94,29 @@ const [permissions, setPermissions] = useState({});
 
       <Box>
 
-         {permissions.task && (
-           <IconButton onClick={navigateToMessageBox}>
-          <Badge badgeContent={1} color="error">
-            <ChatBubbleOutlineIcon />
-          </Badge>
-        </IconButton>
-         )}
-       
+        {permissions.task && (
+          <IconButton onClick={navigateToMessageBox}>
+            <Badge badgeContent={1} color="error">
+              <ChatBubbleOutlineIcon />
+            </Badge>
+          </IconButton>
+        )}
+        <Button variant="contained" color="primary" onClick={handleLogout}>
+          Log Out
+        </Button>
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
         </IconButton>
-         {permissions.task && (
-           <IconButton onClick={handleNotificationClick}>
-             <Badge badgeContent={1} color="error">
-          <NotificationsOutlined />
-          </Badge>
-          
-        </IconButton>
-         )}
-       
+
+        {permissions.task && (
+          <IconButton onClick={handleNotificationClick}>
+            <Badge badgeContent={1} color="error">
+              <NotificationsOutlined />
+            </Badge>
+
+          </IconButton>
+        )}
+
         <IconButton>
           <SettingsOutlined />
         </IconButton>
