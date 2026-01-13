@@ -22,7 +22,7 @@ import {
 import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import { image_file_url } from "../../../api/config/index.jsx";
-import { getAllProducts } from "../../../api/controller/product_controller";
+import { getProduct } from "../../../api/controller/admin_controller/product/product_controller.jsx";
 
 const AllProducts = () => {
   const theme = useTheme();
@@ -44,7 +44,7 @@ const AllProducts = () => {
         per_page: perPage,
       };
 
-      const response = await getAllProducts(params);
+      const response = await getProduct(params);
       if (response.status === "success" && response.data) {
         setProducts(response.data.data || []);
         setTotalProducts(response.data.total || 0);

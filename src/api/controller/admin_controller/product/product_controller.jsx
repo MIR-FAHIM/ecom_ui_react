@@ -43,7 +43,34 @@ export const getProductWithVariants = async (id) => {
     return [];
   }
 }
+export const uploadProductImages = async (productId, images) => {
+  try {
+    // images should be an array of FormData entries with image and is_primary
+    const formData = new FormData();
+    
+    images.forEach((img, index) => {
+      if (img.file) {
+        formData.append(`images[${index}][image]`, img.file);
+        formData.append(`images[${index}][is_primary]`, img.is_primary ? '1' : '0');
+      }
+    });
 
+    const response = await axiosInstance.post(
+      `/api/products/images/upload/${productId}`,
+      formData,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading product images:', error);
+    return { status: 'error', message: error.message };
+  }
+};
 export const getAllVarients = async () => {
   try {
     const response = await axiosInstance.get(`/api/product-variant/get-all-varients`,
@@ -59,16 +86,20 @@ export const getAllVarients = async () => {
     return [];
   }
 }
-export const addProduct = async (data) => {
+export const createProduct = async (productData) => {
   try {
-    const response = await axiosInstance.post(`/api/products/create`, data
-    );
+    // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description
+    const response = await axiosInstance.post('/api/products/create', productData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
-    console.error("Error fetching addProduct:", error);
-    return [];
+    console.error('Error creating product:', error);
+    return { status: 'error', message: error.message };
   }
-}
+};
 
 
 export const addVariant = async (data) => {

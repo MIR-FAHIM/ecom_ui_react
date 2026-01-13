@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Dashboard from "./scenes/admin_panel/dashboard";
 import Login from "./scenes/auth/login";
+import Register from "./scenes/auth/Register";
 import AddProductTab from "./scenes/admin_panel/product/add_product/AddProductTab";
 import AllProducts from "./scenes/admin_panel/product/AllProducts";
 import StockOutProduct from "./scenes/admin_panel/product/StockOutProduct";
@@ -21,16 +22,39 @@ import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
 import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
 import EcommerceSetting from "./scenes/admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./scenes/admin_panel/accounts/EcommerceAccounts";
+import AddBanner from "./scenes/admin_panel/media/AddBanner";
 
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
 import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
+import Cart from "./scenes/a_frontend_ui/order/cart";
+
+import FrontendLayout from "./scenes/a_frontend_ui/layout/FrontendLayout";
+import Privacy from "./scenes/a_frontend_ui/pages/Privacy";
+import Terms from "./scenes/a_frontend_ui/pages/Terms";
+import About from "./scenes/a_frontend_ui/pages/About";
+import Contact from "./scenes/a_frontend_ui/pages/Contact";
+import ProceedOrder from "./scenes/a_frontend_ui/order/ProceedOrder";
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/register" element={<Register />}></Route>
+        {/* Public / storefront routes */}
+        <Route path="/ecom" element={<FrontendLayout />}>
+          <Route index element={<HomeP1 />} />
+          <Route path="home" element={<HomeP1 />} />
+          <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="cart" element={<Cart />} />
+          <Route path="checkout" element={<ProceedOrder />} />
+          <Route path="privacy" element={<Privacy />} />
+          <Route path="terms" element={<Terms />} />
+          <Route path="about" element={<About />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="proceed-order" element={<ProceedOrder />} />
+        </Route>
 
          
 
@@ -71,10 +95,8 @@ const AppRouter = () => {
           <Route path="/ecom/accounts"  element={<EcommerceAccounts />} />
 
 
+          <Route path="/ecom/banner/add" element={<AddBanner />} />
 
-        {/* Public / storefront routes */}
-          <Route path="/ecom/home" element={<HomeP1 />} />
-          <Route path="/ecom/product/:id" element={<ProductDetail />} />
         </Route>
       </Routes>
     </Router>

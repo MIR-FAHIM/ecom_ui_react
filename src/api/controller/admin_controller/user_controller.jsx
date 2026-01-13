@@ -5,12 +5,8 @@ import { companyID } from '../../config'
 
 export const registerEmployee = async (data) => {
   try {
-    const response = await axiosInstance.post(`/api/register-employee`, data,
-      {
-        headers: {
-          'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-        },
-      }
+    const response = await axiosInstance.post(`/api/users/create`, data,
+     
     );
     return response.data; // Return the response from the API
   } catch (error) {

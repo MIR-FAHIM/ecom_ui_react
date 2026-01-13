@@ -30,7 +30,7 @@ import {
 } from "@mui/material";
 import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
 import { tokens } from "../../../theme";
-import { getOrder, deleteOrder, updateOrderStatus } from "../../../api/controller/admin_controller/order_controller";
+import { getAllOrder, deleteOrder, updateOrderStatus } from "../../../api/controller/admin_controller/order/order_controller";
 
 const AllOrders = () => {
   const theme = useTheme();
@@ -59,7 +59,7 @@ const AllOrders = () => {
         per_page: perPage,
       };
 
-      const response = await getOrder(params);
+      const response = await getAllOrder(params);
       if (response.status === "success" && response.data) {
         setOrders(response.data.data || []);
         setTotalOrders(response.data.total || 0);

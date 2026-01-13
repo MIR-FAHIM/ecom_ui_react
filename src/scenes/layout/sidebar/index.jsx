@@ -324,6 +324,43 @@ const SideBar = () => {
           </Menu>
         </Collapse>
 
+                {/* Banner */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("media")}
+        >
+          <DeliveryDiningOutlined sx={iconStyle} />
+          {!collapsed ? "Media" : ""}
+        </Typography>
+
+        <Collapse in={expandedCategory === "media"}>
+          <Menu
+            menuItemStyles={{
+              button: {
+                ":hover": {
+                  color: "#868dfb",
+                  background: "transparent",
+                  transition: ".4s ease",
+                },
+              },
+            }}
+          >
+            <Item title="Add Banner" path="/ecom/banner/add" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+           
+          </Menu>
+        </Collapse>
+
         {/* Setting */}
         <Typography
           variant="h6"

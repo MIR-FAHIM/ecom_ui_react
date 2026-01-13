@@ -15,7 +15,7 @@ import {
   Alert,
 } from "@mui/material";
 import { tokens } from "../../../../theme";
-import { createProduct, uploadProductImages } from "../../../../api/controller/product_controller";
+import { createProduct, uploadProductImages } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getAllVendors } from "../../../../api/controller/user_controller";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller"; 
 

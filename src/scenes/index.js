@@ -22,11 +22,17 @@ import AddDeliveryMan from "./admin_panel/delivery/AddDeliveryMan";
 import AllDeliveryMans from "./admin_panel/delivery/AllDeliveryMans";
 import EcommerceSetting from "./admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./admin_panel/accounts/EcommerceAccounts";
+import AddBanner from "./admin_panel/media/AddBanner";
+
+
+
 
 // user frontend
 
 import HomeP1 from "./a_frontend_ui/home/Home";
 import ProductDetail from "./a_frontend_ui/product/ProductDetail";
+import Cart from "./a_frontend_ui/order/cart";
+import ProceedOrder from "./a_frontend_ui/order/ProceedOrder";
 
 export {
   Navbar,
@@ -51,8 +57,11 @@ export {
   AllDeliveryMans,
   EcommerceSetting,
   EcommerceAccounts,
-
+  AddBanner,
+  
   // user frontend
   HomeP1,
   ProductDetail,
+  Cart,
+  ProceedOrder,
 };

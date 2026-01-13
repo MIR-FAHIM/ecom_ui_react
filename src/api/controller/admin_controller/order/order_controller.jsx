@@ -1,9 +1,27 @@
-import axiosInstance from '../../axiosInstance.jsx'
+import axiosInstance from '../../../axiosInstance.jsx'
 
 // Fetch all orders with pagination
 export const getOrder = async (params = {}) => {
   try {
     const response = await axiosInstance.get('/api/orders/list', { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return { status: 'error', data: [] };
+  }
+}
+export const getCompletedOrder = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/api/orders/completed', { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return { status: 'error', data: [] };
+  }
+}
+export const getAllOrder = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/api/orders/all/orders', { params });
     return response.data;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -38,7 +56,16 @@ export const updateOrderStatusPatch = async (id, status) => {
     return { status: 'error', message: error.message };
   }
 }
+export const checkOutOrder = async (data) => {
+    try {
+        const response = await axiosInstance.post(`/api/orders/checkout`, data);
+        return response; // Return the response from the API
+    } catch (error) {
+        console.error("Error checkOutOrder data:", error);
+        throw error; // Rethrow the error for further handling in your component
+    }
 
+}
 // Update order status (PUT endpoint - fallback)
 export const updateOrderStatus = async (id, status) => {
   try {
