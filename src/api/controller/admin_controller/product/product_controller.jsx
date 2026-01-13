@@ -1,4 +1,4 @@
-import axiosInstance from '../../axiosInstance.jsx'
+import axiosInstance from '../../../axiosInstance.jsx'
 
 // Fetch posts from API
 export const getProduct = async () => {
@@ -27,36 +27,7 @@ export const getStock = async () => {
     return [];
   }
 }
-export const getBrand = async () => {
-  try {
-    const response = await axiosInstance.get(`/api/get-brands`,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching getBrand:", error);
-    return [];
-  }
-}
-export const getCategory = async () => {
-  try {
-    const response = await axiosInstance.get(`/api/get-active-categories`,
-        {
-            headers: {
-              // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-              'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-            },}
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching getCategory:", error);
-    return [];
-  }
-}
+
 export const getProductWithVariants = async (id) => {
   try {
     const response = await axiosInstance.get(`/api/product-variant/all/${id}`,

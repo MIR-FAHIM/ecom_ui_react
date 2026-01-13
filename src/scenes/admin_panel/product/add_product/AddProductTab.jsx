@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { tokens } from "../../../../theme";
 import { createProduct, uploadProductImages } from "../../../../api/controller/product_controller";
+import { getAllVendors } from "../../../../api/controller/user_controller";
+import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller"; 
 
 import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/components/productWizard/steps";
 import StepGeneral from "../../../admin_panel/product/add_product/components/productWizard/StepGeneral";
@@ -49,23 +51,34 @@ function AddProductTab() {
   const [attributes, setAttributes] = useState([]);
   const [images, setImages] = useState([]);
 
-  // Mock data for dropdowns - replace with actual API calls
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Electronics" },
-    { id: 2, name: "Clothing" },
-    { id: 3, name: "Books" },
-  ]);
+  // Data for dropdowns - loaded from API
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [shops, setShops] = useState([]);
 
-  const [brands, setBrands] = useState([
-    { id: 1, name: "Brand A" },
-    { id: 2, name: "Brand B" },
-    { id: 3, name: "Brand C" },
-  ]);
+  useEffect(() => {
+    const loadDropdowns = async () => {
+      try {
+        const [cRes, bRes, vRes] = await Promise.all([
+          getCategory(),
+          getBrand(),
+          getAllVendors({ page: 1, per_page: 100 }),
+        ]);
 
-  const [shops, setShops] = useState([
-    { id: 1, name: "My Shop" },
-    { id: 2, name: "Shop 2" },
-  ]);
+        const cats = Array.isArray(cRes) ? cRes : cRes?.data || [];
+        const brs = Array.isArray(bRes) ? bRes : bRes?.data || bRes?.data || [];
+        const vens = Array.isArray(vRes) ? vRes : vRes?.data || vRes?.data || [];
+
+        setCategories(cats);
+        setBrands(brs);
+        setShops(vens);
+      } catch (e) {
+        console.error("Error loading dropdowns:", e);
+      }
+    };
+
+    loadDropdowns();
+  }, []);
 
   const canGoBack = step > 0;
   const canGoNext = step < PRODUCT_WIZARD_STEPS.length - 1;

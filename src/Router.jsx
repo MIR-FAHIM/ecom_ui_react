@@ -22,12 +22,20 @@ import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
 import EcommerceSetting from "./scenes/admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./scenes/admin_panel/accounts/EcommerceAccounts";
 
+// Public / frontend pages
+import HomeP1 from "./scenes/a_frontend_ui/home/Home";
+import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
+
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />}></Route>
+
+         
+
         <Route path="/" element={<App />}>
+
           <Route path="/" element={<Dashboard />} />
 
           {/* Product Routes */}
@@ -60,8 +68,13 @@ const AppRouter = () => {
 
           {/* Settings & Accounts */}
           <Route path="/ecom/setting" element={<EcommerceSetting />} />
-          <Route path="/ecom/accounts" element={<EcommerceAccounts />} />
+          <Route path="/ecom/accounts"  element={<EcommerceAccounts />} />
 
+
+
+        {/* Public / storefront routes */}
+          <Route path="/ecom/home" element={<HomeP1 />} />
+          <Route path="/ecom/product/:id" element={<ProductDetail />} />
         </Route>
       </Routes>
     </Router>

@@ -16,7 +16,7 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
             <MenuItem value="">-- Select Shop --</MenuItem>
             {shops.map((shop) => (
               <MenuItem key={shop.id} value={shop.id}>
-                {shop.name}
+                {shop.business_name || shop.name || "Shop"}
               </MenuItem>
             ))}
           </Select>
@@ -35,7 +35,7 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
             <MenuItem value="">-- Select Category --</MenuItem>
             {categories.map((cat) => (
               <MenuItem key={cat.id} value={cat.id}>
-                {cat.name}
+                {cat.name || cat.title || 'Category'}
               </MenuItem>
             ))}
           </Select>
@@ -54,7 +54,7 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
             <MenuItem value="">-- Select Brand --</MenuItem>
             {brands.map((brand) => (
               <MenuItem key={brand.id} value={brand.id}>
-                {brand.name}
+                {brand.name || brand.title || 'Brand'}
               </MenuItem>
             ))}
           </Select>

@@ -1,10 +1,10 @@
-// src/api/apiController.js
-import axiosInstance from '../axiosInstance.jsx'
+
+import axiosInstance from '../../../axiosInstance.jsx'
 
 
 export const addAttribute = async (data) => {
     try {
-      const response = await axiosInstance.post(`/api/add-attribute`, data);
+      const response = await axiosInstance.post(`/api/attributes/create`, data);
       return response; // Return the response from the API
     } catch (error) {
       console.error("Error posting data:", error);
@@ -13,11 +13,40 @@ export const addAttribute = async (data) => {
   
   }
 
+export const getBrand = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/brands/list`,
+        
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getBrand:", error);
+    return [];
+  }
+}
+export const getCategory = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/categories/list`,
 
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getCategory:", error);
+    return [];
+  }
+}
 // Fetch posts from API
 export const getAttributes = async () => {
     try {
-        const response = await axiosInstance.get(`/api/get-attribute`); // Assuming your API endpoint to fetch posts
+        const response = await axiosInstance.get(`/api/attributes/list`); // Assuming your API endpoint to fetch posts
+        return response;
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        throw error;
+    }}
+export const getAttributeDetails = async (id) => {
+    try {
+        const response = await axiosInstance.get(`/api/attributes/details/${id}`); // Assuming your API endpoint to fetch posts
         return response;
     } catch (error) {
         console.error("Error fetching posts:", error);

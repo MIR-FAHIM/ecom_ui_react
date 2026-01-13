@@ -23,6 +23,11 @@ import AllDeliveryMans from "./admin_panel/delivery/AllDeliveryMans";
 import EcommerceSetting from "./admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./admin_panel/accounts/EcommerceAccounts";
 
+// user frontend
+
+import HomeP1 from "./a_frontend_ui/home/Home";
+import ProductDetail from "./a_frontend_ui/product/ProductDetail";
+
 export {
   Navbar,
   SideBar,
@@ -46,4 +51,8 @@ export {
   AllDeliveryMans,
   EcommerceSetting,
   EcommerceAccounts,
+
+  // user frontend
+  HomeP1,
+  ProductDetail,
 };
