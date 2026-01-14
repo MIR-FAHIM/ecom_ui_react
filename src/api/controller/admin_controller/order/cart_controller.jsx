@@ -14,7 +14,13 @@ export const getCartByUser = async (id) => {
 
 export const deleteItem = async (id) => {
   try {
-    const response = await axiosInstance.delete(`/api/carts/items/delete/${id}`);
+    const response = await axiosInstance.delete(`/api/carts/items/delete/${id}`, 
+      {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+        },
+      }     
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching deleteItem:", error);
@@ -24,7 +30,13 @@ export const deleteItem = async (id) => {
 
 export const updateQuantity = async (id, qty) => {
   try {
-    const response = await axiosInstance.put(`/api/carts/items/update/${id}?qty=${qty}`);
+    const response = await axiosInstance.put(`/api/carts/items/update/${id}?qty=${qty}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+        },
+      } 
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching updateQuantity:", error);
@@ -36,7 +48,15 @@ export const updateQuantity = async (id, qty) => {
 export const addCart = async (data) => {
   try {
     // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description
-    const response = await axiosInstance.post('/api/carts/items/add', data, );
+    const response = await axiosInstance.post('/api/carts/items/add', 
+      data,
+      {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+          // 'Content-Type': 'multipart/form-data', // If you're sending FormData
+        },
+      }  
+    );
     return response.data;
   } catch (error) {
     console.error('Error creating addCart:', error);

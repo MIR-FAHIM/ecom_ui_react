@@ -18,7 +18,13 @@ export const getProfile = async (id) => {
 // Get all customers
 export const getAllCustomers = async () => {
   try {
-    const response = await axiosInstance.get('/api/users/customers',);
+    const response = await axiosInstance.get('/api/users/customers',
+       {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+        },
+       }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching customers:", error);
@@ -29,7 +35,13 @@ export const getAllCustomers = async () => {
 // Get single customer by ID
 export const getCustomerById = async (id) => {
   try {
-    const response = await axiosInstance.get(`/api/customers/${id}`);
+    const response = await axiosInstance.get(`/api/customers/${id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching customer:", error);
@@ -40,7 +52,12 @@ export const getCustomerById = async (id) => {
 // Get all vendors/sellers
 export const getAllVendors = async (params = {}) => {
   try {
-    const response = await axiosInstance.get('/api/users/vendors', { params });
+    const response = await axiosInstance.get('/api/users/vendors', { 
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
     return response.data;
   } catch (error) {
     console.error("Error fetching vendors:", error);

@@ -4,7 +4,12 @@ import axiosInstance from '../../../axiosInstance.jsx'
 
 export const addAttribute = async (data) => {
     try {
-      const response = await axiosInstance.post(`/api/attributes/create`, data);
+      const response = await axiosInstance.post(`/api/attributes/create`, data,
+        { headers: {
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+        },
+      }
+      );
       return response; // Return the response from the API
     } catch (error) {
       console.error("Error posting data:", error);
@@ -16,7 +21,11 @@ export const addAttribute = async (data) => {
 export const getBrand = async () => {
   try {
     const response = await axiosInstance.get(`/api/brands/list`,
-        
+        {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+            },
+        }
     );
     return response.data;
   } catch (error) {
@@ -27,7 +36,11 @@ export const getBrand = async () => {
 export const getCategory = async () => {
   try {
     const response = await axiosInstance.get(`/api/categories/list`,
-
+        {
+            headers: {  
+              'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+            },
+        }
     );
     return response.data;
   } catch (error) {
@@ -38,7 +51,13 @@ export const getCategory = async () => {
 // Fetch posts from API
 export const getAttributes = async () => {
     try {
-        const response = await axiosInstance.get(`/api/attributes/list`); // Assuming your API endpoint to fetch posts
+        const response = await axiosInstance.get(`/api/attributes/list`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+            },
+          }
+        ); // Assuming your API endpoint to fetch posts
         return response;
     } catch (error) {
         console.error("Error fetching posts:", error);
