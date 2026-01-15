@@ -137,3 +137,19 @@ export const deleteOrder = async (id) => {
     return { status: 'error', message: error.message };
   }
 }
+
+export const getUserOrder = async (id, params = {}) => {
+  try {
+    // Backend endpoint: /api/orders/list/{userId} or similar; using /api/orders/list/{id}
+    const response = await axiosInstance.get(`/api/orders/list/${id}`, {
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    return { status: 'error', data: null };
+  }
+};

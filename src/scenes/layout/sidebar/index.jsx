@@ -93,7 +93,7 @@ const SideBar = () => {
               color: colors.blueAccent[700],
             },
           }}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/admin")}
         >
           <DashboardOutlined sx={iconStyle} />
           {!collapsed ? "Dashboard" : ""}
@@ -135,6 +135,7 @@ const SideBar = () => {
             <Item title="All Products" path="/ecom/product/all" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
             <Item title="Stock Out Products" path="/ecom/product/stock-out" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
             <Item title="Seller Products" path="/ecom/product/seller" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
+            <Item title="Attribute" path="/ecom/product/attribute" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
 

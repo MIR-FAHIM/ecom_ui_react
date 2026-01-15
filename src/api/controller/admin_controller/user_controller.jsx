@@ -60,3 +60,45 @@ export const getAllCustomers = async () => {
     throw error; // Rethrow the error for further handling in your component
   }
 }
+
+export const getAllVendors = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/api/users/vendors', { 
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vendors:", error);
+    return { status: 'error', data: [] };
+  }
+};
+export const getAllShops = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/api/shops/list', { 
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getAllShops:", error);
+    return { status: 'error', data: [] };
+  }
+};
+export const getUserDetail = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/api/users/details/${id}`, { 
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getUserDetail:", error);
+    return { status: 'error', data: [] };
+  }
+};

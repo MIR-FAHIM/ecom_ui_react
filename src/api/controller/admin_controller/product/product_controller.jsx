@@ -1,10 +1,26 @@
 import axiosInstance from '../../../axiosInstance.jsx'
 
 // Fetch posts from API
-export const getProduct = async () => {
+export const getProduct = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/list`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    // Return API payload (status/message/data) so callers can inspect response.status and response.data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getProduct:", error);
+    return { status: 'error', message: error.message, data: null };
+  }
+};
+export const getProductDetails = async (id) => {
 
   try {
-    const response = await axiosInstance.get(`/api/products/list`,
+    const response = await axiosInstance.get(`/api/products/details/${id}`,
       // {
       //   headers: {
       //     // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
@@ -20,7 +36,7 @@ export const getProduct = async () => {
   } catch (error) {
 
 
-    console.error("Error fetching getProduct:", error);
+    console.error("Error fetching getProductDetails:", error);
 
 
 
@@ -119,11 +135,26 @@ export const createProduct = async (productData) => {
     return { status: 'error', message: error.message };
   }
 };
-
-
-export const addVariant = async (data) => {
+export const addProdductDiscount = async (data) => {
   try {
-    const response = await axiosInstance.post(`/api/product-variant/add`, data,
+    // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description
+    const response = await axiosInstance.post('/api/product-discounts/create', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating addProdductDiscount:', error);
+    return { status: 'error', message: error.message };
+  }
+};
+
+
+export const addProductAttribute = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/product-attributes/create`, data,
       {
         headers: {
           // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
@@ -133,7 +164,7 @@ export const addVariant = async (data) => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching addProduct:", error);
+    console.error("Error fetching addAttribute:", error);
     return [];
   }
 }

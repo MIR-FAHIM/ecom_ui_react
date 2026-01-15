@@ -10,6 +10,7 @@ import {
   Typography,
   Divider,
   Chip,
+  TextField,
 } from "@mui/material";
 import {
   getAttributes,
@@ -21,6 +22,7 @@ function StepAttributes({ value = [], onAdd, onRemove }) {
   const [selectedAttrId, setSelectedAttrId] = useState("");
   const [attrValues, setAttrValues] = useState([]);
   const [selectedValue, setSelectedValue] = useState("");
+  const [stock, setStock] = useState(0);
 
   useEffect(() => {
     const fetchAttributes = async () => {
@@ -66,12 +68,19 @@ function StepAttributes({ value = [], onAdd, onRemove }) {
 
     if (!name || !val) return;
 
-    onAdd({ name, value: val });
+    onAdd({
+      attribute_id: Number(selectedAttrId),
+      attribute_value_id: Number(selectedValue),
+      name,
+      value: val,
+      stock: Number(stock) || 0,
+    });
 
     // reset selectors
     setSelectedAttrId("");
     setAttrValues([]);
     setSelectedValue("");
+    setStock(0);
   };
 
   return (
@@ -128,6 +137,16 @@ function StepAttributes({ value = [], onAdd, onRemove }) {
           <Button fullWidth variant="contained" sx={{ height: 40 }} onClick={addSelectedAttribute}>
             Add Attribute
           </Button>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Stock"
+            type="number"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+          />
         </Grid>
       </Grid>
 

@@ -73,7 +73,7 @@ export const getAttributeDetails = async (id) => {
     }}
 export const addAttributeValue = async (data) => {
     try {
-      const response = await axiosInstance.post(`/api/add-attribute-value`, data);
+      const response = await axiosInstance.post(`/api/attributes/values/create`, data);
       return response; // Return the response from the API
     } catch (error) {
       console.error("Error posting data:", error);

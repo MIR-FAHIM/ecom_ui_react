@@ -7,7 +7,6 @@ import { getCategory } from "../../../api/controller/admin_controller/product/se
 import { image_file_url } from "../../../api/config";
 import { useNavigate } from "react-router-dom";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller"; 
-
 import Hero from "./components/Hero";
 import CategoryQuickFilter from "./components/CategoryQuickFilter";
 import ProductCard from "./components/ProductCard";
@@ -23,12 +22,13 @@ const HomeP1 = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadProducts = async ({ search = "", categoryId = "", page = 1, per_page = 24 } = {}) => {
       setLoading(true);
       try {
-        const p = await getProduct({ page: 0, per_page: 24 });
-        // product API returns a pagination object: p.data.data => array
-        setProducts(p.data?.data || []);
+        const p = await getProduct({ page, per_page, search, category_id: categoryId });
+        // API returns { status, message, data: { data: [...], total, ... } }
+        const list = p?.data?.data ?? p?.data ?? [];
+        setProducts(list);
       } catch (e) {
         console.error(e);
       } finally {
@@ -50,7 +50,7 @@ const HomeP1 = () => {
     };
 
     loadCategories();
-    loadData();
+    loadProducts();
   }, []);
 
   useEffect(() => {
@@ -79,15 +79,12 @@ const HomeP1 = () => {
     return () => window.removeEventListener('cart-updated', handler);
   }, []);
 
+  // products already fetched from server; we can still apply a small client-side filter if needed
   const filtered = useMemo(() => {
     let list = products;
     if (category) list = list.filter((p) => String(p.category_id) === String(category));
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter((p) => (p.name || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q));
-    }
     return list;
-  }, [products, query, category]);
+  }, [products, category]);
 
   const handleAddToCart = async (product) => {
     const userId = localStorage.getItem('userId') || 1;
@@ -130,6 +127,20 @@ const HomeP1 = () => {
     const handler = (e) => {
       const detail = (e?.detail) || '';
       setQuery(detail);
+      // fetch server-side results
+      const fetch = async () => {
+        try {
+          setLoading(true);
+          const p = await getProduct({ page: 1, per_page: 24, search: detail });
+          const list = p?.data?.data ?? p?.data ?? [];
+          setProducts(list);
+        } catch (err) {
+          console.error('Search error', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetch();
     };
     window.addEventListener('search', handler);
     return () => window.removeEventListener('search', handler);

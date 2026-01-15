@@ -15,8 +15,8 @@ import {
   Alert,
 } from "@mui/material";
 import { tokens } from "../../../../theme";
-import { createProduct, uploadProductImages } from "../../../../api/controller/admin_controller/product/product_controller";
-import { getAllVendors } from "../../../../api/controller/user_controller";
+import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
+import { getAllShops } from "../../../../api/controller/admin_controller/user_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller"; 
 
 import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/components/productWizard/steps";
@@ -46,6 +46,10 @@ function AddProductTab() {
     short_description: "",
     description: "",
     is_active: true,
+    discount_type: "flat",
+    discount_value: "",
+    price: "",
+    stock: "",
   });
 
   const [attributes, setAttributes] = useState([]);
@@ -56,28 +60,55 @@ function AddProductTab() {
   const [brands, setBrands] = useState([]);
   const [shops, setShops] = useState([]);
 
+  const loadDropdowns = async () => {
+    try {
+      const [cRes, bRes, vRes] = await Promise.all([
+        getCategory(),
+        getBrand(),
+        getAllShops({ page: 1, per_page: 100 }),
+      ]);
+
+      const normalizeList = (x) => {
+        if (!x) return [];
+        if (Array.isArray(x)) return x;
+
+        if (Array.isArray(x?.data)) return x.data;
+        if (Array.isArray(x?.data?.data)) return x.data.data;
+        if (Array.isArray(x?.data?.data?.data)) return x.data.data.data;
+
+        if (Array.isArray(x?.data?.items)) return x.data.items;
+        if (Array.isArray(x?.data?.rows)) return x.data.rows;
+        if (Array.isArray(x?.results)) return x.results;
+        if (Array.isArray(x?.data?.results)) return x.data.results;
+
+        const inner = x?.data ?? x;
+        if (inner && typeof inner === 'object') {
+          for (const k of Object.keys(inner)) {
+            if (Array.isArray(inner[k])) return inner[k];
+          }
+        }
+
+        return [];
+      };
+
+      const cats = normalizeList(cRes);
+      const brs = normalizeList(bRes);
+      const vens = normalizeList(vRes);
+
+      console.debug("Dropdown raw responses:", { cRes, bRes, vRes });
+      console.debug("Dropdown normalized:", { cats, brs, vens });
+
+      setCategories(cats);
+      setBrands(brs);
+      setShops(vens);
+    } catch (e) {
+      console.error("Error loading dropdowns:", e);
+    }
+  };
+
   useEffect(() => {
-    const loadDropdowns = async () => {
-      try {
-        const [cRes, bRes, vRes] = await Promise.all([
-          getCategory(),
-          getBrand(),
-          getAllVendors({ page: 1, per_page: 100 }),
-        ]);
-
-        const cats = Array.isArray(cRes) ? cRes : cRes?.data || [];
-        const brs = Array.isArray(bRes) ? bRes : bRes?.data || bRes?.data || [];
-        const vens = Array.isArray(vRes) ? vRes : vRes?.data || vRes?.data || [];
-
-        setCategories(cats);
-        setBrands(brs);
-        setShops(vens);
-      } catch (e) {
-        console.error("Error loading dropdowns:", e);
-      }
-    };
-
     loadDropdowns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canGoBack = step > 0;
@@ -126,6 +157,9 @@ function AddProductTab() {
       productFormData.append("short_description", general.short_description);
       productFormData.append("description", general.description);
       productFormData.append("is_active", general.is_active ? 1 : 0);
+      // Pricing
+      if (general.price !== undefined && general.price !== "") productFormData.append("price", general.price);
+      if (general.stock !== undefined && general.stock !== "") productFormData.append("stock", general.stock);
 
       const productResponse = await createProduct(productFormData);
       const productId = productResponse.data?.id;
@@ -146,9 +180,41 @@ function AddProductTab() {
         await uploadProductImages(productId, imagesToUpload);
       }
 
+      // Step 3: Attach attributes to product (if any)
+      if (attributes && attributes.length > 0) {
+        for (const attr of attributes) {
+          try {
+            const fd = new FormData();
+            fd.append("product_id", productId);
+            // API expects IDs and stock
+            if (attr.attribute_id) fd.append("attribute_id", attr.attribute_id);
+            if (attr.attribute_value_id) fd.append("attribute_value_id", attr.attribute_value_id);
+            fd.append("stock", attr.stock ?? 0);
+
+            await addProductAttribute(fd);
+          } catch (err) {
+            console.error("Failed to attach attribute to product:", err);
+          }
+        }
+      }
+
+        // Step 4: Add discount if provided
+        try {
+          if (general?.discount_value) {
+            const dfd = new FormData();
+            dfd.append('product_id', productId);
+            dfd.append('type', general.discount_type || 'flat');
+            dfd.append('value', general.discount_value);
+            const discResp = await addProdductDiscount(dfd);
+            console.debug('Discount response:', discResp);
+          }
+        } catch (e) {
+          console.error('Failed to add product discount:', e);
+        }
+
       setSuccessMessage("Product created successfully!");
       setTimeout(() => {
-        navigate("/admin/products");
+        navigate("/ecom/product/all");
       }, 2000);
     } catch (error) {
       console.error("Product creation error:", error);
@@ -164,6 +230,7 @@ function AddProductTab() {
         <StepGeneral
           value={general}
           onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
+          onOpenDropdown={loadDropdowns}
           errors={errors}
           categories={categories}
           brands={brands}

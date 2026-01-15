@@ -101,7 +101,7 @@ const Cart = () => {
       ) : !cart || (Array.isArray(cart.items) && cart.items.length === 0) ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6">Your cart is empty.</Typography>
-          <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate('/ecom/home')}>Continue Shopping</Button>
+          <Button sx={{ mt: 2 }} variant="contained" onClick={() => navigate('/')}>Continue Shopping</Button>
         </Paper>
       ) : (
         <Box>
@@ -145,7 +145,7 @@ const Cart = () => {
             <Typography variant="h6">Subtotal: ৳{cart.subtotal}</Typography>
             <Box>
               <Button variant="outlined" sx={{ mr: 1 }} onClick={loadCart}>Refresh</Button>
-              <Button variant="contained" onClick={() => navigate('/ecom/checkout')}>Checkout</Button>
+              <Button variant="contained" onClick={() => navigate('/checkout')}>Checkout</Button>
             </Box>
           </Paper>
         </Box>

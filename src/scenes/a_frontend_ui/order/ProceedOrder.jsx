@@ -164,7 +164,7 @@ const ProceedOrder = () => {
         // clear local cart count and notify
         localStorage.setItem('cart', JSON.stringify(0));
         window.dispatchEvent(new Event('cart-updated'));
-        setTimeout(() => navigate('/ecom'), 900);
+        setTimeout(() => navigate('/'), 900);
       } else {
         setMsg(res?.data?.message || 'Failed to place order');
       }
