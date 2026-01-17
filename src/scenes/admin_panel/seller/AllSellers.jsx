@@ -24,7 +24,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
-import { getAllVendors } from "../../../api/controller/user_controller.jsx";
+import { getAllVendors } from "../../../api/controller/admin_controller/user_controller.jsx";
 import { tokens } from "../../../theme";
 
 const AllSellers = () => {

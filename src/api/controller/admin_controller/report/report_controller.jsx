@@ -28,7 +28,7 @@ export const getReportText = async () => {
 }
 
 
-export const fetchClients = async () => {
+export const dashboardReport = async () => {
   const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
 
   if (!token) {
@@ -36,7 +36,7 @@ export const fetchClients = async () => {
     return []; // Return an empty array or handle as necessary
   }
   try {
-    const response = await axiosInstance.get(`/api/clients`,
+    const response = await axiosInstance.get(`/api/reports/dashboard`,
       {
         headers: {
           'token': localStorage.getItem("authToken"),// Add the token in Authorization header

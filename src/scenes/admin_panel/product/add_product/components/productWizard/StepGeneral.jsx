@@ -1,7 +1,7 @@
 import React from "react";
-import { Grid, TextField, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Grid, TextField, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, Divider, Typography } from "@mui/material";
 
-function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [], shops = [] }) {
+function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [], shops = [], onOpenDropdown }) {
   return (
     <Grid container spacing={2}>
       {/* Shop Selection */}
@@ -10,13 +10,15 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
           <InputLabel>Shop</InputLabel>
           <Select
             value={value.shop_id || ""}
+            onOpen={() => onOpenDropdown && onOpenDropdown()}
+            onMouseDown={() => onOpenDropdown && onOpenDropdown()}
             onChange={(e) => onChange({ shop_id: e.target.value })}
             label="Shop"
           >
             <MenuItem value="">-- Select Shop --</MenuItem>
             {shops.map((shop) => (
               <MenuItem key={shop.id} value={shop.id}>
-                {shop.name}
+                {shop.business_name || shop.name || "Shop"}
               </MenuItem>
             ))}
           </Select>
@@ -29,13 +31,15 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
           <InputLabel>Category</InputLabel>
           <Select
             value={value.category_id || ""}
+            onOpen={() => onOpenDropdown && onOpenDropdown()}
+            onMouseDown={() => onOpenDropdown && onOpenDropdown()}
             onChange={(e) => onChange({ category_id: e.target.value })}
             label="Category"
           >
             <MenuItem value="">-- Select Category --</MenuItem>
             {categories.map((cat) => (
               <MenuItem key={cat.id} value={cat.id}>
-                {cat.name}
+                {cat.name || cat.title || 'Category'}
               </MenuItem>
             ))}
           </Select>
@@ -48,17 +52,82 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
           <InputLabel>Brand</InputLabel>
           <Select
             value={value.brand_id || ""}
+            onOpen={() => onOpenDropdown && onOpenDropdown()}
+            onMouseDown={() => onOpenDropdown && onOpenDropdown()}
             onChange={(e) => onChange({ brand_id: e.target.value })}
             label="Brand"
           >
             <MenuItem value="">-- Select Brand --</MenuItem>
             {brands.map((brand) => (
               <MenuItem key={brand.id} value={brand.id}>
-                {brand.name}
+                {brand.name || brand.title || 'Brand'}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
+      </Grid>
+
+      {/* Separate Pricing / Discount Section */}
+      <Grid item xs={12}>
+        <Divider sx={{ my: 1 }} />
+        <Typography variant="subtitle2" sx={{ mt: 1, mb: 1 }}>
+          Pricing
+        </Typography>
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          size="small"
+          label="Price"
+          type="number"
+          value={value.price || ''}
+          onChange={(e) => onChange({ price: e.target.value })}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          size="small"
+          label="Stock"
+          type="number"
+          value={value.stock || ''}
+          onChange={(e) => onChange({ stock: e.target.value })}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Divider sx={{ my: 1 }} />
+        <Typography variant="subtitle2" sx={{ mt: 1, mb: 1 }}>
+          Discount
+        </Typography>
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <FormControl fullWidth size="small">
+          <InputLabel>Discount Type</InputLabel>
+          <Select
+            value={value.discount_type || 'flat'}
+            label="Discount Type"
+            onChange={(e) => onChange({ discount_type: e.target.value })}
+          >
+            <MenuItem value="flat">Flat (৳)</MenuItem>
+            <MenuItem value="percentage">Percentage (%)</MenuItem>
+          </Select>
+        </FormControl>
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          size="small"
+          label="Discount Value"
+          type="number"
+          value={value.discount_value || ''}
+          onChange={(e) => onChange({ discount_value: e.target.value })}
+          helperText="Enter flat amount or percent depending on type"
+        />
       </Grid>
 
       {/* Product Name */}

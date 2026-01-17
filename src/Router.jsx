@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Dashboard from "./scenes/admin_panel/dashboard";
 import Login from "./scenes/auth/login";
+import Register from "./scenes/auth/Register";
 import AddProductTab from "./scenes/admin_panel/product/add_product/AddProductTab";
 import AllProducts from "./scenes/admin_panel/product/AllProducts";
 import StockOutProduct from "./scenes/admin_panel/product/StockOutProduct";
@@ -21,20 +22,59 @@ import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
 import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
 import EcommerceSetting from "./scenes/admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./scenes/admin_panel/accounts/EcommerceAccounts";
+import AddBanner from "./scenes/admin_panel/media/AddBanner";
+import Attribute from "./scenes/admin_panel/product/attribute/attribute";
+
+// Public / frontend pages
+import HomeP1 from "./scenes/a_frontend_ui/home/Home";
+import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
+import Cart from "./scenes/a_frontend_ui/order/cart";
+
+import FrontendLayout from "./scenes/a_frontend_ui/layout/FrontendLayout";
+import Privacy from "./scenes/a_frontend_ui/pages/Privacy";
+import Terms from "./scenes/a_frontend_ui/pages/Terms";
+import About from "./scenes/a_frontend_ui/pages/About";
+import Contact from "./scenes/a_frontend_ui/pages/Contact";
+import ProceedOrder from "./scenes/a_frontend_ui/order/ProceedOrder";
+import Profile from "./scenes/a_frontend_ui/profile/Profile";
+import UserOrder from "./scenes/a_frontend_ui/order/UserOrder";
+import UserOrderDetails from "./scenes/a_frontend_ui/order/UserOrderDetails";
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/register" element={<Register />}></Route>
+        {/* Public / storefront routes */}
+        <Route path="/" element={<FrontendLayout />}>
+          <Route index element={<HomeP1 />} />
+          <Route path="home" element={<HomeP1 />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="cart" element={<Cart />} />
+          <Route path="orders" element={<UserOrder />} />
+          <Route path="order/:id" element={<UserOrderDetails />} />
+          <Route path="checkout" element={<ProceedOrder />} />
+          <Route path="privacy" element={<Privacy />} />
+          <Route path="terms" element={<Terms />} />
+          <Route path="about" element={<About />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="proceed-order" element={<ProceedOrder />} />
+        </Route>
+
+         
+
         <Route path="/" element={<App />}>
-          <Route path="/" element={<Dashboard />} />
+
+          <Route path="/admin" element={<Dashboard />} />
 
           {/* Product Routes */}
           <Route path="/ecom/product/add" element={<AddProductTab />} />
           <Route path="/ecom/product/all" element={<AllProducts />} />
           <Route path="/ecom/product/stock-out" element={<StockOutProduct />} />
           <Route path="/ecom/product/seller" element={<SellerProducts />} />
+          <Route path="/ecom/product/attribute" element={<Attribute />} />
 
           {/* Order Routes */}
           <Route path="/ecom/order/all" element={<AllOrdersEcom />} />
@@ -60,7 +100,10 @@ const AppRouter = () => {
 
           {/* Settings & Accounts */}
           <Route path="/ecom/setting" element={<EcommerceSetting />} />
-          <Route path="/ecom/accounts" element={<EcommerceAccounts />} />
+          <Route path="/ecom/accounts"  element={<EcommerceAccounts />} />
+
+
+          <Route path="/ecom/banner/add" element={<AddBanner />} />
 
         </Route>
       </Routes>

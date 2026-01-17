@@ -1,6 +1,6 @@
 // src/context/DataContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { fetchBrands, fetchCategory } from "../api/controller/api_controller";
+
 
 // Create the context
 export const DataContext = createContext();
@@ -15,11 +15,7 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const categoriesData = await fetchCategory();
-      const brandsData = await fetchBrands();
-     
-      setCategory(categoriesData);
-      setBrand(brandsData);
+   
      
       setLoading(false);
     };

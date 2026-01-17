@@ -93,7 +93,7 @@ const SideBar = () => {
               color: colors.blueAccent[700],
             },
           }}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/admin")}
         >
           <DashboardOutlined sx={iconStyle} />
           {!collapsed ? "Dashboard" : ""}
@@ -135,6 +135,7 @@ const SideBar = () => {
             <Item title="All Products" path="/ecom/product/all" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
             <Item title="Stock Out Products" path="/ecom/product/stock-out" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
             <Item title="Seller Products" path="/ecom/product/seller" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
+            <Item title="Attribute" path="/ecom/product/attribute" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
 
@@ -321,6 +322,43 @@ const SideBar = () => {
           >
             <Item title="Add Delivery Man" path="/ecom/delivery/add" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
             <Item title="All Delivery Mans" path="/ecom/delivery/all" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+          </Menu>
+        </Collapse>
+
+                {/* Banner */}
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{
+            m: "15px 0 5px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            ":hover": {
+              color: colors.blueAccent[700],
+            },
+          }}
+          onClick={() => toggleCategory("media")}
+        >
+          <DeliveryDiningOutlined sx={iconStyle} />
+          {!collapsed ? "Media" : ""}
+        </Typography>
+
+        <Collapse in={expandedCategory === "media"}>
+          <Menu
+            menuItemStyles={{
+              button: {
+                ":hover": {
+                  color: "#868dfb",
+                  background: "transparent",
+                  transition: ".4s ease",
+                },
+              },
+            }}
+          >
+            <Item title="Add Banner" path="/ecom/banner/add" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+           
           </Menu>
         </Collapse>
 

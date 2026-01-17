@@ -5,12 +5,9 @@ import { companyID } from '../../config'
 
 export const registerEmployee = async (data) => {
   try {
-    const response = await axiosInstance.post(`/api/register-employee`, data,
-      {
-        headers: {
-          'token': localStorage.getItem("authToken"), // Add the token in Authorization header
-        },
-      }
+    const response = await axiosInstance.post(`/api/users/create`, data,
+
+
     );
     return response.data; // Return the response from the API
   } catch (error) {
@@ -25,7 +22,7 @@ export const uploadProfileImage = async (data) => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          'token': localStorage.getItem("authToken"), // Add the token in Authorization header
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
         },
       }
     );
@@ -38,12 +35,8 @@ export const uploadProfileImage = async (data) => {
 }
 export const loginController = async (data) => {
   try {
-    const response = await axiosInstance.post(`/api/login`, data,
-      {
-        headers: {
-          'token': 'prefix_67e12b036e3f06.63889147', // Add the token in Authorization header
-        },
-      }
+    const response = await axiosInstance.post(`/api/auth/login`, data,
+
     );
     return response.data; // Return the response from the API
   } catch (error) {
@@ -55,9 +48,9 @@ export const loginController = async (data) => {
 export const getAllCustomers = async () => {
   try {
     const response = await axiosInstance.get(`/api/users/customers`,
-      {     
+      {
         headers: {
-          'token': localStorage.getItem("authToken"), // Add the token in Authorization header
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
         },
       }
     );
@@ -65,5 +58,47 @@ export const getAllCustomers = async () => {
   } catch (error) {
     console.error("Error fetching all users:", error);
     throw error; // Rethrow the error for further handling in your component
-  }   
+  }
 }
+
+export const getAllVendors = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/api/users/vendors', { 
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vendors:", error);
+    return { status: 'error', data: [] };
+  }
+};
+export const getAllShops = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/api/shops/list', { 
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getAllShops:", error);
+    return { status: 'error', data: [] };
+  }
+};
+export const getUserDetail = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/api/users/details/${id}`, { 
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getUserDetail:", error);
+    return { status: 'error', data: [] };
+  }
+};
