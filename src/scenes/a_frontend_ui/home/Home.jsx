@@ -19,6 +19,7 @@ import Favorite from "@mui/icons-material/Favorite";
 import { useNavigate } from "react-router-dom";
 
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller";
+import { getUserWish, addWish, deleteWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller";
 import { image_file_url } from "../../../api/config";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller";
@@ -49,15 +50,7 @@ const HomeP1 = () => {
 
   const [cartCount, setCartCount] = useState(0);
 
-  const [wishIds, setWishIds] = useState(() => {
-    try {
-      const raw = localStorage.getItem("wishlist");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  });
+  const [wishIds, setWishIds] = useState([]);
 
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
@@ -187,13 +180,45 @@ const HomeP1 = () => {
     const id = product?.id;
     if (!id) return;
 
-    setWishIds((prev) => {
-      const has = prev.includes(id);
-      const next = has ? prev.filter((x) => x !== id) : [...prev, id];
+    const doLocalToggle = (next) => {
+      setWishIds(next);
       localStorage.setItem("wishlist", JSON.stringify(next));
       window.dispatchEvent(new Event("wishlist-updated"));
-      return next;
-    });
+    };
+
+    (async () => {
+      if (userId) {
+        try {
+          const res = await getUserWish(userId);
+          const payload = res?.data?.data ?? res?.data ?? res ?? [];
+          const entries = Array.isArray(payload) ? payload : [];
+          const existing = entries.find((e) => (e?.product?.id ?? e?.product_id) === id || (e?.product_id ?? e?.product?.id) === id);
+          if (existing && existing?.id) {
+            await deleteWish(existing.id);
+          } else {
+            await addWish({ user_id: userId, product_id: id });
+          }
+
+          // resync local ids from server
+          const res2 = await getUserWish(userId);
+          const payload2 = res2?.data?.data ?? res2?.data ?? res2 ?? [];
+          const items = Array.isArray(payload2) ? payload2.map((e) => e?.product ?? e).filter(Boolean) : [];
+          const ids = items.map((p) => Number(p?.id)).filter(Boolean);
+          doLocalToggle(ids);
+        } catch (e) {
+          console.error("Failed to update wishlist", e);
+        }
+        return;
+      }
+
+      // guest -> in-memory only (do not persist to localStorage)
+      setWishIds((prev) => {
+        const has = prev.includes(id);
+        const next = has ? prev.filter((x) => x !== id) : [...prev, id];
+        doLocalToggle(next);
+        return next;
+      });
+    })();
   };
 
   const clearFilters = () => {

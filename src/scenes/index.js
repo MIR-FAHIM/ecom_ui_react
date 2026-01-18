@@ -38,6 +38,8 @@ import ProductDetail from "./a_frontend_ui/product/ProductDetail";
 import Cart from "./a_frontend_ui/order/cart";
 import ProceedOrder from "./a_frontend_ui/order/ProceedOrder";
 
+import Wish from "./a_frontend_ui/wish/Wish";
+
 export {
   Navbar,
   SideBar,
@@ -72,4 +74,5 @@ export {
   ProductDetail,
   Cart,
   ProceedOrder,
+  Wish,
 };
