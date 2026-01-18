@@ -32,6 +32,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { useNavigate } from "react-router-dom";
 import { getUserDetail } from "../../../api/controller/admin_controller/user_controller.jsx";
+import { getUserWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 
 const Topbar = () => {
   const navigate = useNavigate();
@@ -73,9 +74,23 @@ const Topbar = () => {
     }
 
     try {
-      const raw = localStorage.getItem("wishlist");
-      const parsed = raw ? JSON.parse(raw) : [];
-      setWishCount(Array.isArray(parsed) ? parsed.length : 0);
+      const storedId = localStorage.getItem("userId");
+      if (storedId) {
+        (async () => {
+          try {
+            const res = await getUserWish(storedId);
+            const payload = res?.data?.data ?? res?.data ?? res ?? [];
+            const items = Array.isArray(payload) ? payload.map((e) => e?.product ?? e).filter(Boolean) : [];
+            setWishCount(items.length);
+          } catch (e) {
+            // API failed - show zero for wishlist (no localStorage fallback)
+            setWishCount(0);
+          }
+        })();
+      } else {
+        // not authenticated: no persistent wishlist, show 0
+        setWishCount(0);
+      }
     } catch {
       setWishCount(0);
     }
@@ -270,7 +285,7 @@ const Topbar = () => {
           </Tooltip>
 
           <Tooltip title="Wishlist">
-            <IconButton onClick={() => navigate("/wishlist")} sx={pillIconSx}>
+            <IconButton onClick={() => navigate("/wish")} sx={pillIconSx}>
               <Badge badgeContent={wishCount} color="secondary">
                 <FavoriteIcon />
               </Badge>

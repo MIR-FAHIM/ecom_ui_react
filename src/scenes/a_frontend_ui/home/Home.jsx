@@ -19,6 +19,7 @@ import Favorite from "@mui/icons-material/Favorite";
 import { useNavigate } from "react-router-dom";
 
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller";
+import { getUserWish, addWish, deleteWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller";
 
@@ -26,6 +27,8 @@ import Hero from "./components/Hero";
 import CategoryQuickFilter from "./components/CategoryQuickFilter";
 import FeaturedTitle from "./components/FeaturedTitle";
 import SmartProductCard from "./components/ProductCard";
+
+const safeArray = (x) => (Array.isArray(x) ? x : []);
 
 const HomeP1 = () => {
   const theme = useTheme();
@@ -46,6 +49,7 @@ const HomeP1 = () => {
 
   const [cartCount, setCartCount] = useState(0);
 
+  // We store WISH as array of productIds
   const [wishIds, setWishIds] = useState(() => {
     try {
       const raw = localStorage.getItem("wishlist");
@@ -67,9 +71,9 @@ const HomeP1 = () => {
     try {
       const c = await getCategory();
       const list = Array.isArray(c) ? c : c?.data?.data || [];
-      setCategories(Array.isArray(list) ? list : []);
+      setCategories(safeArray(list));
     } catch (e) {
-      console.error(e);
+      console.error("loadCategories error:", e);
       setCategories([]);
     }
   }, []);
@@ -79,9 +83,9 @@ const HomeP1 = () => {
     try {
       const p = await getProduct({ page, per_page, search, category_id: categoryId });
       const list = p?.data?.data ?? p?.data ?? [];
-      setProducts(Array.isArray(list) ? list : []);
+      setProducts(safeArray(list));
     } catch (e) {
-      console.error(e);
+      console.error("loadProducts error:", e);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -113,10 +117,39 @@ const HomeP1 = () => {
     }
   }, [userId]);
 
+  const syncWishlistFromServer = useCallback(async () => {
+    // If user not logged in, keep local wishlist only
+    if (!userId) return;
+
+    try {
+      const res = await getUserWish(userId);
+
+      // Guessing common shapes:
+      // res.data.data: [{ id, product_id, product: {...} }, ...]
+      // or res.data: [...]
+      const list = res?.data?.data ?? res?.data ?? res ?? [];
+      const arr = safeArray(list);
+
+      const ids = arr
+        .map((x) => x?.product_id ?? x?.product?.id ?? x?.id)
+        .filter((v) => v !== undefined && v !== null)
+        .map((v) => Number(v))
+        .filter((v) => Number.isFinite(v));
+
+      const unique = Array.from(new Set(ids));
+      setWishIds(unique);
+      localStorage.setItem("wishlist", JSON.stringify(unique));
+      window.dispatchEvent(new Event("wishlist-updated"));
+    } catch (e) {
+      console.error("syncWishlistFromServer error:", e);
+    }
+  }, [userId]);
+
   useEffect(() => {
     loadCategories();
     refreshCartCount();
-  }, [loadCategories, refreshCartCount]);
+    syncWishlistFromServer();
+  }, [loadCategories, refreshCartCount, syncWishlistFromServer]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -164,18 +197,45 @@ const HomeP1 = () => {
     [userId, refreshCartCount]
   );
 
-  const toggleWishlist = useCallback((product) => {
-    const id = product?.id;
-    if (!id) return;
+  // Toggle wishlist: if logged in, do server + local. if not, local only.
+  const toggleWishlist = useCallback(
+    async (product) => {
+      const pid = product?.id;
+      if (!pid) return;
 
-    setWishIds((prev) => {
-      const has = prev.includes(id);
-      const next = has ? prev.filter((x) => x !== id) : [...prev, id];
-      localStorage.setItem("wishlist", JSON.stringify(next));
+      const has = wishIds.includes(pid);
+
+      // optimistic update (feels fast)
+      const next = has ? wishIds.filter((x) => x !== pid) : [...wishIds, pid];
+      const unique = Array.from(new Set(next));
+      setWishIds(unique);
+      localStorage.setItem("wishlist", JSON.stringify(unique));
       window.dispatchEvent(new Event("wishlist-updated"));
-      return next;
-    });
-  }, []);
+
+      if (!userId) return;
+
+      try {
+        if (has) {
+          // delete by product id (common), but your API might require wish id.
+          // If your deleteWish expects (userId, productId), this works.
+          // If it expects wish row id, you must change controller to accept product_id.
+          await deleteWish({ user_id: userId, product_id: pid });
+        } else {
+          await addWish({ user_id: userId, product_id: pid });
+        }
+      } catch (e) {
+        console.error("toggleWishlist server error:", e);
+
+        // rollback if server fails
+        const rollback = has ? [...wishIds, pid] : wishIds.filter((x) => x !== pid);
+        const rb = Array.from(new Set(rollback));
+        setWishIds(rb);
+        localStorage.setItem("wishlist", JSON.stringify(rb));
+        window.dispatchEvent(new Event("wishlist-updated"));
+      }
+    },
+    [userId, wishIds]
+  );
 
   const clearFilters = useCallback(() => {
     setQuery("");
@@ -331,7 +391,7 @@ const HomeP1 = () => {
                 return (
                   <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
                     <SmartProductCard
-                      product={product} // PASS FULL OBJECT (fixes primary_image access in card)
+                      product={product}
                       inCart={false}
                       inWish={inWish}
                       onToggleCart={() => handleAddToCart(product)}

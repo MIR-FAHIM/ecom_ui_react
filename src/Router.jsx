@@ -39,6 +39,7 @@ import ProceedOrder from "./scenes/a_frontend_ui/order/ProceedOrder";
 import Profile from "./scenes/a_frontend_ui/profile/Profile";
 import UserOrder from "./scenes/a_frontend_ui/order/UserOrder";
 import UserOrderDetails from "./scenes/a_frontend_ui/order/UserOrderDetails";
+import Wish from "./scenes/a_frontend_ui/wish/Wish";
 
 const AppRouter = () => {
   return (
@@ -61,6 +62,7 @@ const AppRouter = () => {
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="proceed-order" element={<ProceedOrder />} />
+          <Route path="wish" element={<Wish />} />
         </Route>
 
          

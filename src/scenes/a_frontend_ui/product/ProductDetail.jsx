@@ -32,6 +32,7 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { image_file_url } from "../../../api/config";
 import { useParams, useNavigate } from "react-router-dom";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller";
+import { addWish, getUserWish, deleteWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import { getProductDetails } from "../../../api/controller/admin_controller/product/product_controller";
 
 // no en-dash, keep it clean
@@ -106,13 +107,7 @@ const ProductDetail = () => {
   const [msg, setMsg] = useState("");
 
   const [wishIds, setWishIds] = useState(() => {
-    try {
-      const raw = localStorage.getItem("wishlist");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+    return [];
   });
 
   const inWish = useMemo(() => {
@@ -224,13 +219,41 @@ const ProductDetail = () => {
   const toggleWishlist = () => {
     const pid = product?.id;
     if (!pid) return;
-    setWishIds((prev) => {
-      const has = prev.includes(pid);
-      const next = has ? prev.filter((x) => x !== pid) : [...prev, pid];
-      localStorage.setItem("wishlist", JSON.stringify(next));
-      window.dispatchEvent(new Event("wishlist-updated"));
-      return next;
-    });
+    (async () => {
+      if (userId) {
+        try {
+          const res = await getUserWish(userId);
+          const payload = res?.data?.data ?? res?.data ?? res ?? [];
+          const entries = Array.isArray(payload) ? payload : [];
+          const existing = entries.find((e) => (e?.product?.id ?? e?.product_id) === pid || (e?.product_id ?? e?.product?.id) === pid);
+          if (existing && existing?.id) {
+            await deleteWish(existing.id);
+          } else {
+            await addWish({ user_id: userId, product_id: pid });
+          }
+
+          // sync server wishlist -> local storage
+          const res2 = await getUserWish(userId);
+          const payload2 = res2?.data?.data ?? res2?.data ?? res2 ?? [];
+          let items = [];
+          if (Array.isArray(payload2)) items = payload2.map((e) => e?.product ?? e).filter(Boolean);
+          const ids = items.map((p) => Number(p?.id)).filter(Boolean);
+          setWishIds(ids);
+          localStorage.setItem("wishlist", JSON.stringify(ids));
+          window.dispatchEvent(new Event("wishlist-updated"));
+        } catch (e) {
+          console.error("Failed to update wishlist", e);
+        }
+        return;
+      }
+
+      setWishIds((prev) => {
+        const has = prev.includes(pid);
+        localStorage.setItem("wishlist", JSON.stringify(next));
+        window.dispatchEvent(new Event("wishlist-updated"));
+        return next;
+      });
+    })();
   };
 
   const handleAddToCart = async () => {
