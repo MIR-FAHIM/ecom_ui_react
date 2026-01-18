@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Box,
   Button,
@@ -23,7 +23,6 @@ import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import VerifiedIcon from "@mui/icons-material/Verified";
@@ -35,24 +34,59 @@ import { useParams, useNavigate } from "react-router-dom";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller";
 import { getProductDetails } from "../../../api/controller/admin_controller/product/product_controller";
 
+// no en-dash, keep it clean
 const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+
+const safeJsonParse = (value, fallback) => {
+  try {
+    if (value == null) return fallback;
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+      const s = value.trim();
+      if (!s) return fallback;
+      return JSON.parse(s);
+    }
+    return fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const htmlToText = (html) => {
+  if (!html) return "";
+  // quick, safe-ish conversion for UI
+  const tmp = document.createElement("div");
+  tmp.innerHTML = String(html);
+  return (tmp.textContent || tmp.innerText || "").replace(/\n{3,}/g, "\n\n").trim();
+};
+
+const buildImageUrl = (fileOrUrl) => {
+  if (!fileOrUrl) return null;
+  const raw = String(fileOrUrl);
+
+  // If backend sends escaped slashes like all\/file.png, normalize
+  const cleaned = raw.replaceAll("\\/", "/");
+
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+
+  const base = String(image_file_url || "").replace(/\/+$/, "");
+  const path = cleaned.replace(/^\/+/, "");
+  return `${base}/${path}`;
+};
 
 const ProductDetail = () => {
   const theme = useTheme();
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Theme helpers (matches your other pages)
   const brand = theme.palette.brand || {};
   const semantic = theme.palette.semantic || {};
   const divider = theme.palette.divider || "rgba(0,0,0,0.08)";
-  const surface =
-    semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
-  const surface2 =
-    semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
+  const surface = semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
+  const surface2 = semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
   const ink = semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
-  const subInk =
-    semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
+  const subInk = semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
+
   const brandGradient = brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
   const brandGlow = brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
 
@@ -71,7 +105,6 @@ const ProductDetail = () => {
   const [busyCart, setBusyCart] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // local wishlist (same style as your Home page)
   const [wishIds, setWishIds] = useState(() => {
     try {
       const raw = localStorage.getItem("wishlist");
@@ -87,23 +120,26 @@ const ProductDetail = () => {
     return pid ? wishIds.includes(pid) : false;
   }, [wishIds, product?.id]);
 
+  const money = useCallback(
+    (n) => new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0)),
+    []
+  );
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
         const res = await getProductDetails(id);
-        const p = res?.data ?? res;
 
+        // Your API: { status, message, data: {...product} }
+        const p = res?.data?.data ?? res?.data ?? res;
         setProduct(p || null);
 
-        const mainPath =
-          p?.primary_image?.image ||
-          (Array.isArray(p?.images) && p.images.length > 0
-            ? (p.images.find((i) => i.is_primary) || p.images[0])?.image
-            : null);
-
-        setSelectedImage(mainPath || null);
+        // Your API: primary_image.file_name = "all/xxx.png"
+        const main = p?.primary_image?.file_name || null;
+        setSelectedImage(main);
         setZoom(1);
+        setQty(Math.max(1, Number(p?.min_qty || 1)));
       } catch (e) {
         console.error(e);
         setProduct(null);
@@ -111,45 +147,83 @@ const ProductDetail = () => {
         setLoading(false);
       }
     };
-
     load();
   }, [id]);
 
-  const money = (n) =>
-    new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
-
+  // Images for thumbnails:
+  // Your details response currently: images: [] and primary_image has file_name
+  // If you later add images[] with same shape, this will work.
   const images = useMemo(() => {
     const list = Array.isArray(product?.images) ? product.images : [];
-    // ensure primary first (smart)
-    const sorted = [...list].sort((a, b) => Number(b?.is_primary) - Number(a?.is_primary));
-    return sorted;
+    // If item shape includes file_name, we can use it; otherwise ignore safely
+    const normalized = list
+      .map((x) => ({
+        id: x?.id ?? `${x?.file_name ?? x?.image ?? Math.random()}`,
+        file_name: x?.file_name ?? x?.image ?? null,
+        is_primary: Boolean(x?.is_primary),
+      }))
+      .filter((x) => !!x.file_name);
+
+    // Ensure primary first
+    return normalized.sort((a, b) => Number(b.is_primary) - Number(a.is_primary));
   }, [product?.images]);
 
-  const mainImagePath =
-    selectedImage ||
-    product?.primary_image?.image ||
-    (images.length ? images[0]?.image : null);
+  const mainImagePath = useMemo(() => {
+    return (
+      selectedImage ||
+      product?.primary_image?.file_name ||
+      (images.length ? images[0]?.file_name : null) ||
+      null
+    );
+  }, [selectedImage, product?.primary_image?.file_name, images]);
 
-  const mainImage = mainImagePath ? `${image_file_url}/${mainImagePath}` : "/assets/images/placeholder.png";
+  const mainImage = useMemo(() => buildImageUrl(mainImagePath) || "/assets/images/placeholder.png", [mainImagePath]);
 
-  const price = Number(product?.price || 0);
-  const sale = Number(product?.sale_price || 0);
-  const hasSale = sale > 0 && price > 0 && sale < price;
-  const discountPct = hasSale ? Math.round(((price - sale) / price) * 100) : 0;
+  // Pricing: your API uses unit_price, and discount fields
+  const price = useMemo(() => Number(product?.unit_price ?? 0), [product?.unit_price]);
 
-  const displayPrice = hasSale ? sale : price;
+  // If later you introduce sale_price, it will automatically work
+  const sale = useMemo(() => {
+    const s = Number(product?.sale_price ?? 0);
+    return s > 0 ? s : 0;
+  }, [product?.sale_price]);
+
+  const hasSale = useMemo(() => sale > 0 && price > 0 && sale < price, [sale, price]);
+
+  const discountPct = useMemo(() => {
+    if (hasSale) return Math.round(((price - sale) / price) * 100);
+
+    const d = Number(product?.discount ?? 0);
+    const t = String(product?.discount_type ?? "").toLowerCase();
+    if (d > 0 && t === "percent") return Math.round(d);
+
+    return 0;
+  }, [hasSale, price, sale, product?.discount, product?.discount_type]);
+
+  const displayPrice = useMemo(() => (hasSale ? sale : price), [hasSale, sale, price]);
 
   const inStock = useMemo(() => {
-    // your backend looks inconsistent; keep safe logic
+    // Your API: current_stock
+    if (typeof product?.current_stock === "number") return product.current_stock > 0;
+    // fallback
     if (product?.in_stock === false) return false;
     if (typeof product?.stock_qty === "number") return product.stock_qty > 0;
     return true;
-  }, [product?.in_stock, product?.stock_qty]);
+  }, [product?.current_stock, product?.in_stock, product?.stock_qty]);
+
+  const colors = useMemo(() => {
+    // Your API: colors is a JSON string like ["#0000FF", ...]
+    return safeJsonParse(product?.colors, []);
+  }, [product?.colors]);
+
+  const descriptionText = useMemo(() => {
+    // product.description is HTML in your response
+    return htmlToText(product?.description);
+  }, [product?.description]);
 
   const toggleWishlist = () => {
     const pid = product?.id;
     if (!pid) return;
-
     setWishIds((prev) => {
       const has = prev.includes(pid);
       const next = has ? prev.filter((x) => x !== pid) : [...prev, pid];
@@ -254,7 +328,12 @@ const ProductDetail = () => {
           <Stack direction="row" spacing={1.2} alignItems="center">
             <IconButton
               onClick={() => navigate(-1)}
-              sx={{ borderRadius: 3, border: `1px solid ${divider}`, background: surface, "&:hover": { background: surface2 } }}
+              sx={{
+                borderRadius: 3,
+                border: `1px solid ${divider}`,
+                background: surface,
+                "&:hover": { background: surface2 },
+              }}
             >
               <ArrowBackIcon />
             </IconButton>
@@ -290,7 +369,7 @@ const ProductDetail = () => {
                 color: ink,
               }}
             />
-            {hasSale ? (
+            {discountPct > 0 ? (
               <Chip
                 label={`${discountPct}% OFF`}
                 sx={{
@@ -317,7 +396,6 @@ const ProductDetail = () => {
                 backdropFilter: "blur(12px)",
               }}
             >
-              {/* Defined image box */}
               <Box
                 sx={{
                   position: "relative",
@@ -334,8 +412,12 @@ const ProductDetail = () => {
                 <Box
                   component="img"
                   src={mainImage}
-                  alt={product.name}
+                  alt={product?.name || "product"}
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/assets/images/placeholder.png";
+                  }}
                   sx={{
                     width: "100%",
                     height: "100%",
@@ -348,7 +430,6 @@ const ProductDetail = () => {
                   }}
                 />
 
-                {/* Zoom controls (smart pill) */}
                 <Box
                   sx={{
                     position: "absolute",
@@ -372,6 +453,7 @@ const ProductDetail = () => {
                       <ZoomOutIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
+
                   <Tooltip title="Zoom in">
                     <IconButton
                       size="small"
@@ -381,6 +463,7 @@ const ProductDetail = () => {
                       <ZoomInIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
+
                   <Tooltip title="Reset">
                     <IconButton size="small" onClick={() => setZoom(1)} sx={{ borderRadius: 999 }}>
                       <RefreshIcon fontSize="small" />
@@ -389,7 +472,7 @@ const ProductDetail = () => {
                 </Box>
               </Box>
 
-              {/* Thumbnails */}
+              {/* Thumbnails: details response has images: [] usually; this will show only if present */}
               {images.length > 0 ? (
                 <Box
                   sx={{
@@ -403,14 +486,14 @@ const ProductDetail = () => {
                   }}
                 >
                   {images.map((img) => {
-                    const src = `${image_file_url}/${img.image}`;
-                    const selected = img.image === mainImagePath;
+                    const src = buildImageUrl(img.file_name);
+                    const selected = img.file_name === mainImagePath;
 
                     return (
                       <Box
                         key={img.id}
                         onClick={() => {
-                          setSelectedImage(img.image);
+                          setSelectedImage(img.file_name);
                           setZoom(1);
                         }}
                         sx={{
@@ -427,8 +510,8 @@ const ProductDetail = () => {
                       >
                         <Box
                           component="img"
-                          src={src}
-                          alt={img.alt_text || ""}
+                          src={src || "/assets/images/placeholder.png"}
+                          alt=""
                           sx={{
                             width: 72,
                             height: 72,
@@ -459,14 +542,15 @@ const ProductDetail = () => {
             >
               <Stack spacing={1.2}>
                 <Typography variant="h5" sx={{ fontWeight: 950, color: ink, lineHeight: 1.15 }}>
-                  {product.name}
+                  {product?.name}
                 </Typography>
 
                 <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                  <Rating value={Number(product?.rating || 4.2)} precision={0.1} readOnly />
+                  <Rating value={Number(product?.rating || 0)} precision={0.1} readOnly />
                   <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
-                    Ratings {product?.reviews_count ?? 515}
+                    Reviews {product?.reviews_count ?? 0}
                   </Typography>
+
                   <Chip
                     size="small"
                     label={product?.brand?.name ? `Brand: ${product.brand.name}` : "No brand"}
@@ -480,6 +564,29 @@ const ProductDetail = () => {
                     }}
                   />
                 </Stack>
+
+                {/* Color chips (your API: colors JSON string) */}
+                {Array.isArray(colors) && colors.length > 0 ? (
+                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                    <Typography variant="body2" sx={{ color: subInk, fontWeight: 900 }}>
+                      Colors:
+                    </Typography>
+                    {colors.map((c) => (
+                      <Box
+                        key={c}
+                        title={c}
+                        sx={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: 999,
+                          background: c,
+                          border: `1px solid ${divider}`,
+                          boxShadow: theme.palette.mode === "dark" ? "0 0 0 1px rgba(255,255,255,0.10)" : "none",
+                        }}
+                      />
+                    ))}
+                  </Stack>
+                ) : null}
 
                 {/* Price block */}
                 <Box
@@ -501,9 +608,13 @@ const ProductDetail = () => {
                           {money(price)}
                         </Typography>
                       ) : null}
+
+                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 800, display: "block", mt: 0.4 }}>
+                        Unit: {product?.unit || "pc"}
+                      </Typography>
                     </Box>
 
-                    {hasSale ? (
+                    {discountPct > 0 ? (
                       <Chip
                         label={`${discountPct}% OFF`}
                         sx={{
@@ -518,39 +629,10 @@ const ProductDetail = () => {
                   </Stack>
                 </Box>
 
-                {product.short_description ? (
-                  <Typography sx={{ color: ink, fontWeight: 700 }}>
-                    {product.short_description}
-                  </Typography>
-                ) : null}
-
-                {/* Attributes */}
-                {Array.isArray(product?.product_attributes) && product.product_attributes.length > 0 ? (
-                  <Box>
-                    <Typography sx={{ fontWeight: 950, color: ink, mb: 1 }}>Attributes</Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {product.product_attributes.map((pa) => (
-                        <Chip
-                          key={pa.id}
-                          label={pa?.value?.value || "Value"}
-                          sx={{
-                            borderRadius: 999,
-                            fontWeight: 900,
-                            background: surface,
-                            border: `1px solid ${divider}`,
-                            color: ink,
-                          }}
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
-                ) : null}
-
                 <Divider sx={{ opacity: 0.12 }} />
 
                 {/* Quantity + Actions */}
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} alignItems={{ sm: "center" }}>
-                  {/* Qty */}
                   <Box
                     sx={{
                       display: "flex",
@@ -563,7 +645,10 @@ const ProductDetail = () => {
                       width: "fit-content",
                     }}
                   >
-                    <IconButton size="small" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setQty((q) => Math.max(Number(product?.min_qty || 1), q - 1))}
+                    >
                       <RemoveCircleOutlineIcon fontSize="small" />
                     </IconButton>
 
@@ -571,8 +656,9 @@ const ProductDetail = () => {
                       size="small"
                       value={qty}
                       onChange={(e) => {
-                        const v = Number(e.target.value || 1);
-                        setQty(Number.isFinite(v) ? Math.max(1, v) : 1);
+                        const v = Number(e.target.value || product?.min_qty || 1);
+                        const min = Number(product?.min_qty || 1);
+                        setQty(Number.isFinite(v) ? Math.max(min, v) : min);
                       }}
                       sx={{
                         width: 86,
@@ -590,7 +676,6 @@ const ProductDetail = () => {
                     </IconButton>
                   </Box>
 
-                  {/* Actions */}
                   <Stack direction="row" spacing={1} sx={{ ml: { sm: "auto" } }}>
                     <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
                       <IconButton
@@ -621,11 +706,7 @@ const ProductDetail = () => {
                             "&.Mui-disabled": { opacity: 0.55 },
                           }}
                         >
-                          {busyCart ? (
-                            <CircularProgress size={18} />
-                          ) : (
-                            <ShoppingCartOutlinedIcon />
-                          )}
+                          {busyCart ? <CircularProgress size={18} /> : <ShoppingCartOutlinedIcon />}
                         </IconButton>
                       </span>
                     </Tooltip>
@@ -635,7 +716,6 @@ const ProductDetail = () => {
                       disabled={!inStock}
                       onClick={() => {
                         if (!userId) return setMsg("Please login to buy now.");
-                        // You can implement your direct checkout flow here.
                         navigate("/cart");
                       }}
                       sx={{
@@ -657,10 +737,35 @@ const ProductDetail = () => {
 
                 <Divider sx={{ opacity: 0.12 }} />
 
-                {/* Description */}
+                {/* Meta / shipping quick facts based on your response */}
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <Chip
+                    icon={<VerifiedIcon />}
+                    label={`Stock: ${typeof product?.current_stock === "number" ? product.current_stock : "-"}`}
+                    sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                  />
+                  <Chip
+                    label={`COD: ${product?.cash_on_delivery ? "Yes" : "No"}`}
+                    sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                  />
+                  <Chip
+                    label={`Shipping: ${product?.shipping_type || "flat_rate"}`}
+                    sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                  />
+                  {product?.est_shipping_days != null ? (
+                    <Chip
+                      label={`Est: ${product.est_shipping_days} day(s)`}
+                      sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                    />
+                  ) : null}
+                </Stack>
+
+                <Divider sx={{ opacity: 0.12 }} />
+
+                {/* Description (HTML -> text) */}
                 <Typography sx={{ fontWeight: 950, color: ink }}>Description</Typography>
                 <Typography variant="body2" sx={{ color: subInk, fontWeight: 700, whiteSpace: "pre-line" }}>
-                  {product.description || "No detailed description available."}
+                  {descriptionText || "No detailed description available."}
                 </Typography>
               </Stack>
             </Card>

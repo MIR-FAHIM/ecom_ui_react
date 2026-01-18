@@ -20,20 +20,17 @@ import { useNavigate } from "react-router-dom";
 
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller";
 import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller";
-import { image_file_url } from "../../../api/config";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller";
 
 import Hero from "./components/Hero";
 import CategoryQuickFilter from "./components/CategoryQuickFilter";
 import FeaturedTitle from "./components/FeaturedTitle";
-
-// Smart card you already made
 import SmartProductCard from "./components/ProductCard";
 
 const HomeP1 = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
-  // theme helpers (works with the improved theme I gave you)
   const brand = theme.palette.brand || {};
   const semantic = theme.palette.semantic || {};
   const border = theme.palette.divider || "rgba(0,0,0,0.08)";
@@ -60,29 +57,17 @@ const HomeP1 = () => {
   });
 
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
 
   const userId = useMemo(() => {
     const id = localStorage.getItem("userId");
     return id ? String(id) : null;
   }, []);
 
-  const getPrimaryImage = useCallback((product) => {
-    const imgPath =
-      product?.primary_image?.image ||
-      (product?.images?.length
-        ? (product.images.find((i) => i.is_primary) || product.images[0])?.image
-        : null);
-
-    if (imgPath) return `${image_file_url}/${imgPath}`;
-    return "/assets/images/placeholder.png";
-  }, []);
-
   const loadCategories = useCallback(async () => {
     try {
       const c = await getCategory();
       const list = Array.isArray(c) ? c : c?.data?.data || [];
-      setCategories(list);
+      setCategories(Array.isArray(list) ? list : []);
     } catch (e) {
       console.error(e);
       setCategories([]);
@@ -130,15 +115,8 @@ const HomeP1 = () => {
 
   useEffect(() => {
     loadCategories();
-    loadProducts({ page: 1, per_page: 24 });
     refreshCartCount();
-  }, [loadCategories, loadProducts, refreshCartCount]);
-
-  useEffect(() => {
-    const handler = () => refreshCartCount();
-    window.addEventListener("cart-updated", handler);
-    return () => window.removeEventListener("cart-updated", handler);
-  }, [refreshCartCount]);
+  }, [loadCategories, refreshCartCount]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -161,29 +139,32 @@ const HomeP1 = () => {
     return list;
   }, [products, category]);
 
-  const handleAddToCart = async (product) => {
-    if (!userId) {
-      alert("Please login to add to cart.");
-      return;
-    }
-
-    try {
-      const payload = { user_id: userId, product_id: product.id, qty: 1 };
-      const res = await addCart(payload);
-
-      if (res?.status === "success") {
-        await refreshCartCount();
-        window.dispatchEvent(new Event("cart-updated"));
-      } else {
-        alert(res?.message || "Failed to add to cart");
+  const handleAddToCart = useCallback(
+    async (product) => {
+      if (!userId) {
+        alert("Please login to add to cart.");
+        return;
       }
-    } catch (e) {
-      console.error("Error adding to cart:", e);
-      alert("Error adding to cart");
-    }
-  };
 
-  const toggleWishlist = (product) => {
+      try {
+        const payload = { user_id: userId, product_id: product.id, qty: 1 };
+        const res = await addCart(payload);
+
+        if (res?.status === "success") {
+          await refreshCartCount();
+          window.dispatchEvent(new Event("cart-updated"));
+        } else {
+          alert(res?.message || "Failed to add to cart");
+        }
+      } catch (e) {
+        console.error("Error adding to cart:", e);
+        alert("Error adding to cart");
+      }
+    },
+    [userId, refreshCartCount]
+  );
+
+  const toggleWishlist = useCallback((product) => {
     const id = product?.id;
     if (!id) return;
 
@@ -194,20 +175,19 @@ const HomeP1 = () => {
       window.dispatchEvent(new Event("wishlist-updated"));
       return next;
     });
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setQuery("");
     setCategory("");
     loadProducts({ page: 1, per_page: 24, search: "", categoryId: "" });
-  };
+  }, [loadProducts]);
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
         background: pageBg,
-        // Theme-based glow (no hardcoded teal/purple/pink)
         backgroundImage:
           theme.palette.mode === "dark"
             ? `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.10), transparent 55%),
@@ -221,7 +201,6 @@ const HomeP1 = () => {
       <Container sx={{ py: 3 }}>
         <Hero />
 
-        {/* Header row (theme-driven) */}
         <Box
           sx={{
             mb: 2,
@@ -244,7 +223,7 @@ const HomeP1 = () => {
               sx={{
                 fontWeight: 950,
                 letterSpacing: -0.7,
-                background: brand.gradient || `linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)`,
+                background: brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -352,20 +331,7 @@ const HomeP1 = () => {
                 return (
                   <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
                     <SmartProductCard
-                      product={{
-                        id: product.id,
-                        name: product.name,
-                        image: getPrimaryImage(product),
-                        price: product.price,
-                        sale_price: product.sale_price,
-                        discount_percent: product.discount_percent,
-                        in_stock: product.in_stock ?? ((product.stock_qty || 0) > 0),
-                        rating: product.rating ?? 4.5,          // UI filler if API missing
-                        reviews_count: product.reviews_count ?? 12, // UI filler if API missing
-                        sku: product.sku,
-                        category: product.category?.name,
-                        variant: product.variant_label,
-                      }}
+                      product={product} // PASS FULL OBJECT (fixes primary_image access in card)
                       inCart={false}
                       inWish={inWish}
                       onToggleCart={() => handleAddToCart(product)}

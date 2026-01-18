@@ -21,12 +21,8 @@ import {
   VisibilityOutlined,
 } from "@mui/icons-material";
 
-/**
- * Smart Product Card (Theme-first)
- * - Uses your MUI theme (brand + semantic) instead of hardcoded RGBA colors
- * - Image is inside a defined "frame" (consistent box, padding, and radius)
- * - Cart icon is the primary CTA and uses theme brand gradient
- */
+import { image_file_url } from "../../../../api/config/index.jsx";
+
 export default function SmartProductCard({
   product,
   inCart = false,
@@ -37,42 +33,54 @@ export default function SmartProductCard({
 }) {
   const theme = useTheme();
 
-  // Theme helpers (works with improved theme that adds palette.brand + palette.semantic)
   const brand = theme.palette.brand || {};
   const semantic = theme.palette.semantic || {};
   const divider = theme.palette.divider || "rgba(0,0,0,0.08)";
 
-  const surface = semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
-  const surface2 = semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
-  const ink = semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
-  const subInk = semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
+  const surface =
+    semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
+  const surface2 =
+    semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
+  const ink =
+    semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
+  const subInk =
+    semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
 
-  const brandGradient =
-    brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
-
-  const brandGlow =
-    brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
+  const brandGradient = brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
+  const brandGlow = brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
 
   const money = (n) =>
     new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
 
-  const hasSale = useMemo(() => {
-    const p = Number(product?.price || 0);
-    const s = Number(product?.sale_price || 0);
-    return s > 0 && s < p;
-  }, [product?.price, product?.sale_price]);
+  // Your API uses unit_price + discount info; keep fallbacks for older shapes
+  const price = useMemo(() => Number(product?.unit_price ?? product?.price ?? 0), [product?.unit_price, product?.price]);
+
+  const salePrice = useMemo(() => {
+    // If you later introduce sale_price in API, it will work automatically
+    const s = Number(product?.sale_price ?? 0);
+    return s > 0 ? s : 0;
+  }, [product?.sale_price]);
+
+  const hasSale = useMemo(() => salePrice > 0 && salePrice < price, [salePrice, price]);
+
+  const displayPrice = useMemo(() => (hasSale ? money(salePrice) : money(price)), [hasSale, salePrice, price]);
 
   const discountLabel = useMemo(() => {
+    // Supports both: discount_percent OR computed from sale price
     if (product?.discount_percent) return `${product.discount_percent}% OFF`;
-    if (!hasSale) return null;
-    const p = Number(product?.price || 0);
-    const s = Number(product?.sale_price || 0);
-    if (p <= 0) return null;
-    const pct = Math.round(((p - s) / p) * 100);
-    return pct > 0 ? `${pct}% OFF` : null;
-  }, [product?.discount_percent, hasSale, product?.price, product?.sale_price]);
 
-  const displayPrice = hasSale ? money(product?.sale_price) : money(product?.price);
+    if (hasSale && price > 0) {
+      const pct = Math.round(((price - salePrice) / price) * 100);
+      return pct > 0 ? `${pct}% OFF` : null;
+    }
+
+    // Supports your API fields: discount + discount_type
+    const d = Number(product?.discount ?? 0);
+    const t = String(product?.discount_type ?? "").toLowerCase();
+    if (d > 0 && t === "percent") return `${d}% OFF`;
+
+    return null;
+  }, [product?.discount_percent, hasSale, price, salePrice, product?.discount, product?.discount_type]);
 
   const ratingValue = useMemo(() => {
     const r = Number(product?.rating);
@@ -83,16 +91,46 @@ export default function SmartProductCard({
   const reviewsCount = useMemo(() => {
     const n = Number(product?.reviews_count);
     if (Number.isFinite(n) && n >= 0) return n;
-    return 120;
+    return 0;
   }, [product?.reviews_count]);
 
-  // More robust stock check
+  // IMPORTANT: your API image is product.primary_image.file_name = "all/....png"
+  const imageUrl = useMemo(() => {
+    const primary = product?.primary_image ?? product?.primaryImage ?? null;
+
+    // Prefer url if you add it later
+    const direct = primary?.url;
+    if (direct && /^https?:\/\//i.test(String(direct))) return String(direct);
+
+    const file = primary?.file_name;
+    if (file) {
+      const safeFile = String(file).replaceAll("\\/", "/").replace(/^\/+/, "");
+      const base = String(image_file_url || "").replace(/\/+$/, "");
+      return `${base}/${safeFile}`;
+    }
+
+    // If someday you change API to provide full URL in other fields
+    const maybeUrl = product?.image || product?.file_name;
+    if (maybeUrl && /^https?:\/\//i.test(String(maybeUrl))) return String(maybeUrl);
+
+    return "https://via.placeholder.com/600x400?text=No+Image";
+  }, [product?.primary_image, product?.primaryImage, product?.image, product?.file_name]);
+
+  // Your API uses current_stock
   const outOfStock = useMemo(() => {
-   
+    if (typeof product?.current_stock === "number") return product.current_stock <= 0;
     if (typeof product?.stock_qty === "number") return product.stock_qty <= 0;
     if (typeof product?.stock === "number") return product.stock <= 0;
     return false;
-  }, [product?.in_stock, product?.stock_qty, product?.stock]);
+  }, [product?.current_stock, product?.stock_qty, product?.stock]);
+
+  const categoryLabel = useMemo(() => {
+    // Your list response often has category = null, so keep it safe
+    const name = product?.category?.name ?? product?.category?.title ?? null;
+    if (name) return String(name);
+    if (product?.sku) return `SKU: ${product.sku}`;
+    return " ";
+  }, [product?.category, product?.sku]);
 
   return (
     <Card
@@ -111,7 +149,6 @@ export default function SmartProductCard({
         },
       }}
     >
-      {/* Image Section (defined frame) */}
       <Box
         sx={{
           p: 1.25,
@@ -137,39 +174,29 @@ export default function SmartProductCard({
             position: "relative",
           }}
         >
-          {product?.image ? (
-            <Box
-              component="img"
-              src={product.image}
-              alt={product.name}
-              loading="lazy"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                transition: "transform 240ms ease",
-                filter: theme.palette.mode === "dark" ? "saturate(1.08) contrast(1.02)" : "saturate(1.02)",
-                ".MuiCard-root:hover &": { transform: "scale(1.05)" },
-              }}
-            />
-          ) : (
-            <Avatar
-              variant="rounded"
-              sx={{
-                width: 84,
-                height: 84,
-                borderRadius: 4,
-                fontWeight: 900,
-                color: ink,
-                background: brandGradient,
-                border: `1px solid ${divider}`,
-              }}
-            >
-              {(product?.name || "P").slice(0, 1).toUpperCase()}
-            </Avatar>
-          )}
+          {/* Always render image; fallback via onError */}
+          <Box
+            component="img"
+            src={imageUrl}
+            alt={product?.name || "product"}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "https://via.placeholder.com/600x400?text=No+Image";
+            }}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transition: "transform 240ms ease",
+              filter: theme.palette.mode === "dark" ? "saturate(1.08) contrast(1.02)" : "saturate(1.02)",
+              ".MuiCard-root:hover &": { transform: "scale(1.05)" },
+            }}
+          />
 
-          {/* Badges (top-left inside frame) */}
+          {/* If you still want a letter avatar for missing images, keep it hidden and show only when placeholder triggers.
+              For simplicity we rely on placeholder image. */}
+
           <Stack direction="row" spacing={1} sx={{ position: "absolute", left: 10, top: 10, alignItems: "center" }}>
             {discountLabel ? (
               <Chip
@@ -204,9 +231,7 @@ export default function SmartProductCard({
             )}
           </Stack>
 
-          {/* Quick actions (top-right inside frame) */}
           <Stack spacing={1} sx={{ position: "absolute", right: 10, top: 10 }}>
-            {/* Wishlist */}
             <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
               <IconButton
                 onClick={(e) => {
@@ -225,7 +250,6 @@ export default function SmartProductCard({
               </IconButton>
             </Tooltip>
 
-            {/* Cart (primary highlight) */}
             <Tooltip title={outOfStock ? "Out of stock" : inCart ? "Remove from cart" : "Add to cart"}>
               <span>
                 <IconButton
@@ -265,7 +289,6 @@ export default function SmartProductCard({
               </span>
             </Tooltip>
 
-            {/* Quick view */}
             <Tooltip title="Quick view">
               <IconButton
                 onClick={(e) => {
@@ -287,7 +310,6 @@ export default function SmartProductCard({
         </Box>
       </Box>
 
-      {/* Content */}
       <CardContent sx={{ p: 2 }}>
         <Stack spacing={1}>
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, alignItems: "start" }}>
@@ -308,7 +330,7 @@ export default function SmartProductCard({
               </Typography>
 
               <Typography variant="caption" sx={{ fontWeight: 800, letterSpacing: 0.6, color: subInk }}>
-                {product?.category ? product.category : product?.sku ? `SKU: ${product.sku}` : " "}
+                {categoryLabel}
               </Typography>
             </Box>
 
@@ -334,13 +356,12 @@ export default function SmartProductCard({
                     textDecoration: "line-through",
                   }}
                 >
-                  {money(product?.price)}
+                  {money(price)}
                 </Typography>
               ) : null}
             </Box>
           </Box>
 
-          {/* Rating row */}
           <Stack direction="row" spacing={1} alignItems="center">
             <Rating value={ratingValue} precision={0.5} size="small" readOnly />
             <Typography variant="caption" sx={{ fontWeight: 800, color: subInk }}>
@@ -361,7 +382,6 @@ export default function SmartProductCard({
             />
           </Stack>
 
-          {/* Micro CTA hint */}
           <Box
             sx={{
               mt: 0.5,
@@ -375,8 +395,19 @@ export default function SmartProductCard({
               gap: 1,
             }}
           >
-            <Typography variant="caption" sx={{ fontWeight: 900, color: subInk }}>
-              Tap image for details
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 900,
+                color: subInk,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: 170,
+              }}
+              title={product?.unit || ""}
+            >
+              {product?.unit ? `Unit: ${product.unit}` : " "}
             </Typography>
 
             <Chip
