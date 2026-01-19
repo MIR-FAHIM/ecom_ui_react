@@ -36,21 +36,31 @@ function AddProductTab() {
   const [errorMessage, setErrorMessage] = useState("");
 
   // Wizard state
-  const [general, setGeneral] = useState({
-    shop_id: "",
-    category_id: "",
-    brand_id: "",
-    name: "",
-    slug: "",
-    sku: "",
-    short_description: "",
-    description: "",
-    is_active: true,
-    discount_type: "flat",
-    discount_value: "",
-    price: "",
-    stock: "",
-  });
+const [general, setGeneral] = useState({
+  name: "",
+  slug: "",
+  category_id: "",
+  user_id: "",
+  added_by: 1,
+
+  description: "",
+
+  unit_price: "",
+  purchase_price: "",
+  current_stock: "",
+
+  variant_product: 0,
+  todays_deal: 0,
+  published: 0,
+  approved: 1,
+  featured: 0,
+  refundable: 0,
+  cash_on_delivery: 1,
+  stock_visibility_state: 1,
+
+  unit: "",
+  weight: "",
+});
 
   const [attributes, setAttributes] = useState([]);
   const [images, setImages] = useState([]);
@@ -118,11 +128,10 @@ function AddProductTab() {
     const nextErrors = {};
 
     if (s === 0) {
-      if (!general.name.trim()) nextErrors.name = "Product name is required";
-      if (!general.sku.trim()) nextErrors.sku = "SKU is required";
-      if (!general.shop_id) nextErrors.shop_id = "Shop is required";
+      if (!general.name || !general.name.trim()) nextErrors.name = "Product name is required";
+      if (!general.slug || !general.slug.trim()) nextErrors.slug = "Slug is required";
       if (!general.category_id) nextErrors.category_id = "Category is required";
-      if (!general.slug.trim()) nextErrors.slug = "Slug is required";
+      if (!general.user_id) nextErrors.user_id = "User ID is required";
     }
 
     if (s === 2) {
@@ -148,21 +157,43 @@ function AddProductTab() {
 
       // Step 1: Create product
       const productFormData = new FormData();
-      productFormData.append("shop_id", general.shop_id);
-      productFormData.append("category_id", general.category_id);
-      if (general.brand_id) productFormData.append("brand_id", general.brand_id);
-      productFormData.append("name", general.name);
-      productFormData.append("slug", general.slug);
-      productFormData.append("sku", general.sku);
-      productFormData.append("short_description", general.short_description);
-      productFormData.append("description", general.description);
-      productFormData.append("is_active", general.is_active ? 1 : 0);
-      // Pricing
-      if (general.price !== undefined && general.price !== "") productFormData.append("price", general.price);
-      if (general.stock !== undefined && general.stock !== "") productFormData.append("stock", general.stock);
+productFormData.append("name", general.name);
+productFormData.append("slug", general.slug);
+productFormData.append("category_id", general.category_id);
+
+productFormData.append("added_by", localStorage.getItem("userId") );
+productFormData.append("user_id", localStorage.getItem("userId") );
+
+productFormData.append("description", general.description || "");
+
+productFormData.append("unit_price", general.unit_price);
+productFormData.append("purchase_price", general.purchase_price);
+productFormData.append("current_stock", general.current_stock);
+
+productFormData.append("variant_product", general.variant_product ? 1 : 0);
+productFormData.append("todays_deal", general.todays_deal ? 1 : 0);
+productFormData.append("published", general.published ? 1 : 0);
+productFormData.append("approved", general.approved ? 1 : 0);
+productFormData.append("featured", general.featured ? 1 : 0);
+productFormData.append("refundable", general.refundable ? 1 : 0);
+productFormData.append("cash_on_delivery", general.cash_on_delivery ? 1 : 0);
+productFormData.append("stock_visibility_state", general.stock_visibility_state ? 1 : 0);
+
+productFormData.append("unit", general.unit || "");
+productFormData.append("weight", general.weight || "");
+
+      // attach media library images as photo ids
+      const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
+      mediaPhotos.forEach((id) => productFormData.append("photos[]", id));
+
+      // set thumbnail_img if primary is a media item
+      const primaryMedia = images.find((i) => i.is_primary && i.media_id);
+      if (primaryMedia) productFormData.append("thumbnail_img", primaryMedia.media_id);
+
+      // legacy price/stock fields removed; using unit_price/current_stock instead
 
       const productResponse = await createProduct(productFormData);
-      const productId = productResponse.data?.id;
+      const productId = productResponse.data?.id ?? productResponse?.id ?? productResponse?.data?.id;
 
       if (!productId) {
         setErrorMessage("Failed to create product: Invalid response");
@@ -170,13 +201,12 @@ function AddProductTab() {
         return;
       }
 
-      // Step 2: Upload images
-      if (images.length > 0) {
-        const imagesToUpload = images.map((img) => ({
-          file: img.file,
-          is_primary: img.is_primary,
-        }));
+      // Step 2: Upload images (only those with a file to upload)
+      const imagesToUpload = images
+        .filter((img) => img.file)
+        .map((img) => ({ file: img.file, is_primary: img.is_primary }));
 
+      if (imagesToUpload.length > 0) {
         await uploadProductImages(productId, imagesToUpload);
       }
 

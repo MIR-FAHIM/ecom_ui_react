@@ -17,6 +17,42 @@ export const getProduct = async (params = {}) => {
     return { status: 'error', message: error.message, data: null };
   }
 };
+export const getFeaturedProduct = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/list/featured?featured=1`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    // Return API payload (status/message/data) so callers can inspect response.status and response.data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getProduct:", error);
+    return { status: 'error', message: error.message, data: null };
+  }
+};
+
+export const getTodayDealProduct = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/list/today-deal?todays_deal=1`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    // Return API payload (status/message/data) so callers can inspect response.status and response.data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getProduct:", error);
+    return { status: 'error', message: error.message, data: null };
+  }
+};
+
+
+
 export const getProductDetails = async (id) => {
 
   try {
@@ -135,6 +171,24 @@ export const createProduct = async (productData) => {
     return { status: 'error', message: error.message };
   }
 };
+
+export const updateProduct = async (id,productData) => {
+  try {
+    // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description
+    const response = await axiosInstance.post(`/api/products/update/${id}`, productData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating product:', error);
+    return { status: 'error', message: error.message };
+  }
+};
+
+
 export const addProdductDiscount = async (data) => {
   try {
     // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description

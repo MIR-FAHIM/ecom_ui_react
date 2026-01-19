@@ -18,26 +18,31 @@ import {
   Paper,
   Switch,
   FormControlLabel,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { tokens } from "../../../theme";
 import { addBanner, getBanner } from "../../../api/controller/admin_controller/media/banner_controller";
 import { image_file_url } from "../../../api/config";
+import AllMedia from "./AllMedia";
 
 export default function AddBanner() {
-  const [form, setForm] = useState({ banner_name: "", title: "", related_product_id: "", note: "", image: null });
+  const [form, setForm] = useState({ banner_name: "", title: "", related_product_id: "", note: "", image: null, image_id: null });
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [banners, setBanners] = useState([]);
+  const [mediaOpen, setMediaOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
         const res = await getBanner();
-        const list = Array.isArray(res) ? res : res?.data || [];
+        const list = res?.data?.data ?? res?.data ?? (Array.isArray(res) ? res : []);
         setBanners(list);
       } catch (e) {
         console.error(e);
@@ -51,14 +56,33 @@ export default function AddBanner() {
 
   useEffect(() => {
     if (!form.image) return setPreview(null);
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result);
-    reader.readAsDataURL(form.image);
+    // preview is driven by selected `image_id` from media library
+    // keep preview unchanged here
   }, [form.image]);
 
+  // if image_id set (selected from library), show its preview
+  useEffect(() => {
+    if (!form.image_id) return;
+    // try to build url from image_id by checking banners list or leave as null
+    const existing = banners.find((b) => String(b.image?.id) === String(form.image_id) || String(b.image_id) === String(form.image_id));
+    if (existing && existing.image) {
+      const url = existing.image.url || (existing.image.file_name ? `${image_file_url}/${existing.image.file_name}` : null);
+      setPreview(url);
+    }
+  }, [form.image_id, banners]);
+
   const handleChange = (key) => (e) => {
-    const val = key === "image" ? e.target.files[0] : e.target.value;
+    const val = e.target.value;
     setForm((p) => ({ ...p, [key]: val }));
+  };
+
+  const handleSelectMedia = (item) => {
+    // item can be null or media object (when single)
+    if (!item) return;
+    setForm((p) => ({ ...p, image_id: item.id, image: null }));
+    const url = item.url || (item.file_name ? `${image_file_url}/${item.file_name}` : null);
+    setPreview(url);
+    setMediaOpen(false);
   };
 
   const handleSubmit = async (e) => {
@@ -76,6 +100,7 @@ export default function AddBanner() {
       fd.append("related_product_id", form.related_product_id);
       fd.append("note", form.note);
       if (form.image) fd.append("image", form.image);
+      if (form.image_id) fd.append("image_id", form.image_id);
 
       const resp = await addBanner(fd);
 
@@ -88,7 +113,7 @@ export default function AddBanner() {
       setBanners(list);
 
       // reset form
-      setForm({ banner_name: "", title: "", related_product_id: "", note: "", image: null });
+      setForm({ banner_name: "", title: "", related_product_id: "", note: "", image: null, image_id: null });
       setPreview(null);
     } catch (err) {
       console.error("Add banner error:", err);
@@ -152,9 +177,8 @@ export default function AddBanner() {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Button variant="outlined" component="label" fullWidth>
-                  Upload Image
-                  <input type="file" hidden accept="image/*" onChange={handleChange("image")} />
+                <Button variant="contained" fullWidth onClick={() => setMediaOpen(true)}>
+                  Choose From Library
                 </Button>
                 {preview && (
                   <Box sx={{ mt: 1 }}>
@@ -162,7 +186,6 @@ export default function AddBanner() {
                   </Box>
                 )}
               </Grid>
-
               <Grid item xs={12}>
                 <TextField
                   label="Note"
@@ -183,7 +206,7 @@ export default function AddBanner() {
                   <Button
                     variant="outlined"
                     onClick={() => {
-                      setForm({ banner_name: "", title: "", related_product_id: "", note: "", image: null });
+                      setForm({ banner_name: "", title: "", related_product_id: "", note: "", image: null, image_id: null });
                       setPreview(null);
                     }}
                   >
@@ -195,6 +218,13 @@ export default function AddBanner() {
           </form>
         </CardContent>
       </Card>
+
+      <Dialog open={mediaOpen} onClose={() => setMediaOpen(false)} fullWidth maxWidth="lg">
+        <DialogTitle>Select media</DialogTitle>
+        <DialogContent>
+          <AllMedia endpoint="/api/files/list" onSelect={handleSelectMedia} single={true} />
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardContent>
@@ -229,15 +259,15 @@ export default function AddBanner() {
                       <TableCell>{b.title}</TableCell>
                       <TableCell>{b.product?.name || "-"}</TableCell>
                       <TableCell>
-                        {b.image_path ? (
-                          <img
-                            src={b.image_path.startsWith("http") ? b.image_path : `${image_file_url}/${b.image_path}`}
-                            alt={b.banner_name}
-                            style={{ width: 120, height: 60, objectFit: "cover", borderRadius: 4 }}
-                          />
-                        ) : (
-                          "-"
-                        )}
+                        {(() => {
+                          const imgObj = b.image ?? null;
+                          const imgPath = b.image_path || (imgObj?.file_name ? `${image_file_url}/${imgObj.file_name}` : null) || imgObj?.url || null;
+                          if (!imgPath) return "-";
+                          const src = imgPath.startsWith("http") ? imgPath : imgPath;
+                          return (
+                            <img src={src} alt={b.banner_name} style={{ width: 120, height: 60, objectFit: "cover", borderRadius: 4 }} />
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>{b.note}</TableCell>
                       <TableCell>{b.is_active ? "Yes" : "No"}</TableCell>

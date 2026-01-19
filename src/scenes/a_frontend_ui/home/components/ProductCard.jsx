@@ -370,7 +370,7 @@ export default function SmartProductCard({
 
             <Chip
               size="small"
-              label={ratingValue >= 4.5 ? "Top Rated" : "Rated"}
+              label={ "Sold: " + (product?.total_sales ?? product?.sales_count ?? 0) }
               sx={{
                 ml: "auto",
                 borderRadius: 999,
@@ -382,46 +382,7 @@ export default function SmartProductCard({
             />
           </Stack>
 
-          <Box
-            sx={{
-              mt: 0.5,
-              p: 1,
-              borderRadius: 3,
-              border: `1px solid ${divider}`,
-              background: surface2,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 900,
-                color: subInk,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                maxWidth: 170,
-              }}
-              title={product?.unit || ""}
-            >
-              {product?.unit ? `Unit: ${product.unit}` : " "}
-            </Typography>
-
-            <Chip
-              size="small"
-              label={outOfStock ? "Unavailable" : inCart ? "Added" : "Tap cart to add"}
-              sx={{
-                borderRadius: 999,
-                fontWeight: 900,
-                background: outOfStock ? surface : brandGradient,
-                color: outOfStock ? subInk : "#141414",
-                border: `1px solid ${divider}`,
-              }}
-            />
-          </Box>
+        
         </Stack>
       </CardContent>
     </Card>

@@ -18,9 +18,6 @@ import {
   useTheme,
 } from "@mui/material";
 
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -34,9 +31,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { addCart, getCartByUser } from "../../../api/controller/admin_controller/order/cart_controller";
 import { addWish, getUserWish, deleteWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import { getProductDetails } from "../../../api/controller/admin_controller/product/product_controller";
-
-// no en-dash, keep it clean
-const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+import ProductDescription from "./components/ProductDescription";
+import ProductDetailImage from "./components/ProductDetailImage";
 
 const safeJsonParse = (value, fallback) => {
   try {
@@ -53,13 +49,6 @@ const safeJsonParse = (value, fallback) => {
   }
 };
 
-const htmlToText = (html) => {
-  if (!html) return "";
-  // quick, safe-ish conversion for UI
-  const tmp = document.createElement("div");
-  tmp.innerHTML = String(html);
-  return (tmp.textContent || tmp.innerText || "").replace(/\n{3,}/g, "\n\n").trim();
-};
 
 const buildImageUrl = (fileOrUrl) => {
   if (!fileOrUrl) return null;
@@ -210,11 +199,6 @@ const ProductDetail = () => {
     // Your API: colors is a JSON string like ["#0000FF", ...]
     return safeJsonParse(product?.colors, []);
   }, [product?.colors]);
-
-  const descriptionText = useMemo(() => {
-    // product.description is HTML in your response
-    return htmlToText(product?.description);
-  }, [product?.description]);
 
   const toggleWishlist = () => {
     const pid = product?.id;
@@ -410,146 +394,21 @@ const ProductDetail = () => {
         <Grid container spacing={2.4}>
           {/* Left: Media */}
           <Grid item xs={12} md={6}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                border: `1px solid ${divider}`,
-                background: surface,
-                overflow: "hidden",
-                backdropFilter: "blur(12px)",
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  height: { xs: 360, md: 520 },
-                  background:
-                    theme.palette.mode === "dark"
-                      ? "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))"
-                      : "linear-gradient(135deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01))",
-                  display: "grid",
-                  placeItems: "center",
-                  overflow: "hidden",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={mainImage}
-                  alt={product?.name || "product"}
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = "/assets/images/placeholder.png";
-                  }}
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    transform: `scale(${zoom})`,
-                    transformOrigin: "center",
-                    transition: "transform 180ms ease",
-                    filter: "saturate(1.06)",
-                    p: 2,
-                  }}
-                />
-
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 12,
-                    right: 12,
-                    display: "flex",
-                    gap: 0.8,
-                    p: 0.7,
-                    borderRadius: 999,
-                    border: `1px solid ${divider}`,
-                    background: surface,
-                    backdropFilter: "blur(12px)",
-                  }}
-                >
-                  <Tooltip title="Zoom out">
-                    <IconButton
-                      size="small"
-                      onClick={() => setZoom((z) => clamp(Number((z - 0.25).toFixed(2)), 0.75, 2.5))}
-                      sx={{ borderRadius: 999 }}
-                    >
-                      <ZoomOutIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title="Zoom in">
-                    <IconButton
-                      size="small"
-                      onClick={() => setZoom((z) => clamp(Number((z + 0.25).toFixed(2)), 0.75, 2.5))}
-                      sx={{ borderRadius: 999 }}
-                    >
-                      <ZoomInIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title="Reset">
-                    <IconButton size="small" onClick={() => setZoom(1)} sx={{ borderRadius: 999 }}>
-                      <RefreshIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </Box>
-
-              {/* Thumbnails: details response has images: [] usually; this will show only if present */}
-              {images.length > 0 ? (
-                <Box
-                  sx={{
-                    p: 1.2,
-                    display: "flex",
-                    gap: 1,
-                    overflowX: "auto",
-                    borderTop: `1px solid ${divider}`,
-                    background: surface2,
-                    scrollSnapType: "x mandatory",
-                  }}
-                >
-                  {images.map((img) => {
-                    const src = buildImageUrl(img.file_name);
-                    const selected = img.file_name === mainImagePath;
-
-                    return (
-                      <Box
-                        key={img.id}
-                        onClick={() => {
-                          setSelectedImage(img.file_name);
-                          setZoom(1);
-                        }}
-                        sx={{
-                          cursor: "pointer",
-                          borderRadius: 2,
-                          border: `1px solid ${selected ? "transparent" : divider}`,
-                          background: selected ? brandGradient : surface,
-                          p: 0.6,
-                          scrollSnapAlign: "start",
-                          boxShadow: selected ? `0 12px 24px ${brandGlow}` : "none",
-                          transition: "transform 120ms ease",
-                          "&:hover": { transform: "translateY(-1px)" },
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={src || "/assets/images/placeholder.png"}
-                          alt=""
-                          sx={{
-                            width: 72,
-                            height: 72,
-                            objectFit: "cover",
-                            borderRadius: 1.6,
-                            display: "block",
-                            filter: "saturate(1.05)",
-                          }}
-                        />
-                      </Box>
-                    );
-                  })}
-                </Box>
-              ) : null}
-            </Card>
+            <ProductDetailImage
+              mainImage={mainImage}
+              mainImagePath={mainImagePath}
+              productName={product?.name}
+              zoom={zoom}
+              setZoom={setZoom}
+              images={images}
+              onSelectImage={(fileName) => setSelectedImage(fileName)}
+              buildImageUrl={buildImageUrl}
+              divider={divider}
+              surface={surface}
+              surface2={surface2}
+              brandGradient={brandGradient}
+              brandGlow={brandGlow}
+            />
           </Grid>
 
           {/* Right: Info */}
@@ -783,17 +642,12 @@ const ProductDetail = () => {
                   ) : null}
                 </Stack>
 
-                <Divider sx={{ opacity: 0.12 }} />
-
-                {/* Description (HTML -> text) */}
-                <Typography sx={{ fontWeight: 950, color: ink }}>Description</Typography>
-                <Typography variant="body2" sx={{ color: subInk, fontWeight: 700, whiteSpace: "pre-line" }}>
-                  {descriptionText || "No detailed description available."}
-                </Typography>
               </Stack>
             </Card>
           </Grid>
         </Grid>
+
+        <ProductDescription description={product?.description} ink={ink} subInk={subInk} />
 
         <Snackbar open={!!msg} autoHideDuration={2500} onClose={() => setMsg("")} message={msg} />
       </Container>

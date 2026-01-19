@@ -59,8 +59,8 @@ const Cart = () => {
 
   const getPrimaryImage = (product) => {
     const imgPath =
-      product?.primary_image?.image ||
-      (product?.images?.length ? (product.images.find((i) => i.is_primary) || product.images[0])?.image : null);
+      product?.primary_image?.file_name ||
+      (product?.images?.length ? (product.images.find((i) => i.is_primary) || product.images[0])?.file_name : null);
 
     if (imgPath) return `${image_file_url}/${imgPath}`;
     return "/assets/images/placeholder.png";

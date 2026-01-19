@@ -25,8 +25,11 @@ import { addCart, getCartByUser } from "../../../api/controller/admin_controller
 
 import Hero from "./components/Hero";
 import CategoryQuickFilter from "./components/CategoryQuickFilter";
+import CategoryGrid from "./components/CategoryGrid";
 import FeaturedTitle from "./components/FeaturedTitle";
+import FeaturedProduct from "./components/FeaturedProduct";
 import SmartProductCard from "./components/ProductCard";
+import TodayDealProduct from "./components/TodayDealProduct";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -71,6 +74,8 @@ const HomeP1 = () => {
     try {
       const c = await getCategory();
       const list = Array.isArray(c) ? c : c?.data?.data || [];
+
+      // Keep nested structure (top-level categories with `children` array)
       setCategories(safeArray(list));
     } catch (e) {
       console.error("loadCategories error:", e);
@@ -261,116 +266,26 @@ const HomeP1 = () => {
       <Container sx={{ py: 3 }}>
         <Hero />
 
-        <Box
-          sx={{
-            mb: 2,
-            display: "flex",
-            alignItems: { xs: "flex-start", md: "center" },
-            justifyContent: "space-between",
-            gap: 2,
-            flexWrap: "wrap",
-            p: 2,
-            borderRadius: 4,
-            border: `1px solid ${border}`,
-            background: glass,
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          <Box sx={{ flex: 1, minWidth: 240 }}>
-            <Typography
-              variant="h4"
-              component="h1"
-              sx={{
-                fontWeight: 950,
-                letterSpacing: -0.7,
-                background: brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Shop the best products
-            </Typography>
+      
 
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: 700 }}>
-              Browse by category, search from the topbar, tap product for details.
-            </Typography>
-          </Box>
+      
+        <CategoryGrid categories={categories} />
 
-          <Box sx={{ display: "flex", gap: 1.2, alignItems: "center", flexWrap: "wrap" }}>
-            <Select
-              size="small"
-              displayEmpty
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              sx={{
-                minWidth: 200,
-                borderRadius: 999,
-                background: glass,
-                border: `1px solid ${border}`,
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
-                "&:hover": { background: glass2 },
-              }}
-            >
-              <MenuItem value="">All categories</MenuItem>
-              {categories.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </Select>
+        <FeaturedProduct
+          wishIds={wishIds}
+          onToggleWish={(product) => toggleWishlist(product)}
+          onToggleCart={(product) => handleAddToCart(product)}
+          onView={(product) => navigate(`/product/${product.id}`)}
+        />
 
-            <Button
-              variant="outlined"
-              onClick={clearFilters}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 900,
-                borderColor: border,
-                background: glass,
-                "&:hover": { background: glass2, borderColor: theme.palette.primary.main },
-              }}
-            >
-              Clear
-            </Button>
+        <TodayDealProduct
+          wishIds={wishIds}
+          onToggleWish={(product) => toggleWishlist(product)}
+          onToggleCart={(product) => handleAddToCart(product)}
+          onView={(product) => navigate(`/product/${product.id}`)}
+        />
 
-            <Tooltip title="Cart">
-              <IconButton
-                onClick={() => navigate("/cart")}
-                sx={{
-                  borderRadius: 3,
-                  border: `1px solid ${border}`,
-                  background: glass,
-                  "&:hover": { background: glass2 },
-                }}
-              >
-                <Badge badgeContent={cartCount} color="secondary">
-                  <ShoppingCartIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Wishlist">
-              <IconButton
-                onClick={() => navigate("/wishlist")}
-                sx={{
-                  borderRadius: 3,
-                  border: `1px solid ${border}`,
-                  background: glass,
-                  "&:hover": { background: glass2 },
-                }}
-              >
-                <Badge badgeContent={wishIds.length} color="secondary">
-                  {wishIds.length ? <Favorite /> : <FavoriteBorder />}
-                </Badge>
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-
-        <CategoryQuickFilter categories={categories} category={category} setCategory={setCategory} />
-
-        <FeaturedTitle>Featured Products</FeaturedTitle>
+        <FeaturedTitle>All Products</FeaturedTitle>
 
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>

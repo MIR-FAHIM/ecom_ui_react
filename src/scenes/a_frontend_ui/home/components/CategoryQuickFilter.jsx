@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Button, useTheme } from "@mui/material";
+import CategoryItem from "./CategoryItem";
 
 export default function CategoryQuickFilter({ categories = [], category, setCategory }) {
   const theme = useTheme();
@@ -11,29 +12,17 @@ export default function CategoryQuickFilter({ categories = [], category, setCate
   };
 
   return (
-    <Box sx={{ display: "flex", gap: 1, mb: 4, overflowX: "auto" }}>
-      {(() => {
-        const v = !category ? "contained" : "outlined";
-        return (
-          <Button
-            variant={v}
-            onClick={() => setCategory("")}
-            sx={v === "outlined" ? outlinedSx : undefined}
-          >
-            All
-          </Button>
-        );
-      })()}
+    <Box sx={{ display: "flex", gap: 1, mb: 4, overflowX: "auto", alignItems: "center" }}>
+      <Button
+        variant={!category ? "contained" : "outlined"}
+        onClick={() => setCategory("")}
+        sx={!category ? undefined : outlinedSx}
+      >
+        All
+      </Button>
+
       {categories.map((c) => (
-        (() => {
-          const isActive = String(category) === String(c.id);
-          const v = isActive ? "contained" : "outlined";
-          return (
-            <Button key={c.id} variant={v} onClick={() => setCategory(c.id)} sx={v === "outlined" ? outlinedSx : undefined}>
-              {c.name}
-            </Button>
-          );
-        })()
+        <CategoryItem key={c.id} item={c} selectedId={category} onSelect={setCategory} />
       ))}
     </Box>
   );

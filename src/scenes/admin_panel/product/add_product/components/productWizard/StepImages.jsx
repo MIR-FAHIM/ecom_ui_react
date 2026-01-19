@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   Box,
   Grid,
@@ -11,9 +11,15 @@ import {
   FormHelperText,
 } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import AllMedia from "../../../../media/AllMedia";
+import { image_file_url } from "../../../../../../api/config";
 
 function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
   const fileInputRef = useRef(null);
+  const [mediaOpen, setMediaOpen] = useState(false);
 
   const handleFileSelect = (event) => {
     const files = event.target.files;
@@ -36,6 +42,19 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
 
     // Reset input
     fileInputRef.current.value = "";
+  };
+
+  const handleMediaSelect = (itemOrItems) => {
+    if (!itemOrItems) return;
+    const items = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
+    items.forEach((it) => {
+      onAdd({
+        file: null,
+        media_id: it.id,
+        filename: it.file_original_name || it.file_name,
+        is_primary: value.length === 0 || !value.some((v) => v.is_primary),
+      });
+    });
   };
 
   return (
@@ -78,6 +97,11 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
         </Typography>
       </Box>
 
+      <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+        <Button variant="outlined" onClick={() => fileInputRef.current?.click()} startIcon={<CloudUpload />}>Upload Images</Button>
+        <Button variant="contained" onClick={() => setMediaOpen(true)}>Choose From Library</Button>
+      </Box>
+
       {error && (
         <FormHelperText error sx={{ mt: 1 }}>
           {error}
@@ -113,6 +137,16 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
                     />
                   )}
 
+                  {/* media library preview */}
+                  {!img.file && img.media_id && (
+                    <Box
+                      component="img"
+                      src={img.file_name ? `${image_file_url}/${img.file_name}` : (img.url || "/assets/images/placeholder.png")}
+                      alt={img.filename}
+                      sx={{ width: 60, height: 60, objectFit: "cover", borderRadius: 0.5, bgcolor: "action.hover" }}
+                    />
+                  )}
+
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="body2" fontWeight={700} noWrap title={img.filename}>
                       {img.filename}
@@ -141,8 +175,16 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
           ))}
         </Box>
       )}
+
+      <Dialog open={mediaOpen} onClose={() => setMediaOpen(false)} fullWidth maxWidth="lg">
+        <DialogTitle>Select media</DialogTitle>
+        <DialogContent>
+          <AllMedia onSelect={(it) => { handleMediaSelect(it); setMediaOpen(false); }} single={false} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
 
 export default StepImages;
+

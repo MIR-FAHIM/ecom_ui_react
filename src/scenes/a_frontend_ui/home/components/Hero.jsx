@@ -57,11 +57,15 @@ export default function Hero() {
   };
 
   const current = banners[index] || {};
-  const bg = current.image_path
-    ? current.image_path.startsWith("http")
-      ? current.image_path
-      : `${image_file_url}/${current.image_path}`
-    : "/assets/images/banner.jpg";
+  // Prefer returned `image` object (file_name or url), then `image_path`, then fallback
+  let bg = "/assets/images/banner.jpg";
+  if (current?.image?.file_name) {
+    bg = `${image_file_url}/${current.image.file_name}`;
+  } else if (current?.image?.url) {
+    bg = current.image.url;
+  } else if (current?.image_path) {
+    bg = current.image_path.startsWith("http") ? current.image_path : `${image_file_url}/${current.image_path}`;
+  }
 
   const handleCTA = () => {
     if (current?.related_product_id) navigate(`/ecom/product/${current.related_product_id}`);

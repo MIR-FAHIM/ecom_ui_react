@@ -23,11 +23,12 @@ import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import { image_file_url } from "../../../api/config/index.jsx";
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller.jsx";
+import { useNavigate } from "react-router-dom";
 
 const AllProducts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -45,9 +46,10 @@ const AllProducts = () => {
       };
 
       const response = await getProduct(params);
-      if (response.status === "success" && response.data) {
-        setProducts(response.data.data || []);
-        setTotalProducts(response.data.total || 0);
+      const payload = response?.data ?? response;
+      if (payload?.data) {
+        setProducts(payload.data || []);
+        setTotalProducts(payload.total || 0);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -65,12 +67,12 @@ const AllProducts = () => {
     if (!searchTerm.trim()) return products;
 
     const term = searchTerm.toLowerCase();
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(term) ||
-        product.sku.toLowerCase().includes(term) ||
-        product.slug.toLowerCase().includes(term)
-    );
+    return products.filter((product) => {
+      const name = product?.name?.toLowerCase?.() || "";
+      const sku = product?.sku?.toLowerCase?.() || "";
+      const slug = product?.slug?.toLowerCase?.() || "";
+      return name.includes(term) || sku.includes(term) || slug.includes(term);
+    });
   }, [searchTerm, products]);
 
   const handleChangePage = (event, newPage) => {
@@ -98,6 +100,7 @@ const AllProducts = () => {
   const handleEdit = (productId) => {
     console.log("Edit product:", productId);
     // TODO: Navigate to edit product page
+navigate(`/ecom/product/edit/${productId}`);
   };
 
   const handleDelete = (productId) => {
@@ -108,22 +111,40 @@ const AllProducts = () => {
   };
 
   const getPrimaryImage = (product) => {
-    if (product.images && product.images.length > 0) {
+    if (product?.primary_image) return product.primary_image;
+    if (product?.images && product.images.length > 0) {
       const primaryImg = product.images.find((img) => img.is_primary);
       return primaryImg || product.images[0];
     }
     return null;
   };
 
-  const renderStatusChip = (isActive) => {
-    if (isActive === null || isActive === undefined) {
+  const getPrimaryImageUrl = (product) => {
+    const img = getPrimaryImage(product);
+    if (!img) return null;
+    if (img?.url) return img.url;
+    if (img?.file_name) return `${image_file_url}/${img.file_name}`;
+    if (img?.image) return `${image_file_url}/${img.image}`;
+    return null;
+  };
+
+  const renderStatusChip = (product) => {
+    const published = product?.published;
+    const approved = product?.approved;
+
+    if (published === undefined && approved === undefined) {
       return <Chip label="N/A" variant="outlined" size="small" />;
     }
-    return isActive ? (
-      <Chip label="Active" color="success" size="small" />
-    ) : (
-      <Chip label="Inactive" color="warning" size="small" />
-    );
+
+    if (published && approved) {
+      return <Chip label="Published" color="success" size="small" />;
+    }
+
+    if (approved && !published) {
+      return <Chip label="Approved" color="info" size="small" />;
+    }
+
+    return <Chip label="Draft" color="warning" size="small" />;
   };
 
   return (
@@ -195,7 +216,7 @@ const AllProducts = () => {
                       SKU
                     </TableCell>
                     <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Category ID
+                      Category
                     </TableCell>
                     <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
                       Status
@@ -207,7 +228,7 @@ const AllProducts = () => {
                 </TableHead>
                 <TableBody>
                   {filteredProducts.map((product, idx) => {
-                    const primaryImage = getPrimaryImage(product);
+                    const primaryImageUrl = getPrimaryImageUrl(product);
                     const isEven = idx % 2 === 0;
 
                     return (
@@ -226,10 +247,10 @@ const AllProducts = () => {
                           {product.id}
                         </TableCell>
                         <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          {primaryImage && primaryImage.image ? (
+                          {primaryImageUrl ? (
                             <Box
                               component="img"
-                              src={`${image_file_url}/${primaryImage.image}`}
+                              src={primaryImageUrl}
                               alt={product.name}
                               sx={{
                                 width: 50,
@@ -263,13 +284,13 @@ const AllProducts = () => {
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2">{product.sku}</Typography>
+                          <Typography variant="body2">{product.sku || "-"}</Typography>
                         </TableCell>
                         <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2">{product.category_id}</Typography>
+                          <Typography variant="body2">{product.category?.name || product.category_id || "-"}</Typography>
                         </TableCell>
                         <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          {renderStatusChip(product.is_active)}
+                          {renderStatusChip(product)}
                         </TableCell>
                         <TableCell
                           sx={{

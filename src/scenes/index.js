@@ -24,6 +24,8 @@ import EcommerceSetting from "./admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./admin_panel/accounts/EcommerceAccounts";
 import AddBanner from "./admin_panel/media/AddBanner";
 import Attribute from "./admin_panel/product/attribute/attribute";
+import AllMedia from "./admin_panel/media/AllMedia";
+import EditProduct from "./admin_panel/product/edit_product/EditProduct";
 
 
 
@@ -65,6 +67,8 @@ export {
   EcommerceAccounts,
   AddBanner,
   Attribute,
+  AllMedia,
+  EditProduct,
   
   // user frontend
   HomeP1,

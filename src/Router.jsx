@@ -24,6 +24,8 @@ import EcommerceSetting from "./scenes/admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./scenes/admin_panel/accounts/EcommerceAccounts";
 import AddBanner from "./scenes/admin_panel/media/AddBanner";
 import Attribute from "./scenes/admin_panel/product/attribute/attribute";
+import AllMedia from "./scenes/admin_panel/media/AllMedia";
+import EditProduct from "./scenes/admin_panel/product/edit_product/EditProduct";
 
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
@@ -77,6 +79,7 @@ const AppRouter = () => {
           <Route path="/ecom/product/stock-out" element={<StockOutProduct />} />
           <Route path="/ecom/product/seller" element={<SellerProducts />} />
           <Route path="/ecom/product/attribute" element={<Attribute />} />
+          <Route path="/ecom/product/edit/:id" element={<EditProduct />} />
 
           {/* Order Routes */}
           <Route path="/ecom/order/all" element={<AllOrdersEcom />} />
@@ -106,6 +109,7 @@ const AppRouter = () => {
 
 
           <Route path="/ecom/banner/add" element={<AddBanner />} />
+          <Route path="/ecom/media/all" element={<AllMedia />} />
 
         </Route>
       </Routes>

@@ -358,6 +358,7 @@ const SideBar = () => {
             }}
           >
             <Item title="Add Banner" path="/ecom/banner/add" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+            <Item title="All Media" path="/ecom/media/all" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
            
           </Menu>
         </Collapse>
