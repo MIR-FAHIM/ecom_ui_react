@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Card,
@@ -22,32 +22,122 @@ import {
 } from "@mui/icons-material";
 
 import { image_file_url } from "../../../../api/config/index.jsx";
+import { tokens } from "../../../../theme";
+import { addCart, getCartByUser } from "../../../../api/controller/admin_controller/order/cart_controller";
+import { getUserWish, addWish, deleteWish } from "../../../../api/controller/admin_controller/wishlist/wish_controller";
+
+const safeArray = (x) => (Array.isArray(x) ? x : []);
+
+let lastWishSync = 0;
+let lastCartSync = 0;
+let wishSyncPromise = null;
+let cartSyncPromise = null;
+const SYNC_TTL = 30 * 1000;
+
+const readJson = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : fallback;
+    return parsed ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const writeJson = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
+};
+
+const syncWishlist = async (userId) => {
+  if (!userId) return;
+  const now = Date.now();
+  if (now - lastWishSync < SYNC_TTL) return;
+  if (wishSyncPromise) return wishSyncPromise;
+
+  lastWishSync = now;
+  wishSyncPromise = (async () => {
+    const res = await getUserWish(userId);
+    const list = res?.data?.data ?? res?.data ?? res ?? [];
+    const arr = safeArray(list);
+
+    const ids = [];
+    const map = {};
+
+    arr.forEach((item) => {
+      const pid = item?.product_id ?? item?.product?.id;
+      const wid = item?.id;
+      if (pid) ids.push(Number(pid));
+      if (pid && wid) map[String(pid)] = wid;
+    });
+
+    const unique = Array.from(new Set(ids));
+    writeJson("wishlist", unique);
+    writeJson("wishlistMap", map);
+    window.dispatchEvent(new Event("wishlist-updated"));
+  })().finally(() => {
+    wishSyncPromise = null;
+  });
+
+  return wishSyncPromise;
+};
+
+const syncCart = async (userId, force = false) => {
+  if (!userId) return;
+  const now = Date.now();
+  if (!force && now - lastCartSync < SYNC_TTL) return;
+  if (cartSyncPromise) return cartSyncPromise;
+
+  lastCartSync = now;
+  cartSyncPromise = (async () => {
+    const res = await getCartByUser(userId);
+    const items = res?.data?.items ?? res?.data?.data?.items ?? res?.data?.data ?? res?.data ?? [];
+    const arr = safeArray(items);
+    const ids = arr
+      .map((x) => x?.product_id ?? x?.product?.id)
+      .filter((v) => v !== undefined && v !== null)
+      .map((v) => Number(v))
+      .filter((v) => Number.isFinite(v));
+
+    writeJson("cartItems", ids);
+    const total = res?.data?.total_items ?? arr.length;
+    writeJson("cart", Number(total || 0));
+    window.dispatchEvent(new Event("cart-updated"));
+  })().finally(() => {
+    cartSyncPromise = null;
+  });
+
+  return cartSyncPromise;
+};
 
 export default function SmartProductCard({
   product,
-  inCart = false,
-  inWish = false,
-  onToggleCart,
-  onToggleWish,
+  inCart: inCartProp,
+  inWish: inWishProp,
   onView,
 }) {
   const theme = useTheme();
 
-  const brand = theme.palette.brand || {};
-  const semantic = theme.palette.semantic || {};
-  const divider = theme.palette.divider || "rgba(0,0,0,0.08)";
+  const [userId, setUserId] = useState(() => {
+    const id = localStorage.getItem("userId");
+    return id ? String(id) : null;
+  });
+  const [inCart, setInCart] = useState(Boolean(inCartProp));
+  const [inWish, setInWish] = useState(Boolean(inWishProp));
 
-  const surface =
-    semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
-  const surface2 =
-    semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
-  const ink =
-    semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
-  const subInk =
-    semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
+  const colors = tokens(theme.palette.mode);
+  const divider = theme.palette.divider || colors.primary[200];
 
-  const brandGradient = brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
-  const brandGlow = brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
+  const surface = colors.primary[400];
+  const surface2 = colors.primary[300];
+  const ink = colors.gray[100];
+  const subInk = colors.gray[300];
+
+  const accent = theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100];
+  const accentSoft = theme.palette.mode === "dark" ? colors.blueAccent[700] : colors.blueAccent[900];
 
   const money = (n) =>
     new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
@@ -132,6 +222,118 @@ export default function SmartProductCard({
     return " ";
   }, [product?.category, product?.sku]);
 
+  const refreshLocalStates = useCallback(() => {
+    const ids = readJson("wishlist", []);
+    setInWish(Array.isArray(ids) && ids.map(String).includes(String(product?.id)));
+
+    const cartIds = readJson("cartItems", []);
+    setInCart(Array.isArray(cartIds) && cartIds.map(String).includes(String(product?.id)));
+  }, [product?.id]);
+
+  useEffect(() => {
+    refreshLocalStates();
+  }, [refreshLocalStates]);
+
+  useEffect(() => {
+    if (typeof inWishProp === "boolean") setInWish(inWishProp);
+  }, [inWishProp]);
+
+  useEffect(() => {
+    if (typeof inCartProp === "boolean") setInCart(inCartProp);
+  }, [inCartProp]);
+
+  useEffect(() => {
+    const onAuth = () => {
+      const id = localStorage.getItem("userId");
+      setUserId(id ? String(id) : null);
+    };
+    const onWish = () => refreshLocalStates();
+    const onCart = () => refreshLocalStates();
+
+    window.addEventListener("auth-changed", onAuth);
+    window.addEventListener("wishlist-updated", onWish);
+    window.addEventListener("cart-updated", onCart);
+
+    return () => {
+      window.removeEventListener("auth-changed", onAuth);
+      window.removeEventListener("wishlist-updated", onWish);
+      window.removeEventListener("cart-updated", onCart);
+    };
+  }, [refreshLocalStates]);
+
+  useEffect(() => {
+    if (!userId) return;
+    syncWishlist(userId).catch(() => null);
+    syncCart(userId).catch(() => null);
+  }, [userId]);
+
+  const handleToggleWish = useCallback(async (e) => {
+    e.stopPropagation();
+    const pid = product?.id;
+    if (!pid) return;
+
+    const currentIds = readJson("wishlist", []);
+    const has = currentIds.map(String).includes(String(pid));
+    const next = has ? currentIds.filter((x) => String(x) !== String(pid)) : [...currentIds, pid];
+    const unique = Array.from(new Set(next));
+    writeJson("wishlist", unique);
+    setInWish(!has);
+    window.dispatchEvent(new Event("wishlist-updated"));
+
+    if (!userId) return;
+
+    try {
+      if (has) {
+        const map = readJson("wishlistMap", {});
+        const wid = map?.[String(pid)] ?? pid;
+        await deleteWish(wid);
+        const nextMap = { ...map };
+        delete nextMap[String(pid)];
+        writeJson("wishlistMap", nextMap);
+      } else {
+        const res = await addWish({ user_id: userId, product_id: pid });
+        const wid = res?.data?.id ?? res?.id ?? null;
+        if (wid) {
+          const map = readJson("wishlistMap", {});
+          writeJson("wishlistMap", { ...map, [String(pid)]: wid });
+        }
+      }
+      syncWishlist(userId).catch(() => null);
+    } catch (err) {
+      console.error("toggle wishlist error:", err);
+      refreshLocalStates();
+    }
+  }, [product?.id, refreshLocalStates, userId]);
+
+  const handleAddToCart = useCallback(async (e) => {
+    e.stopPropagation();
+    const pid = product?.id;
+    if (!pid) return;
+    if (!userId) {
+      alert("Please login to add to cart.");
+      return;
+    }
+
+    try {
+      const res = await addCart({ user_id: userId, product_id: pid, qty: 1 });
+      if (res?.status === "success") {
+        const current = readJson("cartItems", []);
+        const next = Array.isArray(current) ? [...current, pid] : [pid];
+        const unique = Array.from(new Set(next.map(String))).map((v) => (Number.isFinite(Number(v)) ? Number(v) : v));
+        writeJson("cartItems", unique);
+        writeJson("cart", unique.length);
+        setInCart(true);
+        window.dispatchEvent(new Event("cart-updated"));
+        await syncCart(userId, true);
+      } else {
+        alert(res?.message || "Failed to add to cart");
+      }
+    } catch (err) {
+      console.error("add to cart error:", err);
+      alert("Error adding to cart");
+    }
+  }, [product?.id, userId]);
+
   return (
     <Card
       sx={{
@@ -152,12 +354,7 @@ export default function SmartProductCard({
       <Box
         sx={{
           p: 1.25,
-          background:
-            theme.palette.mode === "dark"
-              ? `radial-gradient(800px 260px at 20% 10%, rgba(251,239,118,0.10), transparent 55%),
-                 radial-gradient(800px 260px at 90% 0%, rgba(250,92,92,0.10), transparent 55%)`
-              : `radial-gradient(800px 260px at 20% 10%, rgba(251,239,118,0.18), transparent 55%),
-                 radial-gradient(800px 260px at 90% 0%, rgba(250,92,92,0.14), transparent 55%)`,
+          background: surface,
         }}
       >
         <Box
@@ -199,18 +396,18 @@ export default function SmartProductCard({
 
           <Stack direction="row" spacing={1} sx={{ position: "absolute", left: 10, top: 10, alignItems: "center" }}>
             {discountLabel ? (
-              <Chip
-                icon={<LocalOffer fontSize="small" />}
-                label={discountLabel}
-                size="small"
-                sx={{
-                  borderRadius: 999,
-                  fontWeight: 900,
-                  background: brandGradient,
-                  color: "#141414",
-                  border: `1px solid ${divider}`,
-                }}
-              />
+                <Chip
+                  icon={<LocalOffer fontSize="small" />}
+                  label={discountLabel}
+                  size="small"
+                  sx={{
+                    borderRadius: 999,
+                    fontWeight: 900,
+                    background: accent,
+                    color: "#fff",
+                    border: `1px solid ${divider}`,
+                  }}
+                />
             ) : null}
 
             {outOfStock ? (
@@ -234,10 +431,7 @@ export default function SmartProductCard({
           <Stack spacing={1} sx={{ position: "absolute", right: 10, top: 10 }}>
             <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
               <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleWish?.(product);
-                }}
+                onClick={handleToggleWish}
                 sx={{
                   borderRadius: 3,
                   border: `1px solid ${divider}`,
@@ -254,23 +448,20 @@ export default function SmartProductCard({
               <span>
                 <IconButton
                   disabled={outOfStock}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleCart?.(product);
-                  }}
+                  onClick={handleAddToCart}
                   sx={{
                     width: 50,
                     height: 50,
                     borderRadius: 4,
                     border: `1px solid ${divider}`,
-                    background: brandGradient,
-                    color: "#141414",
-                    boxShadow: `0 14px 28px ${brandGlow}`,
+                    background: surface,
+                    
+                    boxShadow: `0 10px 22px ${accentSoft}`,
                     transition: "transform 120ms ease, box-shadow 180ms ease, filter 180ms ease",
                     "&:hover": {
                       transform: "translateY(-1px) scale(1.03)",
-                      filter: "saturate(1.15)",
-                      boxShadow: `0 18px 34px ${brandGlow}`,
+                      filter: "saturate(1.05)",
+                      boxShadow: `0 14px 28px ${accentSoft}`,
                     },
                     "&.Mui-disabled": { opacity: 0.5 },
                     position: "relative",
@@ -312,57 +503,52 @@ export default function SmartProductCard({
 
       <CardContent sx={{ p: 2 }}>
         <Stack spacing={1}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, alignItems: "start" }}>
-            <Box sx={{ minWidth: 0 }}>
+          {/* Row 1: Name */}
+          <Typography
+            fontWeight={950}
+            sx={{
+              color: ink,
+              letterSpacing: -0.2,
+              lineHeight: 1.15,
+              display: "-webkit-box",
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {product?.name || "Unnamed product"}
+          </Typography>
+
+          {/* Row 2: Price */}
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+            <Typography
+              fontWeight={950}
+              sx={{
+                fontSize: 18,
+                color: accent,
+              }}
+            >
+              {displayPrice}
+            </Typography>
+
+            {hasSale ? (
               <Typography
-                fontWeight={950}
+                variant="caption"
                 sx={{
-                  color: ink,
-                  letterSpacing: -0.2,
-                  lineHeight: 1.15,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
+                  fontWeight: 800,
+                  color: subInk,
+                  textDecoration: "line-through",
                 }}
               >
-                {product?.name || "Unnamed product"}
+                {money(price)}
               </Typography>
-
-              <Typography variant="caption" sx={{ fontWeight: 800, letterSpacing: 0.6, color: subInk }}>
-                {categoryLabel}
-              </Typography>
-            </Box>
-
-            <Box sx={{ textAlign: "right", flexShrink: 0 }}>
-              <Typography
-                fontWeight={950}
-                sx={{
-                  fontSize: 18,
-                  background: brandGradient,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                {displayPrice}
-              </Typography>
-
-              {hasSale ? (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 800,
-                    color: subInk,
-                    textDecoration: "line-through",
-                  }}
-                >
-                  {money(price)}
-                </Typography>
-              ) : null}
-            </Box>
+            ) : null}
           </Box>
 
+          {/* Row 3: Other */}
           <Stack direction="row" spacing={1} alignItems="center">
+          
+
             <Rating value={ratingValue} precision={0.5} size="small" readOnly />
             <Typography variant="caption" sx={{ fontWeight: 800, color: subInk }}>
               ({reviewsCount})
@@ -370,7 +556,7 @@ export default function SmartProductCard({
 
             <Chip
               size="small"
-              label={ "Sold: " + (product?.total_sales ?? product?.sales_count ?? 0) }
+              label={"Sold: " + (product?.total_sales ?? product?.sales_count ?? 0)}
               sx={{
                 ml: "auto",
                 borderRadius: 999,

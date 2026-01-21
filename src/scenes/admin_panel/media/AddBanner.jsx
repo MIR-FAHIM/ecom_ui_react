@@ -16,14 +16,15 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Switch,
-  FormControlLabel,
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 import { tokens } from "../../../theme";
-import { addBanner, getBanner } from "../../../api/controller/admin_controller/media/banner_controller";
+import { addBanner, getBanner, removeBanner } from "../../../api/controller/admin_controller/media/banner_controller";
 import { image_file_url } from "../../../api/config";
 import AllMedia from "./AllMedia";
 
@@ -36,6 +37,7 @@ export default function AddBanner() {
   const [success, setSuccess] = useState("");
   const [banners, setBanners] = useState([]);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -124,6 +126,23 @@ export default function AddBanner() {
   };
 
   const styles = { container: { p: 3 } };
+
+  const handleRemove = async (bannerId) => {
+    if (!bannerId) return;
+    if (!window.confirm("Remove this banner?")) return;
+
+    try {
+      setRemovingId(bannerId);
+      await removeBanner(bannerId);
+      setSuccess("Banner removed");
+      setBanners((prev) => prev.filter((b) => String(b.id) !== String(bannerId)));
+    } catch (err) {
+      console.error("Remove banner error:", err);
+      setError(err?.response?.data?.message || err.message || "Failed to remove banner");
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   return (
     <Box sx={styles.container}>
@@ -249,6 +268,7 @@ export default function AddBanner() {
                     <TableCell>Note</TableCell>
                     <TableCell>Active</TableCell>
                     <TableCell>Created</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -272,6 +292,20 @@ export default function AddBanner() {
                       <TableCell>{b.note}</TableCell>
                       <TableCell>{b.is_active ? "Yes" : "No"}</TableCell>
                       <TableCell>{new Date(b.created_at).toLocaleString()}</TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Remove">
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              disabled={removingId === b.id}
+                              onClick={() => handleRemove(b.id)}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -26,3 +26,14 @@ export const getBanner = async () => {
     return [];
   }
 }
+export const removeBanner = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/api/banners/remove/${id}`,
+        
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching removeBanner:", error);
+    return [];
+  }
+}

@@ -6,7 +6,6 @@ import {
   Box,
   IconButton,
   Badge,
-  TextField,
   Button,
   Menu,
   MenuItem,
@@ -15,12 +14,10 @@ import {
   Tooltip,
   Avatar,
   Chip,
-  InputAdornment,
   useTheme,
 } from "@mui/material";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import SearchIcon from "@mui/icons-material/Search";
 import BoltIcon from "@mui/icons-material/Bolt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -31,24 +28,24 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { useNavigate } from "react-router-dom";
+import { tokens } from "../../../theme.js";
 import { getUserDetail } from "../../../api/controller/admin_controller/user_controller.jsx";
 import { getUserWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
+import SearchProduct from "../search_product/SearchProduct.jsx";
 
 const Topbar = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  // Theme helpers (works with the theme I gave you)
-  const brand = theme.palette.brand || {};
-  const semantic = theme.palette.semantic || {};
-  const border = theme.palette.divider || "rgba(255,255,255,0.12)";
-  const glass = semantic.surface || "rgba(255,255,255,0.06)";
-  const glass2 = semantic.surface2 || "rgba(255,255,255,0.09)";
+  // Theme tokens
+  const colors = tokens(theme.palette.mode);
+  const border = colors.gray[600];
+  const glass = theme.palette.mode === "dark" ? colors.primary[400] : colors.primary[300];
+  const glass2 = theme.palette.mode === "dark" ? colors.primary[300] : colors.primary[200];
 
   const [cartCount, setCartCount] = useState(0);
   const [wishCount, setWishCount] = useState(0);
 
-  const [query, setQuery] = useState("");
   const [user, setUser] = useState(null);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -141,16 +138,6 @@ const Topbar = () => {
     navigate("/");
   };
 
-  const handleSearch = () => {
-    const q = (query || "").trim();
-    navigate("/");
-    window.dispatchEvent(new CustomEvent("search", { detail: q }));
-  };
-
-  const onKeyDown = (e) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
   const pillIconSx = {
     borderRadius: 3,
     border: `1px solid ${border}`,
@@ -165,14 +152,7 @@ const Topbar = () => {
       sx={{
         mb: 2,
         borderBottom: `1px solid ${border}`,
-        background: theme.palette.mode === "dark"
-          ? `radial-gradient(1200px 260px at 10% 0%, rgba(251,239,118,0.10), transparent 55%),
-             radial-gradient(1200px 260px at 90% 0%, rgba(250,92,92,0.10), transparent 55%),
-             rgba(12,12,18,0.72)`
-          : `radial-gradient(1200px 260px at 10% 0%, rgba(251,239,118,0.20), transparent 55%),
-             radial-gradient(1200px 260px at 90% 0%, rgba(250,92,92,0.16), transparent 55%),
-             rgba(255,255,255,0.78)`,
-        backdropFilter: "blur(14px)",
+          background: colors.primary[500],
       }}
     >
       <Toolbar
@@ -205,9 +185,7 @@ const Topbar = () => {
               sx={{
                 fontWeight: 950,
                 letterSpacing: -0.7,
-                background: brand.gradient || `linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                color: colors.greenAccent[500],
               }}
             >
               ShopLogo
@@ -220,54 +198,7 @@ const Topbar = () => {
 
         {/* Middle: Search */}
         <Box sx={{ flex: 1, maxWidth: 820, display: { xs: "none", sm: "block" } }}>
-          <TextField
-            size="small"
-            placeholder="Search products by name or SKU"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={onKeyDown}
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ opacity: 0.75 }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Button
-                    onClick={handleSearch}
-                    size="small"
-                    variant="contained"
-                    sx={{
-                      borderRadius: 999,
-                      textTransform: "none",
-                      fontWeight: 900,
-                      px: 2,
-                      boxShadow: "none",
-                      background: brand.gradient || `linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)`,
-                      "&:hover": { filter: "saturate(1.08)", boxShadow: "none" },
-                    }}
-                  >
-                    Search
-                  </Button>
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 999,
-                background: glass,
-                border: `1px solid ${border}`,
-                "& fieldset": { borderColor: "transparent" },
-                "&:hover": { background: glass2 },
-                "&.Mui-focused": {
-                  background: glass2,
-                  borderColor: theme.palette.primary.main,
-                },
-              },
-            }}
-          />
+          <SearchProduct placeholder="Search products by name or SKU" />
         </Box>
 
         {/* Right: Actions */}
@@ -299,11 +230,11 @@ const Topbar = () => {
               sx={{
                 borderRadius: 3,
                 border: `1px solid ${border}`,
-                background: brand.gradient || `linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)`,
-                color: "#111",
-                boxShadow: semantic.shadow || "0 16px 36px rgba(0,0,0,0.16)",
-                "&:hover": { filter: "saturate(1.08)", transform: "translateY(-1px)" },
-                transition: "transform 120ms ease, filter 180ms ease",
+                background: theme.palette.secondary.main,
+                color: colors.gray[900],
+                boxShadow: "none",
+                "&:hover": { opacity: 0.92, transform: "translateY(-1px)" },
+                transition: "transform 120ms ease, opacity 180ms ease",
               }}
             >
               <Badge badgeContent={cartCount} color="error">
@@ -339,8 +270,8 @@ const Topbar = () => {
                         height: 26,
                         fontSize: 12,
                         fontWeight: 900,
-                        background: brand.gradient || `linear-gradient(135deg, #FA5C5C, #FBEF76)`,
-                        color: "#111",
+                        background: colors.blueAccent[400],
+                        color: colors.gray[900],
                         border: `1px solid ${border}`,
                       }}
                     >
@@ -348,7 +279,7 @@ const Topbar = () => {
                     </Avatar>
                   }
                 >
-                  <Box sx={{ display: { xs: "none", md: "block" } }}>
+                  <Box sx={{color: colors.primary[600], display: { xs: "none", md: "block" } }}>
                     {user?.name || "Profile"}
                   </Box>
                 </Button>
@@ -368,13 +299,12 @@ const Topbar = () => {
                     minWidth: 250,
                     overflow: "hidden",
                     border: `1px solid ${border}`,
-                    background: theme.palette.mode === "dark" ? "rgba(20,20,28,0.92)" : "rgba(255,255,255,0.94)",
-                    backdropFilter: "blur(14px)",
+                    background: colors.primary[500],
                   },
                 }}
               >
                 <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-                  <Typography sx={{ fontWeight: 950 }}>{user?.name || "Account"}</Typography>
+                  <Typography sx={{  color: "text.secondary", fontWeight: 950 }}>{user?.name || "Account"}</Typography>
                   <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
                     {user?.email || " "}
                   </Typography>
@@ -441,45 +371,7 @@ const Topbar = () => {
 
       {/* Mobile Search bar */}
       <Box sx={{ px: 2, pb: 1.4, display: { xs: "block", sm: "none" } }}>
-        <TextField
-          size="small"
-          placeholder="Search products..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ opacity: 0.75 }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleSearch}
-                  sx={{
-                    borderRadius: 3,
-                    border: `1px solid ${border}`,
-                    background: brand.gradient || `linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)`,
-                    color: "#111",
-                  }}
-                >
-                  <SearchIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 999,
-              background: glass,
-              border: `1px solid ${border}`,
-              "& fieldset": { borderColor: "transparent" },
-              "&:hover": { background: glass2 },
-            },
-          }}
-        />
+        <SearchProduct isMobile placeholder="Search products..." />
       </Box>
     </AppBar>
   );

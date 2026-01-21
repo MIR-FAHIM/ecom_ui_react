@@ -24,7 +24,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
-import { getAllVendors } from "../../../api/controller/admin_controller/user_controller.jsx";
+import { getAllShops } from "../../../api/controller/admin_controller/user_controller.jsx";
 import { tokens } from "../../../theme";
 
 const AllSellers = () => {
@@ -50,7 +50,7 @@ const AllSellers = () => {
 
       // Your controller MUST support params: page, per_page (if you added per_page)
       // If your backend does not support per_page yet, it will ignore it safely.
-      const response = await getAllVendors({ page: apiPage, per_page: perPage });
+      const response = await getAllShops({ page: apiPage, per_page: perPage });
 
       if (response?.status === "success") {
         const paginator = response?.data; // THIS is the paginator object
@@ -84,23 +84,25 @@ const AllSellers = () => {
 
     return rows.filter((s) => {
       const name = (s?.name ?? "").toLowerCase();
+      const slug = (s?.slug ?? "").toLowerCase();
       const email = (s?.email ?? "").toLowerCase();
-      const mobile = String(s?.mobile ?? "");
-      const business_name = (s?.business_name ?? "").toLowerCase();
+      const phone = String(s?.phone ?? "");
       const address = (s?.address ?? "").toLowerCase();
       const district = (s?.district ?? "").toLowerCase();
       const area = (s?.area ?? "").toLowerCase();
       const zone = (s?.zone ?? "").toLowerCase();
+      const userName = (s?.user?.name ?? "").toLowerCase();
 
       return (
         name.includes(q) ||
+        slug.includes(q) ||
         email.includes(q) ||
-        mobile.includes(searchQuery.trim()) ||
-        business_name.includes(q) ||
+        phone.includes(searchQuery.trim()) ||
         address.includes(q) ||
         district.includes(q) ||
         area.includes(q) ||
-        zone.includes(q)
+        zone.includes(q) ||
+        userName.includes(q)
       );
     });
   }, [rows, searchQuery]);
@@ -147,7 +149,7 @@ const AllSellers = () => {
   };
 
   const renderLocation = (s) => {
-    const parts = [s?.area, s?.district, s?.zone].filter(Boolean);
+    const parts = [s?.address, s?.area, s?.district, s?.zone].filter(Boolean);
     return parts.length ? parts.join(", ") : "N/A";
   };
 
@@ -159,7 +161,7 @@ const AllSellers = () => {
           All Sellers
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Server paginated list. Search filters only the current page.
+          Shops list. Search filters only the current page.
         </Typography>
       </Box>
 
@@ -169,10 +171,10 @@ const AllSellers = () => {
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
               <Typography variant="h6" fontWeight={800}>
-                Sellers (Total: {total})
+                Shops (Total: {total})
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                API: /api/users/vendors?page=1
+                API: /api/shops/list?page=1
               </Typography>
             </Grid>
 
@@ -252,7 +254,7 @@ const AllSellers = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  {["ID", "Name", "Business", "Email", "Mobile", "Location", "Status", "Actions"].map((h) => (
+                  {["ID", "Shop", "User", "Email", "Phone", "Address", "Status", "Actions"].map((h) => (
                     <TableCell
                       key={h}
                       sx={{
@@ -272,7 +274,7 @@ const AllSellers = () => {
                 {loading && (
                   <TableRow>
                     <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">Loading sellers...</Typography>
+                      <Typography color="text.secondary">Loading shops...</Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -280,7 +282,7 @@ const AllSellers = () => {
                 {!loading && filteredRows.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">No sellers found</Typography>
+                      <Typography color="text.secondary">No shops found</Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -297,9 +299,9 @@ const AllSellers = () => {
                     >
                       <TableCell sx={{ fontWeight: 700 }}>{seller?.id ?? "N/A"}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>{seller?.name ?? "N/A"}</TableCell>
-                      <TableCell>{seller?.business_name ?? "N/A"}</TableCell>
+                      <TableCell>{seller?.user?.name ?? "N/A"}</TableCell>
                       <TableCell>{seller?.email ?? "N/A"}</TableCell>
-                      <TableCell>{seller?.mobile ?? "N/A"}</TableCell>
+                      <TableCell>{seller?.phone ?? "N/A"}</TableCell>
                       <TableCell>{renderLocation(seller)}</TableCell>
                       <TableCell>{renderStatusChip(seller?.status, seller?.is_banned)}</TableCell>
 

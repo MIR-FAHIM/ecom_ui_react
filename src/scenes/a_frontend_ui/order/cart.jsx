@@ -29,20 +29,18 @@ import LockCheckoutIcon from "@mui/icons-material/Lock";
 import { getCartByUser, updateQuantity, deleteItem } from "../../../api/controller/admin_controller/order/cart_controller";
 import { image_file_url } from "../../../api/config";
 import { useNavigate } from "react-router-dom";
+import { tokens } from "../../../theme";
 
 const Cart = () => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const brand = theme.palette.brand || {};
-  const semantic = theme.palette.semantic || {};
-  const divider = theme.palette.divider || "rgba(0,0,0,0.08)";
-  const surface = semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
-  const surface2 = semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
-  const ink = semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
-  const subInk = semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
-  const brandGradient = brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
-  const brandGlow = brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
+  const colors = tokens(theme.palette.mode);
+  const divider = theme.palette.divider || colors.primary[200];
+  const surface = colors.primary[400];
+  const surface2 = colors.primary[300];
+  const ink = colors.gray[100];
+  const subInk = colors.gray[300];
 
   const money = (n) =>
     new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
@@ -152,15 +150,7 @@ const Cart = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: theme.palette.background?.default,
-        backgroundImage:
-          theme.palette.mode === "dark"
-            ? `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.10), transparent 55%),
-               radial-gradient(1200px 700px at 90% 5%, rgba(250,92,92,0.10), transparent 55%),
-               radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.08), transparent 55%)`
-            : `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.22), transparent 55%),
-               radial-gradient(1200px 700px at 90% 5%, rgba(250,92,92,0.18), transparent 55%),
-               radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.14), transparent 55%)`,
+        background: theme.palette.background?.default || colors.primary[500],
       }}
     >
       <Container sx={{ py: 3 }}>
@@ -199,9 +189,7 @@ const Cart = () => {
                 sx={{
                   fontWeight: 950,
                   letterSpacing: -0.7,
-                  background: brandGradient,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  color: theme.palette.secondary.main,
                   lineHeight: 1.05,
                 }}
               >
@@ -272,10 +260,10 @@ const Cart = () => {
                 textTransform: "none",
                 fontWeight: 900,
                 px: 2.5,
-                background: brandGradient,
-                color: "#141414",
-                boxShadow: `0 16px 34px ${brandGlow}`,
-                "&:hover": { filter: "saturate(1.1)", boxShadow: `0 20px 40px ${brandGlow}` },
+                background: theme.palette.secondary.main,
+                color: colors.gray[900],
+                boxShadow: "none",
+                "&:hover": { opacity: 0.92, boxShadow: "none" },
               }}
               variant="contained"
               onClick={() => navigate("/")}
@@ -320,9 +308,11 @@ const Cart = () => {
                           }}
                         >
                           <Avatar
+                          
                             variant="square"
                             src={getPrimaryImage(it.product)}
                             sx={{ width: "100%", height: "100%" }}
+                            onClick={() => navigate(`/product/${it.product?.id}`)}
                           />
                         </Box>
                       </ListItemAvatar>
@@ -338,6 +328,33 @@ const Cart = () => {
                             <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
                               Shop: {it.shop?.name || "N/A"}
                             </Typography>
+
+                            {it.product_attribute ? (
+                              <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap sx={{ mt: 0.6, rowGap: 0.6 }}>
+                                <Chip
+                                  size="small"
+                                  label={`${it.product_attribute?.attribute?.name || "N/A"}`}
+                                  sx={{
+                                    borderRadius: 999,
+                                    fontWeight: 900,
+                                    background: "transparent",
+                                    border: `1px solid ${divider}`,
+                                    color: subInk,
+                                  }}
+                                />
+                                <Chip
+                                  size="small"
+                                  label={`Value: ${it.product_attribute?.value?.value || "N/A"}`}
+                                  sx={{
+                                    borderRadius: 999,
+                                    fontWeight: 900,
+                                    background: surface2,
+                                    border: `1px solid ${divider}`,
+                                    color: ink,
+                                  }}
+                                />
+                              </Stack>
+                            ) : null}
 
                             <Stack
                               direction={{ xs: "column", sm: "row" }}
@@ -476,9 +493,7 @@ const Cart = () => {
                     component="span"
                     sx={{
                       ml: 0.5,
-                      background: brandGradient,
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
+                      color: theme.palette.secondary.main,
                     }}
                   >
                     {money(cart.subtotal)}
@@ -512,10 +527,10 @@ const Cart = () => {
                     textTransform: "none",
                     fontWeight: 950,
                     px: 2.6,
-                    background: brandGradient,
-                    color: "#141414",
-                    boxShadow: `0 16px 34px ${brandGlow}`,
-                    "&:hover": { filter: "saturate(1.1)", boxShadow: `0 20px 40px ${brandGlow}` },
+                    background: theme.palette.secondary.main,
+                    color: colors.gray[900],
+                    boxShadow: "none",
+                    "&:hover": { opacity: 0.92, boxShadow: "none" },
                   }}
                 >
                   Checkout

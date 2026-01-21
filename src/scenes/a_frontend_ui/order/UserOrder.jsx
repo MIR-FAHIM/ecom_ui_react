@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button, Chip, TablePagination } from '@mui/material';
+import { Box, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button, Chip, TablePagination, useTheme } from '@mui/material';
 import { getUserOrder } from '../../../api/controller/admin_controller/order/order_controller';
 import { useNavigate } from 'react-router-dom';
+import { tokens } from '../../../theme';
 
 const UserOrder = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const border = theme.palette.divider || colors.primary[200];
+  const surface = colors.primary[400];
+  const surface2 = colors.primary[300];
+  const ink = colors.gray[100];
+  const subInk = colors.gray[300];
+
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,16 +68,16 @@ const UserOrder = () => {
 
   return (
     <Container sx={{ py: 3 }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>My Orders</Typography>
+      <Typography variant="h5" sx={{ mb: 2, fontWeight: 900, color: ink }}>My Orders</Typography>
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
       ) : orders.length === 0 ? (
         <Typography>No orders yet.</Typography>
       ) : (
-        <Paper>
+        <Paper sx={{ border: `1px solid ${border}`, background: surface }}>
           <TableContainer>
-            <Table>
+            <Table sx={{ "& th": { fontWeight: 900, color: ink, background: surface2 } }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Order #</TableCell>
@@ -81,14 +90,20 @@ const UserOrder = () => {
               </TableHead>
               <TableBody>
                 {orders.map((o) => (
-                  <TableRow key={o.id} hover>
-                    <TableCell>{o.order_number}</TableCell>
+                  <TableRow key={o.id} hover sx={{ "& td": { color: subInk } }}>
+                    <TableCell sx={{ color: ink, fontWeight: 800 }}>{o.order_number}</TableCell>
                     <TableCell>{new Date(o.created_at).toLocaleString()}</TableCell>
                     <TableCell><Chip label={o.status} color={getStatusColor(o.status)} size="small" /></TableCell>
                     <TableCell>{o.payment_status}</TableCell>
                     <TableCell align="right">৳ {o.total ?? 0}</TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => navigate(`/order/${o.id}`)}>View</Button>
+                      <Button
+                        size="small"
+                        sx={{ minWidth: 64, color: theme.palette.secondary.main, fontWeight: 800 }}
+                        onClick={() => navigate(`/order/${o.id}`)}
+                      >
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -104,6 +119,7 @@ const UserOrder = () => {
             rowsPerPage={perPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[10, 20, 50]}
+            sx={{ color: subInk }}
           />
         </Paper>
       )}

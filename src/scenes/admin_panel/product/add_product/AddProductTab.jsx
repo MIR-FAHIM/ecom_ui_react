@@ -36,11 +36,11 @@ function AddProductTab() {
   const [errorMessage, setErrorMessage] = useState("");
 
   // Wizard state
-const [general, setGeneral] = useState({
+  const [general, setGeneral] = useState({
   name: "",
   slug: "",
   category_id: "",
-  user_id: "",
+  user_id: localStorage.getItem("userId") || "",
   added_by: 1,
 
   description: "",
@@ -118,6 +118,10 @@ const [general, setGeneral] = useState({
 
   useEffect(() => {
     loadDropdowns();
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setGeneral((prev) => ({ ...prev, user_id: storedUserId }));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -131,7 +135,7 @@ const [general, setGeneral] = useState({
       if (!general.name || !general.name.trim()) nextErrors.name = "Product name is required";
       if (!general.slug || !general.slug.trim()) nextErrors.slug = "Slug is required";
       if (!general.category_id) nextErrors.category_id = "Category is required";
-      if (!general.user_id) nextErrors.user_id = "User ID is required";
+      if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
     }
 
     if (s === 2) {

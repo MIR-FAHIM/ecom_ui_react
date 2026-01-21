@@ -202,6 +202,18 @@ export const themeSettings = (mode) => {
         fontSize: 14,
       },
     },
+    components: {
+      MuiContainer: {
+        defaultProps: {
+          maxWidth: "xl",
+        },
+        styleOverrides: {
+          maxWidthXl: {
+            maxWidth: "1480px",
+          },
+        },
+      },
+    },
   };
 };
 

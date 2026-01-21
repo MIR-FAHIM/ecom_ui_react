@@ -78,6 +78,33 @@ export const getProductDetails = async (id) => {
 
   }
 }
+export const getProductReviews = async (id) => {
+
+  try {
+    const response = await axiosInstance.get(`/api/reviews/product/${id}`,
+      // {
+      //   headers: {
+      //     // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
+      //     'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      //   },
+      // }
+    );
+
+
+    return response.data;
+
+
+  } catch (error) {
+
+
+    console.error("Error fetching getProductReviews:", error);
+
+
+
+  }
+}
+
+
 export const getStock = async () => {
   try {
     const response = await axiosInstance.get(`/api/stock/list`,

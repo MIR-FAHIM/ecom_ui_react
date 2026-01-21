@@ -39,6 +39,10 @@ import UserOrderDetails from "./a_frontend_ui/order/UserOrderDetails";
 import ProductDetail from "./a_frontend_ui/product/ProductDetail";
 import Cart from "./a_frontend_ui/order/cart";
 import ProceedOrder from "./a_frontend_ui/order/ProceedOrder";
+import CategoryWiseProduct from "./a_frontend_ui/product/category_wise/CategoryWiseProduct";
+import RelatedProduct from "./a_frontend_ui/product/related_product/RelatedProduct";
+import ProductReview from "./a_frontend_ui/product/review_product/ProductReview";
+import AddShop from "./a_frontend_ui/seller/AddShop";
 
 import Wish from "./a_frontend_ui/wish/Wish";
 
@@ -79,4 +83,8 @@ export {
   Cart,
   ProceedOrder,
   Wish,
+  CategoryWiseProduct,
+  RelatedProduct,
+  ProductReview,
+  AddShop,
 };

@@ -21,6 +21,7 @@ import {
   Tooltip,
   IconButton,
   Avatar,
+  useTheme,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -34,10 +35,17 @@ import {
   ShoppingBag,
 } from "@mui/icons-material";
 import { getOrderDetails } from "../../../api/controller/admin_controller/order/order_controller";
+import { tokens } from "../../../theme";
 
 const UserOrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const border = theme.palette.divider || colors.primary[200];
+  const surface = colors.primary[400];
+  const surface2 = colors.primary[200];
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -133,8 +141,7 @@ const UserOrderDetails = () => {
           display: "grid",
           placeItems: "center",
           minHeight: "70vh",
-          background:
-            "radial-gradient(1200px 600px at 20% 10%, rgba(124, 58, 237, 0.18), transparent 55%), radial-gradient(1200px 600px at 80% 0%, rgba(34, 211, 238, 0.16), transparent 55%), radial-gradient(1200px 600px at 50% 90%, rgba(244, 114, 182, 0.14), transparent 55%)",
+          background: theme.palette.background?.default || colors.primary[500],
         }}
       >
         <Card
@@ -142,10 +149,8 @@ const UserOrderDetails = () => {
             width: { xs: "100%", sm: 460 },
             borderRadius: 4,
             overflow: "hidden",
-            border: "1px solid",
-            borderColor: "divider",
-            backdropFilter: "blur(10px)",
-            background: "rgba(255,255,255,0.06)",
+          
+            background: surface,
           }}
         >
           <CardContent sx={{ p: 3 }}>
@@ -194,8 +199,7 @@ const UserOrderDetails = () => {
       sx={{
         p: { xs: 2, md: 3 },
         minHeight: "100vh",
-        background:
-          "radial-gradient(1400px 700px at 10% 0%, rgba(34, 211, 238, 0.18), transparent 55%), radial-gradient(1400px 700px at 90% 5%, rgba(124, 58, 237, 0.18), transparent 55%), radial-gradient(1400px 700px at 50% 95%, rgba(244, 114, 182, 0.14), transparent 55%)",
+        background: theme.palette.background?.default || colors.primary[500],
       }}
     >
       {/* Header */}
@@ -204,10 +208,8 @@ const UserOrderDetails = () => {
           mb: 2,
           borderRadius: 4,
           overflow: "hidden",
-          border: "1px solid",
-          borderColor: "divider",
-          background: "rgba(255,255,255,0.06)",
-          backdropFilter: "blur(10px)",
+          border: `1px solid `,
+          background: surface,
         }}
       >
         <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
@@ -223,8 +225,8 @@ const UserOrderDetails = () => {
                   textTransform: "none",
                   fontWeight: 800,
                   px: 2,
-                  borderColor: "rgba(255,255,255,0.18)",
-                  background: "rgba(255,255,255,0.04)",
+                  borderColor: border,
+                  background: surface,
                 }}
               >
                 Back
@@ -237,9 +239,7 @@ const UserOrderDetails = () => {
                   sx={{
                     lineHeight: 1.05,
                     letterSpacing: -0.6,
-                    background: "linear-gradient(90deg, rgba(34,211,238,1), rgba(124,58,237,1), rgba(244,114,182,1))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
+                    color: theme.palette.secondary.main,
                   }}
                 >
                   Order Details
@@ -267,8 +267,8 @@ const UserOrderDetails = () => {
                     sx={{
                       borderRadius: 999,
                       fontWeight: 800,
-                      borderColor: "rgba(255,255,255,0.18)",
-                      background: "rgba(255,255,255,0.03)",
+                      borderColor: border,
+                      background: surface2,
                     }}
                   />
                 </Stack>
@@ -281,9 +281,8 @@ const UserOrderDetails = () => {
                   onClick={() => window.print()}
                   sx={{
                     borderRadius: 3,
-                    border: "1px solid",
-                    borderColor: "rgba(255,255,255,0.18)",
-                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid `,
+                    background: surface,
                   }}
                 >
                   <Print />
@@ -301,10 +300,8 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              background: "rgba(255,255,255,0.06)",
-              backdropFilter: "blur(10px)",
+              border: `1px solid `,
+              background: surface,
               overflow: "hidden",
             }}
           >
@@ -317,8 +314,8 @@ const UserOrderDetails = () => {
                     borderRadius: 3,
                     display: "grid",
                     placeItems: "center",
-                    background: "linear-gradient(135deg, rgba(34,211,238,0.35), rgba(124,58,237,0.25))",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: surface2,
+                    border: `1px solid `,
                   }}
                 >
                   <CalendarMonth fontSize="small" />
@@ -341,10 +338,8 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              background: "rgba(255,255,255,0.06)",
-              backdropFilter: "blur(10px)",
+              border: `1px solid `,
+              background: surface,
               overflow: "hidden",
             }}
           >
@@ -357,8 +352,8 @@ const UserOrderDetails = () => {
                     borderRadius: 3,
                     display: "grid",
                     placeItems: "center",
-                    background: "linear-gradient(135deg, rgba(244,114,182,0.30), rgba(124,58,237,0.22))",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: surface2,
+                    border: `1px solid `,
                   }}
                 >
                   <ReceiptLong fontSize="small" />
@@ -381,10 +376,8 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              background: "rgba(255,255,255,0.06)",
-              backdropFilter: "blur(10px)",
+              border: `1px solid `,
+              background: surface,
               overflow: "hidden",
             }}
           >
@@ -397,8 +390,8 @@ const UserOrderDetails = () => {
                     borderRadius: 3,
                     display: "grid",
                     placeItems: "center",
-                    background: "linear-gradient(135deg, rgba(34,211,238,0.22), rgba(244,114,182,0.25))",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: surface2,
+                    border: `1px solid `,
                   }}
                 >
                   <Payments fontSize="small" />
@@ -412,9 +405,7 @@ const UserOrderDetails = () => {
                     sx={{
                       mt: 0.4,
                       fontSize: 22,
-                      background: "linear-gradient(90deg, rgba(34,211,238,1), rgba(244,114,182,1))",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
+                      color: theme.palette.secondary.main,
                     }}
                   >
                     {formatCurrency(order.total)}
@@ -433,10 +424,8 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              background: "rgba(255,255,255,0.06)",
-              backdropFilter: "blur(10px)",
+              border: `1px solid`,
+              background: surface,
               overflow: "hidden",
             }}
           >
@@ -449,8 +438,8 @@ const UserOrderDetails = () => {
                     borderRadius: 3,
                     display: "grid",
                     placeItems: "center",
-                    background: "linear-gradient(135deg, rgba(124,58,237,0.26), rgba(244,114,182,0.22))",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: surface2,
+                    border: `1px solid `,
                   }}
                 >
                   <Person fontSize="small" />
@@ -470,8 +459,9 @@ const UserOrderDetails = () => {
                       height: 40,
                       fontWeight: 900,
                       borderRadius: 3,
-                      background: "linear-gradient(135deg, rgba(34,211,238,0.35), rgba(124,58,237,0.30))",
-                      border: "1px solid rgba(255,255,255,0.12)",
+                      background: theme.palette.secondary.main,
+                      color: colors.gray[900],
+                      border: `1px solid `,
                     }}
                   >
                     {getInitials(order.customer_name)}
@@ -516,10 +506,8 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-              background: "rgba(255,255,255,0.06)",
-              backdropFilter: "blur(10px)",
+              border: `1px solid`,
+              background: surface,
               overflow: "hidden",
             }}
           >
@@ -532,8 +520,8 @@ const UserOrderDetails = () => {
                     borderRadius: 3,
                     display: "grid",
                     placeItems: "center",
-                    background: "linear-gradient(135deg, rgba(34,211,238,0.22), rgba(124,58,237,0.22))",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: surface2,
+                    border: `1px solid`,
                   }}
                 >
                   <LocationOn fontSize="small" />
@@ -588,8 +576,8 @@ const UserOrderDetails = () => {
                       mt: 0.5,
                       p: 1.4,
                       borderRadius: 3,
-                      border: "1px solid rgba(255,255,255,0.14)",
-                      background: "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+                      border: `1px solid`,
+                      background: surface2,
                     }}
                   >
                     <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
@@ -610,10 +598,8 @@ const UserOrderDetails = () => {
           mt: 2,
           borderRadius: 4,
           overflow: "hidden",
-          border: "1px solid",
-          borderColor: "divider",
-          background: "rgba(255,255,255,0.06)",
-          backdropFilter: "blur(10px)",
+          border: `1px solid`,
+          background: surface,
         }}
       >
         <Box
@@ -634,8 +620,8 @@ const UserOrderDetails = () => {
                 borderRadius: 3,
                 display: "grid",
                 placeItems: "center",
-                background: "linear-gradient(135deg, rgba(244,114,182,0.28), rgba(34,211,238,0.20))",
-                border: "1px solid rgba(255,255,255,0.15)",
+                background: surface2,
+                border: `1px solid`,
               }}
             >
               <ShoppingBag fontSize="small" />
@@ -660,9 +646,8 @@ const UserOrderDetails = () => {
                 sx={{
                   "& th": {
                     fontWeight: 900,
-                    borderBottom: "1px solid rgba(255,255,255,0.14)",
-                    background: "rgba(20, 20, 24, 0.35)",
-                    backdropFilter: "blur(10px)",
+                    borderBottom: `1px solid`,
+                    background: surface2,
                   },
                 }}
               >
@@ -678,7 +663,7 @@ const UserOrderDetails = () => {
 
               <TableBody
                 sx={{
-                  "& td": { borderBottom: "1px solid rgba(255,255,255,0.10)" },
+                  "& td": { borderBottom: `1px solid}` },
                 }}
               >
                 {orderItems.map((item, idx) => {
@@ -688,13 +673,10 @@ const UserOrderDetails = () => {
                     <TableRow
                       key={item.id ?? `${item.sku}-${idx}`}
                       sx={{
-                        background: isEven
-                          ? "linear-gradient(90deg, rgba(34,211,238,0.06), rgba(124,58,237,0.04), rgba(244,114,182,0.06))"
-                          : "transparent",
+                        background: isEven ? surface2 : "transparent",
                         transition: "transform 120ms ease, background 200ms ease",
                         "&:hover": {
-                          background:
-                            "linear-gradient(90deg, rgba(34,211,238,0.10), rgba(124,58,237,0.08), rgba(244,114,182,0.10))",
+                          background: surface2,
                         },
                       }}
                     >
@@ -724,8 +706,8 @@ const UserOrderDetails = () => {
                           sx={{
                             borderRadius: 999,
                             fontWeight: 900,
-                            background: "rgba(255,255,255,0.06)",
-                            border: "1px solid rgba(255,255,255,0.14)",
+                            background: surface,
+                            border: `1px solid`,
                           }}
                         />
                       </TableCell>
@@ -764,10 +746,8 @@ const UserOrderDetails = () => {
         sx={{
           mt: 2,
           borderRadius: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          background: "rgba(255,255,255,0.06)",
-          backdropFilter: "blur(10px)",
+          border: `1px solid`,
+          background: surface,
           overflow: "hidden",
         }}
       >
@@ -780,8 +760,8 @@ const UserOrderDetails = () => {
                 borderRadius: 3,
                 display: "grid",
                 placeItems: "center",
-                background: "linear-gradient(135deg, rgba(34,211,238,0.20), rgba(244,114,182,0.25))",
-                border: "1px solid rgba(255,255,255,0.15)",
+                background: surface2,
+                border: `1px solid`,
               }}
             >
               <ReceiptLong fontSize="small" />
@@ -799,9 +779,8 @@ const UserOrderDetails = () => {
                 sx={{
                   p: 2,
                   borderRadius: 4,
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  background:
-                    "linear-gradient(135deg, rgba(34,211,238,0.08), rgba(124,58,237,0.06), rgba(244,114,182,0.08))",
+               
+                  background: surface2,
                 }}
               >
                 <Stack spacing={1.2}>
@@ -820,9 +799,7 @@ const UserOrderDetails = () => {
                     valueSx={{
                       fontSize: 18,
                       fontWeight: 950,
-                      background: "linear-gradient(90deg, rgba(34,211,238,1), rgba(244,114,182,1))",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
+                      color: theme.palette.secondary.main,
                     }}
                   />
                 </Stack>
@@ -834,15 +811,15 @@ const UserOrderDetails = () => {
                 sx={{
                   p: 2,
                   borderRadius: 4,
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.03)",
+                 
+                  background: surface2,
                 }}
               >
                 <Typography sx={{ fontWeight: 950, mb: 1.2 }}>Timeline</Typography>
 
                 <Stack spacing={1}>
-                  <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Created" value={formatDate(order.created_at)} />
-                  <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Updated" value={formatDate(order.updated_at)} />
+                  <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Created" value={formatDate(order.created_at)} border={border} surface2={surface2} />
+                  <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Updated" value={formatDate(order.updated_at)} border={border} surface2={surface2} />
                   <MiniMeta
                     icon={<LocalShipping fontSize="small" />}
                     label="Status"
@@ -852,6 +829,8 @@ const UserOrderDetails = () => {
                       color: statusMeta.tone,
                       icon: statusMeta.icon,
                     }}
+                    border={border}
+                    surface2={surface2}
                   />
                 </Stack>
               </Box>
@@ -872,7 +851,7 @@ function Row({ label, value, labelSx, valueSx }) {
   );
 }
 
-function MiniMeta({ icon, label, value, valueChip }) {
+function MiniMeta({ icon, label, value, valueChip, border, surface2 }) {
   return (
     <Stack direction="row" spacing={1.2} alignItems="center" sx={{ minWidth: 0 }}>
       <Box
@@ -882,8 +861,8 @@ function MiniMeta({ icon, label, value, valueChip }) {
           borderRadius: 3,
           display: "grid",
           placeItems: "center",
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(255,255,255,0.03)",
+          border: `1px solid ${border}`,
+          background: surface2,
           flexShrink: 0,
         }}
       >

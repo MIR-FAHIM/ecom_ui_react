@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Box, Typography, Button, IconButton, CircularProgress } from "@mui/material";
+import { Box, IconButton, CircularProgress } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import { getBanner } from "../../../../api/controller/admin_controller/media/banner_controller";
 import { image_file_url } from "../../../../api/config";
 
@@ -11,7 +10,6 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -67,14 +65,10 @@ export default function Hero() {
     bg = current.image_path.startsWith("http") ? current.image_path : `${image_file_url}/${current.image_path}`;
   }
 
-  const handleCTA = () => {
-    if (current?.related_product_id) navigate(`/ecom/product/${current.related_product_id}`);
-  };
-
   return (
     <Box
       sx={{
-        height: 320,
+        height: 450,
         borderRadius: 2,
         mb: 4,
         position: "relative",
@@ -87,28 +81,9 @@ export default function Hero() {
         sx={{
           width: "100%",
           height: "100%",
-          background: `linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url("${bg}") center/cover`,
-          display: "flex",
-          alignItems: "center",
-          px: { xs: 2, md: 6 },
-          color: "#fff",
+          background: `url("${bg}") center/cover`,
         }}
-      >
-        <Box sx={{ maxWidth: 720 }}>
-          <Typography variant="h3" fontWeight="bold">
-            {current.title || current.banner_name || "Daily Essentials, Delivered"}
-          </Typography>
-          {current.note && (
-            <Typography sx={{ my: 1 }}>{current.note}</Typography>
-          )}
-
-          <Box sx={{ mt: 1 }}>
-            <Button variant="contained" color="warning" onClick={handleCTA} disabled={!current.related_product_id}>
-              Shop Now
-            </Button>
-          </Box>
-        </Box>
-      </Box>
+      />
 
       {/* Navigation */}
       {banners.length > 1 && (

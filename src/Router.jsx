@@ -30,6 +30,7 @@ import EditProduct from "./scenes/admin_panel/product/edit_product/EditProduct";
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
 import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
+import CategoryWiseProduct from "./scenes/a_frontend_ui/product/category_wise/CategoryWiseProduct";
 import Cart from "./scenes/a_frontend_ui/order/cart";
 
 import FrontendLayout from "./scenes/a_frontend_ui/layout/FrontendLayout";
@@ -42,6 +43,10 @@ import Profile from "./scenes/a_frontend_ui/profile/Profile";
 import UserOrder from "./scenes/a_frontend_ui/order/UserOrder";
 import UserOrderDetails from "./scenes/a_frontend_ui/order/UserOrderDetails";
 import Wish from "./scenes/a_frontend_ui/wish/Wish";
+import RelatedProduct from "./scenes/a_frontend_ui/product/related_product/RelatedProduct";
+import ProductReview from "./scenes/a_frontend_ui/product/review_product/ProductReview";
+import AddShop from "./scenes/a_frontend_ui/seller/AddShop";
+
 
 const AppRouter = () => {
   return (
@@ -55,6 +60,7 @@ const AppRouter = () => {
           <Route path="home" element={<HomeP1 />} />
           <Route path="profile" element={<Profile />} />
           <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="category/:id" element={<CategoryWiseProduct />} />
           <Route path="cart" element={<Cart />} />
           <Route path="orders" element={<UserOrder />} />
           <Route path="order/:id" element={<UserOrderDetails />} />
@@ -65,6 +71,9 @@ const AppRouter = () => {
           <Route path="contact" element={<Contact />} />
           <Route path="proceed-order" element={<ProceedOrder />} />
           <Route path="wish" element={<Wish />} />
+          <Route path="related-product" element={<RelatedProduct />} />
+          <Route path="product-review" element={<ProductReview />} />
+          <Route path="seller/add" element={<AddShop />} />
         </Route>
 
          

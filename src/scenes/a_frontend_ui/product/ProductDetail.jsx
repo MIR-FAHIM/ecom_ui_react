@@ -33,6 +33,9 @@ import { addWish, getUserWish, deleteWish } from "../../../api/controller/admin_
 import { getProductDetails } from "../../../api/controller/admin_controller/product/product_controller";
 import ProductDescription from "./components/ProductDescription";
 import ProductDetailImage from "./components/ProductDetailImage";
+import RelatedProduct from "./related_product/RelatedProduct";
+import ProductReview from "./review_product/ProductReview";
+import { tokens } from "../../../theme";
 
 const safeJsonParse = (value, fallback) => {
   try {
@@ -69,16 +72,12 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const brand = theme.palette.brand || {};
-  const semantic = theme.palette.semantic || {};
-  const divider = theme.palette.divider || "rgba(0,0,0,0.08)";
-  const surface = semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
-  const surface2 = semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
-  const ink = semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
-  const subInk = semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
-
-  const brandGradient = brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
-  const brandGlow = brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
+  const colors = tokens(theme.palette.mode);
+  const divider = theme.palette.divider || colors.primary[200];
+  const surface = colors.primary[400];
+  const surface2 = colors.primary[300];
+  const ink = colors.gray[100];
+  const subInk = colors.gray[300];
 
   const userId = useMemo(() => {
     const u = localStorage.getItem("userId");
@@ -94,6 +93,7 @@ const ProductDetail = () => {
 
   const [busyCart, setBusyCart] = useState(false);
   const [msg, setMsg] = useState("");
+  const [selectedAttributeId, setSelectedAttributeId] = useState(null);
 
   const [wishIds, setWishIds] = useState(() => {
     return [];
@@ -195,10 +195,42 @@ const ProductDetail = () => {
     return true;
   }, [product?.current_stock, product?.in_stock, product?.stock_qty]);
 
-  const colors = useMemo(() => {
-    // Your API: colors is a JSON string like ["#0000FF", ...]
-    return safeJsonParse(product?.colors, []);
-  }, [product?.colors]);
+  const productAttributeOptions = useMemo(() => {
+    const list = Array.isArray(product?.product_attributes) ? product.product_attributes : [];
+    const map = new Map();
+
+    list.forEach((item) => {
+      const attrName =
+        item?.attribute?.name ||
+        item?.attribute_name ||
+        item?.attribute?.title ||
+        item?.attribute?.label ||
+        "Attribute";
+      const attrId = item?.attribute?.id ?? attrName;
+      const rawValue = item?.value?.value ?? item?.value?.name ?? item?.attribute_value;
+      const optionId = item?.id ?? item?.attribute_value_id ?? item?.value?.id;
+
+      if (rawValue == null || rawValue === "" || optionId == null) return;
+
+      const key = String(attrId);
+      if (!map.has(key)) {
+        map.set(key, { name: attrName, options: [] });
+      }
+
+      const group = map.get(key);
+      if (!group.options.some((opt) => String(opt.id) === String(optionId))) {
+        group.options.push({ id: optionId, label: String(rawValue) });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [product?.product_attributes]);
+
+  useEffect(() => {
+    setSelectedAttributeId(null);
+  }, [product?.id]);
+
+
 
   const toggleWishlist = () => {
     const pid = product?.id;
@@ -254,7 +286,12 @@ const ProductDetail = () => {
 
     setBusyCart(true);
     try {
-      const payload = { user_id: userId, product_id: product.id, qty: Number(qty || 1) };
+      const payload = {
+        user_id: userId,
+        product_id: product.id,
+        qty: Number(qty || 1),
+        attribute_id: selectedAttributeId ?? null,
+      };
       const res = await addCart(payload);
 
       if (res?.status === "success") {
@@ -303,15 +340,7 @@ const ProductDetail = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: theme.palette.background?.default,
-        backgroundImage:
-          theme.palette.mode === "dark"
-            ? `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.10), transparent 55%),
-               radial-gradient(1200px 700px at 90% 5%, rgba(250,92,92,0.10), transparent 55%),
-               radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.08), transparent 55%)`
-            : `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.22), transparent 55%),
-               radial-gradient(1200px 700px at 90% 5%, rgba(250,92,92,0.18), transparent 55%),
-               radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.14), transparent 55%)`,
+        background: theme.palette.background?.default || colors.primary[500],
         py: 3,
       }}
     >
@@ -350,9 +379,7 @@ const ProductDetail = () => {
                 sx={{
                   fontWeight: 950,
                   letterSpacing: -0.6,
-                  background: brandGradient,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  color: theme.palette.secondary.main,
                   lineHeight: 1.1,
                 }}
               >
@@ -382,9 +409,9 @@ const ProductDetail = () => {
                 sx={{
                   borderRadius: 999,
                   fontWeight: 950,
-                  background: brandGradient,
-                  color: "#141414",
-                  boxShadow: `0 12px 26px ${brandGlow}`,
+                  background: theme.palette.secondary.main,
+                  color: colors.gray[900],
+                  boxShadow: "none",
                 }}
               />
             ) : null}
@@ -406,8 +433,8 @@ const ProductDetail = () => {
               divider={divider}
               surface={surface}
               surface2={surface2}
-              brandGradient={brandGradient}
-              brandGlow={brandGlow}
+              brandGradient={theme.palette.secondary.main}
+              brandGlow={"none"}
             />
           </Grid>
 
@@ -419,18 +446,19 @@ const ProductDetail = () => {
                 border: `1px solid ${divider}`,
                 background: surface,
                 backdropFilter: "blur(12px)",
-                p: 2,
+                p: 2.4,
+                height: "100%",
               }}
             >
-              <Stack spacing={1.2}>
+              <Stack spacing={2}>
                 <Typography variant="h5" sx={{ fontWeight: 950, color: ink, lineHeight: 1.15 }}>
                   {product?.name}
                 </Typography>
 
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                  <Rating value={Number(product?.rating || 0)} precision={0.1} readOnly />
+                <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" sx={{ rowGap: 1 }}>
+                  <Rating value={Number(product?.average_review?.average_rating || 0)} precision={0.1} readOnly />
                   <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
-                    Reviews {product?.reviews_count ?? 0}
+                    Reviews {product?.average_review?.review_count ?? 0}
                   </Typography>
 
                   <Chip
@@ -449,7 +477,7 @@ const ProductDetail = () => {
 
                 {/* Color chips (your API: colors JSON string) */}
                 {Array.isArray(colors) && colors.length > 0 ? (
-                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                  <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" sx={{ rowGap: 1 }}>
                     <Typography variant="body2" sx={{ color: subInk, fontWeight: 900 }}>
                       Colors:
                     </Typography>
@@ -502,19 +530,72 @@ const ProductDetail = () => {
                         sx={{
                           borderRadius: 999,
                           fontWeight: 950,
-                          background: brandGradient,
-                          color: "#141414",
-                          boxShadow: `0 12px 26px ${brandGlow}`,
+                          background: theme.palette.secondary.main,
+                          color: colors.gray[900],
+                          boxShadow: "none",
                         }}
                       />
                     ) : null}
                   </Stack>
                 </Box>
 
+                {productAttributeOptions.length > 0 ? (
+                  <Box
+                    sx={{
+                      p: 1.4,
+                      borderRadius: 3,
+                      border: `1px solid ${divider}`,
+                      background: surface,
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: 900, color: ink, mb: 1 }}>
+                      Attributes
+                    </Typography>
+                    <Stack spacing={1.2}>
+                      {productAttributeOptions.map((attr) => (
+                        <Stack
+                          key={attr.name}
+                          direction="row"
+                          spacing={1.2}
+                          alignItems="center"
+                          flexWrap="wrap"
+                          useFlexGap
+                          sx={{ rowGap: 1 }}
+                        >
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
+                            {attr.name}:
+                          </Typography>
+                          <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap sx={{ rowGap: 0.8 }}>
+                            {attr.options.map((opt) => {
+                              const selected = String(selectedAttributeId) === String(opt.id);
+                              return (
+                              <Chip
+                                key={`${attr.name}-${opt.id}`}
+                                size="small"
+                                label={opt.label}
+                                onClick={() => setSelectedAttributeId(opt.id)}
+                                sx={{
+                                  borderRadius: 999,
+                                  fontWeight: 900,
+                                  background: selected ? theme.palette.secondary.main : surface2,
+                                  border: `1px solid ${divider}`,
+                                  color: selected ? colors.gray[900] : ink,
+                                  cursor: "pointer",
+                                }}
+                              />
+                              );
+                            })}
+                          </Stack>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </Box>
+                ) : null}
+
                 <Divider sx={{ opacity: 0.12 }} />
 
                 {/* Quantity + Actions */}
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} alignItems={{ sm: "center" }}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.6} alignItems={{ sm: "center" }}>
                   <Box
                     sx={{
                       display: "flex",
@@ -558,7 +639,7 @@ const ProductDetail = () => {
                     </IconButton>
                   </Box>
 
-                  <Stack direction="row" spacing={1} sx={{ ml: { sm: "auto" } }}>
+                  <Stack direction="row" spacing={1.2} sx={{ ml: { sm: "auto" } }}>
                     <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
                       <IconButton
                         onClick={toggleWishlist}
@@ -581,10 +662,10 @@ const ProductDetail = () => {
                           sx={{
                             borderRadius: 3,
                             border: `1px solid ${divider}`,
-                            background: brandGradient,
-                            color: "#141414",
-                            boxShadow: `0 14px 30px ${brandGlow}`,
-                            "&:hover": { filter: "saturate(1.1)", boxShadow: `0 18px 36px ${brandGlow}` },
+                            background: theme.palette.secondary.main,
+                            color: colors.gray[900],
+                            boxShadow: "none",
+                            "&:hover": { opacity: 0.92, boxShadow: "none" },
                             "&.Mui-disabled": { opacity: 0.55 },
                           }}
                         >
@@ -620,7 +701,7 @@ const ProductDetail = () => {
                 <Divider sx={{ opacity: 0.12 }} />
 
                 {/* Meta / shipping quick facts based on your response */}
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                <Stack direction="row" spacing={1.2} flexWrap="wrap" useFlexGap sx={{ rowGap: 1 }}>
                   <Chip
                     icon={<VerifiedIcon />}
                     label={`Stock: ${typeof product?.current_stock === "number" ? product.current_stock : "-"}`}
@@ -647,7 +728,15 @@ const ProductDetail = () => {
           </Grid>
         </Grid>
 
-        <ProductDescription description={product?.description} ink={ink} subInk={subInk} />
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12} md={4}>
+            <RelatedProduct productId={product?.id} />
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <ProductReview productId={product?.id} />
+            <ProductDescription description={product?.description} ink={ink} subInk={subInk} />
+          </Grid>
+        </Grid>
 
         <Snackbar open={!!msg} autoHideDuration={2500} onClose={() => setMsg("")} message={msg} />
       </Container>

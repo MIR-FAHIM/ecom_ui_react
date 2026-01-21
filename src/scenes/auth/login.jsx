@@ -42,6 +42,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [showPw, setShowPw] = useState(false);
@@ -50,10 +51,19 @@ const Login = () => {
   const [errMsg, setErrMsg] = useState("");
 
   const validate = () => {
-    if (!email || !password) return "Please fill in all fields.";
-    if (!/^\S+@\S+\.\S+$/.test(email)) return "Enter a valid email address.";
+    if ((!email && !phone) || !password) return "Please fill in all fields.";
+    if (email) {
+      const isEmail = /^\S+@\S+\.\S+$/.test(email);
+      if (!isEmail) return "Enter a valid email address.";
+    }
+    if (phone) {
+      const isPhone = /^\+?\d{8,15}$/.test(String(phone).replace(/[\s-]/g, ""));
+      if (!isPhone) return "Enter a valid phone number.";
+    }
     return "";
   };
+
+  const isPhoneInput = (value) => /^\+?\d[\d\s-]*$/.test(value || "");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -66,7 +76,8 @@ const Login = () => {
     setErrMsg("");
 
     try {
-      const res = await loginController({ email, password });
+      const payload = phone ? { phone, password } : { email, password };
+      const res = await loginController(payload);
 
       const ok =
         res?.status === 200 ||
@@ -104,6 +115,7 @@ const Login = () => {
 
   const applyDemo = (cred) => {
     setEmail(cred.email);
+    setPhone("");
     setPassword(cred.password);
   };
 
@@ -215,10 +227,24 @@ const Login = () => {
             )}
 
             <TextField
-              label="Email address"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Email or phone"
+              type="text"
+              value={phone || email}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (!v) {
+                  setEmail("");
+                  setPhone("");
+                  return;
+                }
+                if (isPhoneInput(v)) {
+                  setPhone(v);
+                  setEmail("");
+                } else {
+                  setEmail(v);
+                  setPhone("");
+                }
+              }}
               fullWidth
               margin="normal"
               autoComplete="email"
