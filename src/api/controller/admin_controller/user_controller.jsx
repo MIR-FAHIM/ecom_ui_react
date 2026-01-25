@@ -60,6 +60,20 @@ export const getAllCustomers = async () => {
     throw error; // Rethrow the error for further handling in your component
   }
 }
+export const getDeliveryMen = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/users/delivery-men`, {
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data; // Return the response from the API
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    throw error; // Rethrow the error for further handling in your component
+  }
+}
 
 export const getAllVendors = async (params = {}) => {
   try {

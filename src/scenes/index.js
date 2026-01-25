@@ -26,6 +26,9 @@ import AddBanner from "./admin_panel/media/AddBanner";
 import Attribute from "./admin_panel/product/attribute/attribute";
 import AllMedia from "./admin_panel/media/AllMedia";
 import EditProduct from "./admin_panel/product/edit_product/EditProduct";
+import DeliveryManDetail from "./admin_panel/delivery/DeliveryManDetail";
+import AllTransaction from "./admin_panel/accounts/AllTransaction";
+
 
 
 
@@ -73,6 +76,9 @@ export {
   Attribute,
   AllMedia,
   EditProduct,
+  DeliveryManDetail,
+  AllTransaction,
+
   
   // user frontend
   HomeP1,

@@ -397,7 +397,7 @@ const SideBar = () => {
               color: colors.blueAccent[700],
             },
           }}
-          onClick={() => navigate("/ecom/accounts")}
+          onClick={() => navigate("/ecom/accounts/transactions")}
         >
           <AccountBalanceOutlined sx={iconStyle} />
           {!collapsed ? "Accounts" : ""}

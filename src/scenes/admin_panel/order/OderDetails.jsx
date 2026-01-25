@@ -18,10 +18,14 @@ import {
   TableRow,
   Chip,
   Alert,
+  TextField,
+  MenuItem,
 } from "@mui/material";
 import { ArrowBack, Print } from "@mui/icons-material";
 import { tokens } from "../../../theme";
-import { getOrderDetails, updateOrderStatusPatch } from "../../../api/controller/admin_controller/order/order_controller";
+import { getOrderDetails, updateOrderStatusPatch, assignDeliveryBoy , unassignDeliveryBoy} from "../../../api/controller/admin_controller/order/order_controller";
+import {getDeliveryMen } from "../../../api/controller/admin_controller/user_controller";
+
 
 
 
@@ -30,30 +34,61 @@ const OderDetails = () => {
   const colors = tokens(theme.palette.mode);
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [errMsg, setErrMsg] = useState("");
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [deliveryMen, setDeliveryMen] = useState([]);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [selectedDeliveryManId, setSelectedDeliveryManId] = useState("");
+  const [assignNote, setAssignNote] = useState("");
+  const [assigning, setAssigning] = useState(false);
+
+  const extractErrorMessage = (value, fallback) => {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (value?.message && typeof value.message === "string") return value.message;
+    return fallback;
+  };
 
   // Fetch order details
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        setLoading(true);
-        const response = await getOrderDetails(id);
-        if (response.status === "success" && response.data) {
-          setOrder(response.data);
-          setNewStatus(response.data.status);
-        }
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-      } finally {
-        setLoading(false);
+  const fetchOrderDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await getOrderDetails(id);
+      if (response.status === "success" && response.data) {
+        setOrder(response.data);
+        setNewStatus(response.data.status);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const fetchDeliveryMen = async () => {
+    try {
+      setDeliveryLoading(true);
+      const response = await getDeliveryMen({ page: 1, per_page: 200 });
+      if (response?.status === "success") {
+        const paginator = response?.data;
+        const list = Array.isArray(paginator?.data) ? paginator.data : [];
+        setDeliveryMen(list);
+      } else {
+        setDeliveryMen([]);
+      }
+    } catch (error) {
+      console.error("Error fetching delivery men:", error);
+      setDeliveryMen([]);
+    } finally {
+      setDeliveryLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (id) {
       fetchOrderDetails();
+      fetchDeliveryMen();
     }
   }, [id]);
 
@@ -72,13 +107,20 @@ const OderDetails = () => {
     }
 
     try {
+      setErrMsg("");
       setUpdatingStatus(true);
       const response = await updateOrderStatusPatch(order.id, newStatusValue);
+     
       if (response.status === "success") {
         setOrder({ ...order, status: newStatusValue });
+      } else  {
+         setErrMsg(extractErrorMessage(response?.message, "Failed to update order status"));
       }
     } catch (error) {
       console.error("Error updating order status:", error);
+      setErrMsg(
+        extractErrorMessage(error?.response?.data?.message, "Failed to update order status")
+      );
     } finally {
       setUpdatingStatus(false);
     }
@@ -87,7 +129,8 @@ const OderDetails = () => {
   const getOrderStatusColor = (status) => {
     const statusMap = {
       "new order": "info",
-      processing: "warning",
+      "order received": "warning",
+      "assigned deliveryman": "warning",
       "on the way": "info",
       delivered: "success",
       completed: "success",
@@ -121,6 +164,75 @@ const OderDetails = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const getDeliveryStatusColor = (status) => {
+    const statusMap = {
+      assigned: "info",
+      picked: "warning",
+      "on the way": "info",
+      delivered: "success",
+      completed: "success",
+      cancelled: "error",
+    };
+    return statusMap[String(status ?? "").toLowerCase()] || "default";
+  };
+
+  const assignment = order?.delivery_man ?? null;
+  const deliveryProfile = assignment?.delivery_man ?? null;
+
+  useEffect(() => {
+    if (assignment?.delivery_man_id) {
+      setSelectedDeliveryManId(String(assignment.delivery_man_id));
+    }
+  }, [assignment?.delivery_man_id]);
+
+  const handleAssignDelivery = async () => {
+    if (!order?.id || !selectedDeliveryManId) return;
+    try {
+      setErrMsg("");
+      setAssigning(true);
+      const response = await assignDeliveryBoy({
+        delivery_man_id: selectedDeliveryManId,
+        order_id: order.id,
+        note: assignNote,
+      });
+      if (response?.status === "success") {
+        await fetchOrderDetails();
+      } else {
+        setErrMsg(extractErrorMessage(response?.message, "Failed to assign delivery man"));
+      }
+    } catch (error) {
+      console.error("Error assigning delivery man:", error);
+      setErrMsg(
+        extractErrorMessage(error?.response?.data?.message, "Failed to assign delivery man")
+      );
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleUnassignDelivery = async () => {
+    if (!order?.id) return;
+    try {
+      setErrMsg("");
+      setAssigning(true);
+      const response = await unassignDeliveryBoy({ order_id: order.id });
+      if (response?.status === "success") {
+        await fetchOrderDetails();
+        setSelectedDeliveryManId("");
+        setAssignNote("");
+      } else {
+        setErrMsg(extractErrorMessage(response?.message, "Failed to unassign delivery man"));
+      }
+    } catch (error) {
+      console.error("Error unassigning delivery man:", error);
+      setErrMsg(
+        extractErrorMessage(error?.response?.data?.message, "Failed to unassign delivery man")
+      );
+    } finally {
+      setAssigning(false);
+    }
   };
 
   if (loading) {
@@ -168,6 +280,12 @@ const OderDetails = () => {
         </Box>
       </Box>
 
+      {errMsg && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errMsg}
+        </Alert>
+      )}
+
       {/* Status Change Row */}
       <Card sx={{ background: colors.primary[400], mb: 2 }}>
         <CardContent>
@@ -177,7 +295,7 @@ const OderDetails = () => {
           <Divider sx={{ mb: 2, opacity: 0.2 }} />
 
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {["new order", "processing", "on the way", "delivered", "completed"].map((status) => (
+            {["new order", "order received", "assigned deliveryman", "on the way", "delivered", "completed"].map((status) => (
               <Button
                 key={status}
                 variant={order.status === status ? "contained" : "outlined"}
@@ -338,6 +456,152 @@ const OderDetails = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Delivery Assignment */}
+      <Card sx={{ background: colors.primary[400], mt: 2 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+            Assign Delivery Man
+          </Typography>
+          <Divider sx={{ mb: 2, opacity: 0.2 }} />
+
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={5}>
+              <TextField
+                select
+                fullWidth
+                label="Delivery Man"
+                value={selectedDeliveryManId}
+                onChange={(e) => setSelectedDeliveryManId(e.target.value)}
+                disabled={deliveryLoading || assigning}
+                size="small"
+              >
+                <MenuItem value="">Select delivery man</MenuItem>
+                {deliveryMen.map((man) => (
+                  <MenuItem key={man?.id} value={String(man?.id)}>
+                    {man?.name} ({man?.phone || "N/A"})
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            <Grid item xs={12} md={5}>
+              <TextField
+                fullWidth
+                label="Note"
+                value={assignNote}
+                onChange={(e) => setAssignNote(e.target.value)}
+                disabled={assigning}
+                size="small"
+              />
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              {assignment ? (
+                <Button
+                  fullWidth
+                  color="error"
+                  variant="outlined"
+                  onClick={handleUnassignDelivery}
+                  disabled={assigning}
+                >
+                  Unassign
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={handleAssignDelivery}
+                  disabled={!selectedDeliveryManId || assigning}
+                >
+                  Assign
+                </Button>
+              )}
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Delivery Section */}
+      {assignment && (
+        <Card sx={{ background: colors.primary[400], mt: 2 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              Delivery Information
+            </Typography>
+            <Divider sx={{ mb: 2, opacity: 0.2 }} />
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      DELIVERY STATUS
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
+                      <Chip
+                        label={assignment?.status ?? "N/A"}
+                        color={getDeliveryStatusColor(assignment?.status)}
+                        variant="outlined"
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      NOTE
+                    </Typography>
+                    <Typography variant="body2">{assignment?.note || "N/A"}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      ASSIGNED AT
+                    </Typography>
+                    <Typography variant="body2">
+                      {assignment?.created_at ? formatDate(assignment.created_at) : "N/A"}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      DELIVERY MAN
+                    </Typography>
+                    <Typography variant="body2">{deliveryProfile?.name ?? "N/A"}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      EMAIL
+                    </Typography>
+                    <Typography variant="body2">{deliveryProfile?.email ?? "N/A"}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      PHONE
+                    </Typography>
+                    <Typography variant="body2">{deliveryProfile?.phone ?? "N/A"}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      ADDRESS
+                    </Typography>
+                    <Typography variant="body2">
+                      {deliveryProfile?.address || "N/A"}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Order Items */}
       <Card sx={{ background: colors.primary[400], mt: 2 }}>

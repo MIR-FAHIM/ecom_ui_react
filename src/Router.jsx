@@ -9,6 +9,7 @@ import AllProducts from "./scenes/admin_panel/product/AllProducts";
 import StockOutProduct from "./scenes/admin_panel/product/StockOutProduct";
 import SellerProducts from "./scenes/admin_panel/product/SellerProducts";
 import AllOrdersEcom from "./scenes/admin_panel/order/AllOrders";
+import AllTransaction from "./scenes/admin_panel/accounts/AllTransaction";
 import OderDetails from "./scenes/admin_panel/order/OderDetails";
 import CompletedOrders from "./scenes/admin_panel/order/CompletedOrders";
 import OrderReport from "./scenes/admin_panel/order/OrderReport";
@@ -19,13 +20,15 @@ import AllCustomers from "./scenes/admin_panel/customer/AllCustomers";
 import TodayReport from "./scenes/admin_panel/report/TodayReport";
 import MonthWiseReport from "./scenes/admin_panel/report/MonthWiseReport";
 import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
-import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
+import DeliveryManDetail from "./scenes/admin_panel/delivery/DeliveryManDetail";
+
 import EcommerceSetting from "./scenes/admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./scenes/admin_panel/accounts/EcommerceAccounts";
 import AddBanner from "./scenes/admin_panel/media/AddBanner";
 import Attribute from "./scenes/admin_panel/product/attribute/attribute";
 import AllMedia from "./scenes/admin_panel/media/AllMedia";
 import EditProduct from "./scenes/admin_panel/product/edit_product/EditProduct";
+import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
 
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
@@ -58,6 +61,7 @@ const AppRouter = () => {
         <Route path="/" element={<FrontendLayout />}>
           <Route index element={<HomeP1 />} />
           <Route path="home" element={<HomeP1 />} />
+          
           <Route path="profile" element={<Profile />} />
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="category/:id" element={<CategoryWiseProduct />} />
@@ -99,6 +103,7 @@ const AppRouter = () => {
           {/* Seller Routes */}
           <Route path="/ecom/seller/add" element={<AddSeller />} />
           <Route path="/ecom/seller/all" element={<AllSellers />} />
+    
 
           {/* Customer Routes */}
           <Route path="/ecom/customer/add" element={<AddCustomer />} />
@@ -111,10 +116,12 @@ const AppRouter = () => {
           {/* Delivery Routes */}
           <Route path="/ecom/delivery/add" element={<AddDeliveryMan />} />
           <Route path="/ecom/delivery/all" element={<AllDeliveryMans />} />
+          <Route path="/ecom/delivery/detail/:id" element={<DeliveryManDetail />} />
 
           {/* Settings & Accounts */}
           <Route path="/ecom/setting" element={<EcommerceSetting />} />
           <Route path="/ecom/accounts"  element={<EcommerceAccounts />} />
+          <Route path="/ecom/accounts/transactions"  element={<AllTransaction />} />
 
 
           <Route path="/ecom/banner/add" element={<AddBanner />} />

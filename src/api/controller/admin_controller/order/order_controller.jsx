@@ -105,6 +105,49 @@ export const checkOutOrder = async (data) => {
   }
 
 }
+export const assignDeliveryBoy = async (data) => {
+  try {
+    const payload = data instanceof FormData ? data : (() => {
+      const fd = new FormData();
+      if (data?.delivery_man_id != null) fd.append("delivery_man_id", data.delivery_man_id);
+      if (data?.order_id != null) fd.append("order_id", data.order_id);
+      if (data?.note != null) fd.append("note", data.note);
+      return fd;
+    })();
+
+    const response = await axiosInstance.post(`/api/deliveries/assign`, payload, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error assignDeliveryBoy data:", error);
+    throw error;
+  }
+}
+
+export const unassignDeliveryBoy = async (data) => {
+  try {
+    const payload = data instanceof FormData ? data : (() => {
+      const fd = new FormData();
+      if (data?.order_id != null) fd.append("order_id", data.order_id);
+      return fd;
+    })();
+
+    const response = await axiosInstance.post(`/api/deliveries/unassign`, payload, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error unassignDeliveryBoy data:", error);
+    throw error;
+  }
+}
+
+
 // Update order status (PUT endpoint - fallback)
 export const updateOrderStatus = async (id, status) => {
   try {
@@ -153,3 +196,5 @@ export const getUserOrder = async (id, params = {}) => {
     return { status: 'error', data: null };
   }
 };
+
+
