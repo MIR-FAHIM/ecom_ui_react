@@ -29,6 +29,8 @@ import Attribute from "./scenes/admin_panel/product/attribute/attribute";
 import AllMedia from "./scenes/admin_panel/media/AllMedia";
 import EditProduct from "./scenes/admin_panel/product/edit_product/EditProduct";
 import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
+import WebsiteLogoSetting from "./scenes/admin_panel/setting/website_logo_setting";
+import ShippingCostSetting from "./scenes/admin_panel/setting/shipping_cost";
 
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
@@ -49,6 +51,10 @@ import Wish from "./scenes/a_frontend_ui/wish/Wish";
 import RelatedProduct from "./scenes/a_frontend_ui/product/related_product/RelatedProduct";
 import ProductReview from "./scenes/a_frontend_ui/product/review_product/ProductReview";
 import AddShop from "./scenes/a_frontend_ui/seller/AddShop";
+import ShopProducts from "./scenes/a_frontend_ui/seller/ShopProducts";
+import EditSellerTab from "./scenes/admin_panel/seller/EditSellerTab";
+import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
+
 
 
 const AppRouter = () => {
@@ -64,6 +70,8 @@ const AppRouter = () => {
           
           <Route path="profile" element={<Profile />} />
           <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="shop/:id" element={<ShopProducts />} />
+          <Route path="shops" element={<ShopList />} />
           <Route path="category/:id" element={<CategoryWiseProduct />} />
           <Route path="cart" element={<Cart />} />
           <Route path="orders" element={<UserOrder />} />
@@ -103,6 +111,8 @@ const AppRouter = () => {
           {/* Seller Routes */}
           <Route path="/ecom/seller/add" element={<AddSeller />} />
           <Route path="/ecom/seller/all" element={<AllSellers />} />
+          <Route path="/ecom/admin/seller/:id" element={<EditSellerTab />} />
+          <Route path="/ecom/admin/seller/edit/:id" element={<EditSellerTab />} />
     
 
           {/* Customer Routes */}
@@ -122,6 +132,8 @@ const AppRouter = () => {
           <Route path="/ecom/setting" element={<EcommerceSetting />} />
           <Route path="/ecom/accounts"  element={<EcommerceAccounts />} />
           <Route path="/ecom/accounts/transactions"  element={<AllTransaction />} />
+          <Route path="/ecom/setting/website-logo"  element={<WebsiteLogoSetting />} />
+          <Route path="/ecom/setting/shipping-cost"  element={<ShippingCostSetting />} />
 
 
           <Route path="/ecom/banner/add" element={<AddBanner />} />

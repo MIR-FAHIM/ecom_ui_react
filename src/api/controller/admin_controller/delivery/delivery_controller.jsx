@@ -44,3 +44,25 @@ export const getCompletedDeliveries = async (id, params = {}) => {
     return { status: 'error', data: [] };
   }
 }
+export const getShippingCosts = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/shipping-costs/get`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getShippingCosts:", error);
+    return { status: 'error', data: [] };
+  }
+}
+export const setShippingCosts = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/shipping-costs/set`, data, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching setShippingCosts:", error);
+    return { status: 'error', data: [] };
+  }
+}

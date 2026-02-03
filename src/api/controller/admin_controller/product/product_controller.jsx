@@ -17,6 +17,25 @@ export const getProduct = async (params = {}) => {
     return { status: 'error', message: error.message, data: null };
   }
 };
+
+export const getCategoryWiseProduct = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/category/wise`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    // Return API payload (status/message/data) so callers can inspect response.status and response.data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getProduct:", error);
+    return { status: 'error', message: error.message, data: null };
+  }
+};
+
+
 export const getFeaturedProduct = async (params = {}) => {
   try {
     const response = await axiosInstance.get(`/api/products/list/featured?featured=1`, {

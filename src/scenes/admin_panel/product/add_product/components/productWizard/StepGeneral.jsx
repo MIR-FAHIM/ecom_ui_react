@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Grid, TextField, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [], shops = [], onOpenDropdown }) {
+	const localUserId = useMemo(() => localStorage.getItem("userId") || "", []);
+	const shopOptions = Array.isArray(shops) ? shops : [];
+
   return (
     <Grid container spacing={2}>
 
@@ -40,6 +43,28 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
             {categories.map((cat) => (
               <MenuItem key={cat.id || cat._id} value={cat.id ?? cat._id}>
                 {cat.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <FormControl fullWidth size="small" error={!!errors.user_id}>
+          <InputLabel>Shop</InputLabel>
+          <Select
+            value={value.user_id || ""}
+            label="Shop"
+            onOpen={onOpenDropdown}
+            onChange={(e) => {
+              const next = e.target.value;
+              onChange({ user_id: next || localUserId });
+            }}
+          >
+            <MenuItem value={localUserId}>My account</MenuItem>
+            {shopOptions.map((shop) => (
+              <MenuItem key={shop.id} value={shop.user_id ?? shop.id}>
+                {shop.name || `Shop #${shop.id}`}
               </MenuItem>
             ))}
           </Select>

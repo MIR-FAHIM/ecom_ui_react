@@ -119,8 +119,8 @@ const AllSellers = () => {
     fetchSellers(0, next);
   };
 
-  const handleViewProfile = (sellerId) => navigate(`/admin/seller/${sellerId}`);
-  const handleEdit = (sellerId) => navigate(`/admin/seller/edit/${sellerId}`);
+  const handleViewProfile = (sellerId) => navigate(`/ecom/admin/seller/${sellerId}`);
+  const handleEdit = (sellerId) => navigate(`/ecom/admin/seller/edit/${sellerId}`);
 
   const handleDelete = (sellerId) => {
     if (window.confirm("Are you sure you want to delete this seller?")) {

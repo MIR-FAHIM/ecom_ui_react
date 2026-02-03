@@ -377,12 +377,28 @@ const SideBar = () => {
               color: colors.blueAccent[700],
             },
           }}
-          onClick={() => navigate("/ecom/setting")}
+          onClick={() => toggleCategory("setting")}
         >
           <SettingsOutlined sx={iconStyle} />
           {!collapsed ? "Setting" : ""}
         </Typography>
-
+        <Collapse in={expandedCategory === "setting"}>
+          <Menu
+            menuItemStyles={{
+              button: {
+                ":hover": {
+                  color: "#868dfb",
+                  background: "transparent",
+                  transition: ".4s ease",
+                },
+              },
+            }}
+          >
+            <Item title="Website Setting" path="/ecom/setting/website-logo" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+            <Item title="Shipping Cost Setting" path="/ecom/setting/shipping-cost" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+        
+          </Menu>
+        </Collapse>
         {/* Accounts */}
         <Typography
           variant="h6"

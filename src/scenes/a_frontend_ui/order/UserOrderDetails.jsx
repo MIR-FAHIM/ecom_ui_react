@@ -21,6 +21,10 @@ import {
   Tooltip,
   IconButton,
   Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   useTheme,
 } from "@mui/material";
 import {
@@ -36,6 +40,7 @@ import {
 } from "@mui/icons-material";
 import { getOrderDetails } from "../../../api/controller/admin_controller/order/order_controller";
 import { tokens } from "../../../theme";
+import ProductReviewForm from "../review/review_page.jsx";
 
 const UserOrderDetails = () => {
   const { id } = useParams();
@@ -49,6 +54,9 @@ const UserOrderDetails = () => {
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewProductId, setReviewProductId] = useState("");
+  const [reviewProductName, setReviewProductName] = useState("");
 
   // Fetch order details
   useEffect(() => {
@@ -132,6 +140,19 @@ const UserOrderDetails = () => {
 
   const orderItems = order?.items || [];
   const itemsCount = orderItems.reduce((sum, i) => sum + Number(i.qty || 0), 0);
+  const isOrderCompleted = normalizeStatus(order?.status) === "completed";
+
+  const openReview = (item) => {
+    const pid = item?.product_id ?? item?.id ?? "";
+    if (!pid) return;
+    setReviewProductId(String(pid));
+    setReviewProductName(item?.product_name || "Product");
+    setReviewOpen(true);
+  };
+
+  const closeReview = () => {
+    setReviewOpen(false);
+  };
 
   if (loading) {
     return (
@@ -658,6 +679,7 @@ const UserOrderDetails = () => {
                   <TableCell align="center">Qty</TableCell>
                   <TableCell align="right">Line Total</TableCell>
                   <TableCell align="center">Status</TableCell>
+                  {isOrderCompleted ? <TableCell align="center">Review</TableCell> : null}
                 </TableRow>
               </TableHead>
 
@@ -726,6 +748,19 @@ const UserOrderDetails = () => {
                           sx={{ borderRadius: 999, fontWeight: 900, textTransform: "capitalize" }}
                         />
                       </TableCell>
+
+                      {isOrderCompleted ? (
+                        <TableCell align="center">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => openReview(item)}
+                            sx={{ textTransform: "none", fontWeight: 800, color : 'success.main' }}
+                          >
+                            Add Review
+                          </Button>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   );
                 })}
@@ -838,6 +873,27 @@ const UserOrderDetails = () => {
           </Grid>
         </CardContent>
       </Card>
+
+      <Dialog open={reviewOpen} onClose={closeReview} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 900 }}>
+          Write a review
+          {reviewProductName ? `: ${reviewProductName}` : ""}
+        </DialogTitle>
+        <DialogContent dividers>
+          <ProductReviewForm
+            productId={reviewProductId}
+            userId={order?.user_id}
+            onSuccess={() => {
+              closeReview();
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeReview} sx={{ textTransform: "none", fontWeight: 800 }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

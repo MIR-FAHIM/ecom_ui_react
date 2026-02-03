@@ -28,6 +28,9 @@ import AllMedia from "./admin_panel/media/AllMedia";
 import EditProduct from "./admin_panel/product/edit_product/EditProduct";
 import DeliveryManDetail from "./admin_panel/delivery/DeliveryManDetail";
 import AllTransaction from "./admin_panel/accounts/AllTransaction";
+import ShopManage from "./admin_panel/seller/EditSellerTab";
+import WebsiteLogoSetting from "./admin_panel/setting/website_logo_setting";
+import ShippingCostSetting from "./admin_panel/setting/shipping_cost";
 
 
 
@@ -46,6 +49,7 @@ import CategoryWiseProduct from "./a_frontend_ui/product/category_wise/CategoryW
 import RelatedProduct from "./a_frontend_ui/product/related_product/RelatedProduct";
 import ProductReview from "./a_frontend_ui/product/review_product/ProductReview";
 import AddShop from "./a_frontend_ui/seller/AddShop";
+import ShopProducts from "./a_frontend_ui/seller/ShopProducts";
 
 import Wish from "./a_frontend_ui/wish/Wish";
 
@@ -78,6 +82,9 @@ export {
   EditProduct,
   DeliveryManDetail,
   AllTransaction,
+  ShopManage,
+  WebsiteLogoSetting,
+  ShippingCostSetting,
 
   
   // user frontend
@@ -93,4 +100,5 @@ export {
   RelatedProduct,
   ProductReview,
   AddShop,
+  ShopProducts,
 };

@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { tokens } from "../../../../theme";
 import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
-import { getAllShops } from "../../../../api/controller/admin_controller/user_controller.jsx";
+import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller"; 
 
 import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/components/productWizard/steps";
@@ -166,7 +166,7 @@ productFormData.append("slug", general.slug);
 productFormData.append("category_id", general.category_id);
 
 productFormData.append("added_by", localStorage.getItem("userId") );
-productFormData.append("user_id", localStorage.getItem("userId") );
+productFormData.append("user_id", general.user_id || localStorage.getItem("userId") );
 
 productFormData.append("description", general.description || "");
 
@@ -354,7 +354,7 @@ productFormData.append("weight", general.weight || "");
 
           <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between", gap: 2 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               disabled={!canGoBack || loading}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
             >

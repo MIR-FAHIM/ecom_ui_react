@@ -173,16 +173,16 @@ export default function SmartProductCard({
   }, [product?.discount_percent, hasSale, price, salePrice, product?.discount, product?.discount_type]);
 
   const ratingValue = useMemo(() => {
-    const r = Number(product?.rating);
+    const r = Number(product?.average_review?.average_rating);
     if (Number.isFinite(r) && r >= 0) return Math.min(5, r);
     return 4.5;
-  }, [product?.rating]);
+  }, [product?.average_review?.average_rating]);
 
   const reviewsCount = useMemo(() => {
-    const n = Number(product?.reviews_count);
+    const n = Number(product?.average_review?.review_count);
     if (Number.isFinite(n) && n >= 0) return n;
     return 0;
-  }, [product?.reviews_count]);
+  }, [product?.average_review?.review_count]);
 
   // IMPORTANT: your API image is product.primary_image.file_name = "all/....png"
   const imageUrl = useMemo(() => {

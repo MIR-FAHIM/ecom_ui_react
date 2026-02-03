@@ -12,6 +12,7 @@ import CategoryGrid from "./components/CategoryGrid";
 import FeaturedProduct from "./components/FeaturedProduct";
 import TodayDealProduct from "./components/TodayDealProduct";
 import AllProduct from "./components/AllProduct";
+import HomeShopList from "./components/HomeShopList";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -62,6 +63,8 @@ const HomeP1 = () => {
 
       
         <CategoryGrid categories={categories} />
+
+        <HomeShopList />
 
         <FeaturedProduct
           onView={(product) => navigate(`/product/${product.id}`)}

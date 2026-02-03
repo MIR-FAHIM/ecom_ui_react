@@ -10,12 +10,14 @@ import {
 	ListItemButton,
 	ListItemText,
 	Divider,
+	Pagination,
+	Stack,
 	useTheme,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
-import { getProductCategoryDetails, getCategoryChildren } from "../../../../api/controller/admin_controller/product/product_setting_controller";
+import { getCategoryWiseProduct } from "../../../../api/controller/admin_controller/product/product_controller";
+import { getProductCategoryDetails, getCategoryChildren,  } from "../../../../api/controller/admin_controller/product/product_setting_controller";
 import SmartProductCard from "../../home/components/ProductCard";
 import { tokens } from "../../../../theme";
 
@@ -35,6 +37,13 @@ const CategoryWiseProduct = () => {
 	const [category, setCategory] = useState(null);
 	const [children, setChildren] = useState([]);
 	const [selectedSubId, setSelectedSubId] = useState("");
+	const [page, setPage] = useState(1);
+	const [pagination, setPagination] = useState({
+		current_page: 1,
+		last_page: 1,
+		total: 0,
+		per_page: 24,
+	});
 
 	const loadProducts = useCallback(async () => {
 		if (!id) return;
@@ -42,9 +51,24 @@ const CategoryWiseProduct = () => {
 		setError("");
 		try {
 			const categoryId = selectedSubId || id;
-			const res = await getProduct({ category_id: categoryId, page: 1, per_page: 24 });
-			const list = res?.data?.data ?? res?.data ?? [];
-			setProducts(safeArray(list));
+			const res = await getCategoryWiseProduct({
+				category_id: categoryId,
+				page,
+				per_page: pagination.per_page,
+			});
+			const pageData = res?.data ?? res ?? {};
+			const list = safeArray(pageData?.data ?? pageData?.items ?? pageData);
+			setProducts(list);
+			setPagination((prev) => ({
+				...prev,
+				current_page: pageData?.current_page || prev.current_page,
+				last_page: pageData?.last_page || prev.last_page,
+				total: pageData?.total ?? prev.total,
+				per_page: pageData?.per_page ?? prev.per_page,
+			}));
+			if (pageData?.current_page && pageData.current_page !== page) {
+				setPage(pageData.current_page);
+			}
 		} catch (e) {
 			console.error("CategoryWiseProduct load error:", e);
 			setProducts([]);
@@ -52,7 +76,7 @@ const CategoryWiseProduct = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [id, selectedSubId]);
+	}, [id, selectedSubId, page, pagination.per_page]);
 
 	useEffect(() => {
 		loadProducts();
@@ -82,9 +106,19 @@ const CategoryWiseProduct = () => {
 		};
 
 		setSelectedSubId("");
+		setPage(1);
 		loadCategory();
 		loadChildren();
 	}, [id]);
+
+	const handleSelectSubCategory = (value) => {
+		setSelectedSubId(value);
+		setPage(1);
+	};
+
+	const handlePageChange = (_, value) => {
+		setPage(value);
+	};
 
 	const title = useMemo(() => category?.name || `Category: ${id || ""}`, [category?.name, id]);
 
@@ -126,7 +160,7 @@ const CategoryWiseProduct = () => {
 							<List dense disablePadding>
 								<ListItemButton
 									selected={!selectedSubId}
-									onClick={() => setSelectedSubId("")}
+									onClick={() => handleSelectSubCategory("")}
 									sx={{ borderRadius: 2, mb: 0.5 }}
 								>
 									<ListItemText primary="All" />
@@ -136,7 +170,7 @@ const CategoryWiseProduct = () => {
 									<ListItemButton
 										key={child?.id}
 										selected={String(selectedSubId) === String(child?.id)}
-										onClick={() => setSelectedSubId(String(child?.id))}
+										onClick={() => handleSelectSubCategory(String(child?.id))}
 										sx={{ borderRadius: 2, mb: 0.5 }}
 									>
 										<ListItemText primary={child?.name || "Unnamed"} />
@@ -165,16 +199,29 @@ const CategoryWiseProduct = () => {
 								</Button>
 							</Box>
 						) : (
-							<Grid container spacing={2.5}>
-								{products.map((product, index) => (
-									<Grid key={product?.id ?? product?.product_id ?? index} item xs={12} sm={6} md={4} lg={3}>
-										<SmartProductCard
-											product={product}
-											onView={(p) => navigate(`/product/${p?.id}`)}
+							<>
+								<Grid container spacing={2.5}>
+									{products.map((product, index) => (
+										<Grid key={product?.id ?? product?.product_id ?? index} item xs={12} sm={6} md={4} lg={3}>
+											<SmartProductCard
+												product={product}
+												onView={(p) => navigate(`/product/${p?.id}`)}
+											/>
+										</Grid>
+									))}
+								</Grid>
+
+								{pagination.last_page > 1 ? (
+									<Stack alignItems="center" sx={{ mt: 3 }}>
+										<Pagination
+											count={pagination.last_page}
+											page={page}
+											onChange={handlePageChange}
+											color="primary"
 										/>
-									</Grid>
-								))}
-							</Grid>
+									</Stack>
+								) : null}
+							</>
 						)}
 					</Grid>
 				</Grid>

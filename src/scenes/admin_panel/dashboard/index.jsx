@@ -28,6 +28,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import { dashboardReport } from "../../../api/controller/admin_controller/report/report_controller";
+import { tokens } from "../../../theme";
 
 const moneyBDT = (n) =>
   new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
@@ -117,34 +118,28 @@ const MetricCard = ({ title, value, icon, themeBits, onClick, accent = "a" }) =>
 function Dashboard() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const colors = tokens(theme.palette.mode);
 
   // Theme helpers (same style used in your checkout/product pages)
   const themeBits = useMemo(() => {
-    const brand = theme.palette.brand || {};
-    const semantic = theme.palette.semantic || {};
+    const divider = theme.palette.divider || colors.primary[200];
+    const surface = colors.primary[400];
+    const surface2 = colors.primary[300];
+    const ink = colors.blueAccent[800];
+    const subInk =  colors.blueAccent[900];
 
-    const divider = theme.palette.divider || "rgba(0,0,0,0.08)";
-    const surface =
-      semantic.surface || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)");
-    const surface2 =
-      semantic.surface2 || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)");
-    const ink = semantic.ink || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)");
-    const subInk =
-      semantic.subInk || (theme.palette.mode === "dark" ? "rgba(255,255,255,0.68)" : "rgba(0,0,0,0.58)");
+    const brandGradient = `linear-gradient(90deg, ${colors.blueAccent[400]}, ${colors.greenAccent[500]})`;
+    const brandGlow = theme.palette.mode === "dark" ? "rgba(72, 90, 200, 0.25)" : "rgba(72, 90, 200, 0.18)";
 
-    const brandGradient = brand.gradient || "linear-gradient(90deg, #FA5C5C, #FD8A6B, #FEC288, #FBEF76)";
-    const brandGlow = brand.glow || (theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.12)");
-
-    // Accent surfaces derived from your palette colors (safe fallback)
     const accents = {
-      a: theme.palette.mode === "dark" ? "rgba(250,92,92,0.18)" : "rgba(250,92,92,0.14)",   // FA5C5C
-      b: theme.palette.mode === "dark" ? "rgba(253,138,107,0.18)" : "rgba(253,138,107,0.14)", // FD8A6B
-      c: theme.palette.mode === "dark" ? "rgba(254,194,136,0.18)" : "rgba(254,194,136,0.14)", // FEC288
-      d: theme.palette.mode === "dark" ? "rgba(251,239,118,0.18)" : "rgba(251,239,118,0.14)", // FBEF76
+      a: theme.palette.mode === "dark" ? "rgba(104,112,250,0.22)" : "rgba(104,112,250,0.14)",
+      b: theme.palette.mode === "dark" ? "rgba(76,206,172,0.20)" : "rgba(76,206,172,0.12)",
+      c: theme.palette.mode === "dark" ? "rgba(226,114,110,0.20)" : "rgba(226,114,110,0.12)",
+      d: theme.palette.mode === "dark" ? "rgba(250,92,92,0.20)" : "rgba(250,92,92,0.12)",
     };
 
     return { divider, surface, surface2, ink, subInk, brandGradient, brandGlow, accents };
-  }, [theme.palette]);
+  }, [theme.palette, colors]);
 
   const { divider, surface, surface2, ink, subInk, brandGradient, brandGlow } = themeBits;
 
@@ -177,15 +172,15 @@ function Dashboard() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: theme.palette.background?.default,
+          background: theme.palette.background?.default || colors.primary[500],
         backgroundImage:
           theme.palette.mode === "dark"
-            ? `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.10), transparent 55%),
-               radial-gradient(1200px 700px at 90% 5%, rgba(250,92,92,0.10), transparent 55%),
-               radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.08), transparent 55%)`
-            : `radial-gradient(1200px 700px at 10% 0%, rgba(251,239,118,0.22), transparent 55%),
-               radial-gradient(1200px 700px at 90% 5%, rgba(250,92,92,0.18), transparent 55%),
-               radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.14), transparent 55%)`,
+            ? `radial-gradient(1200px 700px at 10% 0%, rgba(104,112,250,0.12), transparent 55%),
+              radial-gradient(1200px 700px at 90% 5%, rgba(76,206,172,0.10), transparent 55%),
+              radial-gradient(1200px 700px at 50% 95%, rgba(226,114,110,0.10), transparent 55%)`
+            : `radial-gradient(1200px 700px at 10% 0%, rgba(104,112,250,0.20), transparent 55%),
+              radial-gradient(1200px 700px at 90% 5%, rgba(76,206,172,0.18), transparent 55%),
+              radial-gradient(1200px 700px at 50% 95%, rgba(226,114,110,0.16), transparent 55%)`,
         p: 2.5,
       }}
     >
@@ -246,7 +241,7 @@ function Dashboard() {
               fontWeight: 950,
               px: 2,
               background: brandGradient,
-              color: "#141414",
+              color: colors.gray[900],
               boxShadow: `0 16px 34px ${brandGlow}`,
               "&:hover": { filter: "saturate(1.1)", boxShadow: `0 20px 40px ${brandGlow}` },
             }}
@@ -486,7 +481,7 @@ function Dashboard() {
                       textTransform: "none",
                       fontWeight: 950,
                       background: brandGradient,
-                      color: "#141414",
+                      color: colors.gray[900],
                       boxShadow: `0 16px 34px ${brandGlow}`,
                       "&:hover": { filter: "saturate(1.1)", boxShadow: `0 20px 40px ${brandGlow}` },
                     }}
@@ -514,7 +509,7 @@ function Dashboard() {
                     fontWeight: 950,
                     py: 1.25,
                     background: brandGradient,
-                    color: "#141414",
+                    color: colors.gray[900],
                     boxShadow: `0 14px 30px ${brandGlow}`,
                     "&:hover": { filter: "saturate(1.1)", boxShadow: `0 18px 36px ${brandGlow}` },
                   }}
@@ -527,10 +522,11 @@ function Dashboard() {
               <Grid item xs={12} sm={6} md={3}>
                 <Button
                   fullWidth
-                  variant="outlined"
+                  variant="contained"
                   sx={{
                     borderRadius: 999,
                     textTransform: "none",
+                       background: brandGradient,
                     fontWeight: 950,
                     py: 1.25,
                     borderColor: divider,
@@ -546,11 +542,12 @@ function Dashboard() {
               <Grid item xs={12} sm={6} md={3}>
                 <Button
                   fullWidth
-                  variant="outlined"
+                  variant="contained"
                   sx={{
                     borderRadius: 999,
                     textTransform: "none",
                     fontWeight: 950,
+                       background: brandGradient,
                     py: 1.25,
                     borderColor: divider,
                     background: surface,
@@ -565,11 +562,12 @@ function Dashboard() {
               <Grid item xs={12} sm={6} md={3}>
                 <Button
                   fullWidth
-                  variant="outlined"
+                  variant="contained"
                   sx={{
                     borderRadius: 999,
                     textTransform: "none",
                     fontWeight: 950,
+                       background: brandGradient,
                     py: 1.25,
                     borderColor: divider,
                     background: surface,

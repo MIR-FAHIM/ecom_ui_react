@@ -21,7 +21,7 @@ import {
 	uploadProductImages,
 	addProductAttribute,
 } from "../../../../api/controller/admin_controller/product/product_controller";
-import { getAllShops } from "../../../../api/controller/admin_controller/user_controller.jsx";
+import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller";
 import { PRODUCT_WIZARD_STEPS } from "../add_product/components/productWizard/steps";
 import StepGeneral from "../add_product/components/productWizard/StepGeneral";

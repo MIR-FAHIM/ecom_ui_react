@@ -29,9 +29,20 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../../theme.js";
+import { image_file_url } from "../../../api/config/index.jsx";
 import { getUserDetail } from "../../../api/controller/admin_controller/user_controller.jsx";
+import { getWebsiteSetting } from "../../../api/controller/admin_controller/website_setting/website_setting_controller.jsx";
 import { getUserWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import SearchProduct from "../search_product/SearchProduct.jsx";
+
+const buildImageUrl = (media) => {
+  if (!media) return "";
+  const direct = media?.url || media?.external_link;
+  if (direct && /^https?:\/\//i.test(String(direct))) return String(direct);
+  const fileName = media?.file_name || media?.file_original_name;
+  if (fileName) return `${String(image_file_url || "").replace(/\/+$/, "")}/${String(fileName).replace(/^\/+/, "")}`;
+  return "";
+};
 
 const Topbar = () => {
   const navigate = useNavigate();
@@ -47,6 +58,11 @@ const Topbar = () => {
   const [wishCount, setWishCount] = useState(0);
 
   const [user, setUser] = useState(null);
+  const [brand, setBrand] = useState({
+    name: "ShopLogo",
+    slogan: "Trendy picks, fast checkout",
+    logoUrl: "",
+  });
 
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
@@ -94,6 +110,24 @@ const Topbar = () => {
   };
 
   useEffect(() => {
+    const loadWebsiteSetting = async () => {
+      try {
+        const res = await getWebsiteSetting();
+        const payload = res?.data ?? res;
+        const data = payload?.data ?? payload;
+        if (data && typeof data === "object") {
+          const logoUrl = buildImageUrl(data?.logo || null);
+          setBrand({
+            name: data?.website_name || "ShopLogo",
+            slogan: data?.slogan || "Trendy picks, fast checkout",
+            logoUrl,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load website settings", e);
+      }
+    };
+
     const loadUser = async () => {
       try {
         const storedId = localStorage.getItem("userId");
@@ -108,6 +142,7 @@ const Topbar = () => {
       }
     };
 
+    loadWebsiteSetting();
     loadUser();
     loadCounts();
 
@@ -177,7 +212,16 @@ const Topbar = () => {
               transition: "transform 120ms ease",
             }}
           >
-            <BoltIcon />
+            {brand.logoUrl ? (
+              <Box
+                component="img"
+                src={brand.logoUrl}
+                alt={brand.name}
+                sx={{ width: 28, height: 28, objectFit: "contain", borderRadius: 1 }}
+              />
+            ) : (
+              <BoltIcon />
+            )}
           </IconButton>
 
           <Box onClick={() => navigate("/")} sx={{ cursor: "pointer", userSelect: "none", lineHeight: 1.05 }}>
@@ -188,10 +232,10 @@ const Topbar = () => {
                 color: colors.greenAccent[500],
               }}
             >
-              ShopLogo
+              {brand.name}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 800 }}>
-              Trendy picks, fast checkout
+              {brand.slogan}
             </Typography>
           </Box>
         </Box>

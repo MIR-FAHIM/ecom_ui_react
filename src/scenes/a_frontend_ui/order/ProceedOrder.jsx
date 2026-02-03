@@ -38,6 +38,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getUserAddresses, addUserAddress } from "../../../api/controller/admin_controller/order/user_address_controller";
 import { checkOutOrder } from "../../../api/controller/admin_controller/order/order_controller";
+import { getShippingCosts } from "../../../api/controller/admin_controller/delivery/delivery_controller";
 import { getCartByUser, updateQuantity, deleteItem } from "../../../api/controller/admin_controller/order/cart_controller";
 import { tokens } from "../../../theme";
 
@@ -72,6 +73,7 @@ const ProceedOrder = () => {
 
   const [processing, setProcessing] = useState({});
   const [openAddressModal, setOpenAddressModal] = useState(false);
+  const [shippingCost, setShippingCost] = useState(0);
 
   // IMPORTANT: this fixes your popup bug
   const [addrLoading, setAddrLoading] = useState(true);
@@ -162,6 +164,21 @@ const ProceedOrder = () => {
     loadAddresses();
     loadCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const loadShipping = async () => {
+      try {
+        const res = await getShippingCosts();
+        const list = res?.data ?? res ?? [];
+        const first = Array.isArray(list) ? list[0] : null;
+        setShippingCost(Number(first?.shipping_cost || 0));
+      } catch (e) {
+        console.error("Error loading shipping cost", e);
+        setShippingCost(0);
+      }
+    };
+    loadShipping();
   }, []);
 
   // AUTO-OPEN only AFTER addresses loaded, only if user logged in, only if still empty
@@ -706,6 +723,27 @@ const ProceedOrder = () => {
                     }}
                   >
                     {money(cart.subtotal)}
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 0.8 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: subInk }}>
+                    Shipping Cost
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 950, color: ink }}>
+                    {money(shippingCost)}
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 0.8 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: subInk }}>
+                    Total
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 950, color: theme.palette.secondary.main }}
+                  >
+                    {money(Number(cart.subtotal || 0) + Number(shippingCost || 0))}
                   </Typography>
                 </Stack>
 
