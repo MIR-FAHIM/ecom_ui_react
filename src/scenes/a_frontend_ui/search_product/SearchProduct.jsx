@@ -138,7 +138,7 @@ const SearchProduct = ({
 										fontWeight: 900,
 										px: 2,
 										boxShadow: "none",
-										background: theme.palette.secondary.main,
+										background: theme.palette.primary.main,
 										"&:hover": { opacity: 0.92, boxShadow: "none" },
 									}}
 								>

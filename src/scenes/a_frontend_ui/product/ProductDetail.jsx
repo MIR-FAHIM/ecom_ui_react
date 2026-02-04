@@ -677,10 +677,10 @@ const ProductDetail = () => {
                     <Button
                       variant="contained"
                       disabled={!inStock}
-                      onClick={() => {
-                        if (!userId) return setMsg("Please login to buy now.");
-                        navigate("/cart");
-                      }}
+                      onClick={
+                      
+                        handleAddToCart
+                }
                       sx={{
                         borderRadius: 999,
                         textTransform: "none",

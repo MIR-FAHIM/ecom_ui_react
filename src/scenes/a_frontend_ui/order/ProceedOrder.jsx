@@ -329,10 +329,10 @@ const ProceedOrder = () => {
           p: 1.4,
           borderRadius: 3,
           border: `1px solid ${selected ? "transparent" : divider}`,
-          background: selected ? theme.palette.secondary.main : surface,
+          background: selected ? theme.palette.primary[100] : surface,
           boxShadow: "none",
           transition: "transform 140ms ease, box-shadow 200ms ease, filter 200ms ease",
-          color: selected ? colors.gray[900] : ink,
+          color: selected ? colors.primary[800] : ink,
           "&:hover": { transform: "translateY(-1px)" },
         }}
       >
@@ -373,7 +373,7 @@ const ProceedOrder = () => {
                 fontWeight: 950,
                 background: selected ? colors.primary[200] : surface2,
                 border: `1px solid ${selected ? colors.primary[300] : divider}`,
-                color: selected ? colors.gray[900] : ink,
+                color: selected ? colors.gray[10] : ink,
               }}
             />
           </Box>
@@ -780,6 +780,7 @@ const ProceedOrder = () => {
                       borderRadius: 999,
                       textTransform: "none",
                       fontWeight: 900,
+                       color: colors.primary[900],
                       borderColor: divider,
                       background: surface,
                       "&:hover": { background: surface2, borderColor: theme.palette.primary.main },
@@ -800,7 +801,7 @@ const ProceedOrder = () => {
                       fontWeight: 950,
                       px: 2.6,
                       background: theme.palette.secondary.main,
-                      color: colors.gray[900],
+                      color: colors.bg[100],
                       boxShadow: "none",
                       "&:hover": { opacity: 0.92, boxShadow: "none" },
                       "&.Mui-disabled": { opacity: 0.55 },

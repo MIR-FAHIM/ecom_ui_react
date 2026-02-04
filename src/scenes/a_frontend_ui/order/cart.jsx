@@ -510,6 +510,7 @@ const Cart = () => {
                     borderRadius: 999,
                     textTransform: "none",
                     fontWeight: 900,
+                     color: colors.gray[100],
                     borderColor: divider,
                     background: surface,
                     "&:hover": { background: surface2, borderColor: theme.palette.primary.main },

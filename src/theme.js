@@ -79,7 +79,7 @@ export const tokens = (mode) => ({
           600: "#858585",
           700: "#a3a3a3",
           800: "#c2c2c2",
-          900: "#e0e0e0",
+          900: "#ffffff",
         },
         bg:{
           100: "#FFFFFF",
@@ -129,6 +129,10 @@ export const tokens = (mode) => ({
           800: "#2a2d64",
           900: "#151632",
         },
+        yellowAccent: {
+          100: "#f7e862",
+
+        },
       }),
 });
 
@@ -161,8 +165,9 @@ export const themeSettings = (mode) => {
               main: colors.primary[100],
             },
             secondary: {
-              main: colors.greenAccent[500],
+              main: colors.blueAccent[500],
               blue: colors.blueAccent[100],
+              yellow: colors.yellowAccent[100],
             },
             neutral: {
               dark: colors.gray[700],
