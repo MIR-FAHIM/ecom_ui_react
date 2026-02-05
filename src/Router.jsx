@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Dashboard from "./scenes/admin_panel/dashboard";
 import Login from "./scenes/auth/login";
+import LoginOtp from "./scenes/auth/LoginOtp";
 import Register from "./scenes/auth/Register";
 import AddProductTab from "./scenes/admin_panel/product/add_product/AddProductTab";
 import AllProducts from "./scenes/admin_panel/product/AllProducts";
@@ -62,6 +63,7 @@ const AppRouter = () => {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/login-otp" element={<LoginOtp />}></Route>
         <Route path="/register" element={<Register />}></Route>
         {/* Public / storefront routes */}
         <Route path="/" element={<FrontendLayout />}>

@@ -398,13 +398,17 @@ const Topbar = () => {
               startIcon={<AccountCircleIcon />}
               sx={{
                 ml: 0.4,
+                 color: colors.gray[100],
                 borderRadius: 999,
                 textTransform: "none",
                 fontWeight: 900,
                 border: `1px solid ${border}`,
                 background: glass,
-                px: 1.6,
-                "&:hover": { background: glass2 },
+                sx: {
+                 
+                  px: 1.6,
+                  "&:hover": { background: glass2 },
+                }
               }}
             >
               Login

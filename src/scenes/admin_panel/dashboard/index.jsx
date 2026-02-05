@@ -570,8 +570,8 @@ function Dashboard() {
                        background: brandGradient,
                     py: 1.25,
                     borderColor: divider,
-                    background: surface,
-                    "&:hover": { background: surface2, borderColor: theme.palette.primary.main },
+               
+                    "&:hover": {  borderColor: theme.palette.primary.main },
                   }}
                   onClick={() => navigate("/ecom/report/today")}
                 >

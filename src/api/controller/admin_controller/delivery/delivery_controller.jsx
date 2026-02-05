@@ -53,6 +53,24 @@ export const getShippingCosts = async () => {
     return { status: 'error', data: [] };
   }
 }
+export const getDivisions = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/locations/divisions`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getShippingCosts:", error);
+    return { status: 'error', data: [] };
+  }
+}
+export const getDistricts = async (divisionId) => {
+  try {
+    const response = await axiosInstance.get(`/api/locations/districts/${divisionId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getShippingCosts:", error);
+    return { status: 'error', data: [] };
+  }
+}
 export const setShippingCosts = async (data) => {
   try {
     const response = await axiosInstance.post(`/api/shipping-costs/set`, data, {

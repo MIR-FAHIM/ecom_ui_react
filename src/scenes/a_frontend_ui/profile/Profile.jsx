@@ -61,7 +61,7 @@ const Profile = () => {
           <Box>
             <Typography variant="h6">Welcome, {user.name}</Typography>
             <Typography variant="body2" color="text.secondary">Email: {user.email}</Typography>
-            <Typography variant="body2" color="text.secondary">Mobile: {user.mobile}</Typography>
+            <Typography variant="body2" color="text.secondary">Phone: {user.phone}</Typography>
           </Box>
         );
 

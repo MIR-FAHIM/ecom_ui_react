@@ -45,6 +45,18 @@ export const loginController = async (data) => {
   }
 
 }
+export const loginWithOtpController = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/auth/login-otp`, data,
+
+    );
+    return response.data; // Return the response from the API
+  } catch (error) {
+    console.error("Error login with OTP data:", error);
+    throw error; // Rethrow the error for further handling in your component
+  }
+
+}
 export const getAllCustomers = async () => {
   try {
     const response = await axiosInstance.get(`/api/users/customers`,

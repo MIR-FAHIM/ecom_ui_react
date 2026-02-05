@@ -4,11 +4,6 @@ import {
   Paper,
   Typography,
   Grid,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  List,
-  ListItem,
   Button,
   TextField,
   CircularProgress,
@@ -23,6 +18,7 @@ import {
   Stack,
   Tooltip,
   useTheme,
+  MenuItem,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
@@ -31,16 +27,16 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LockCheckoutIcon from "@mui/icons-material/Lock";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
-import PlaceIcon from "@mui/icons-material/Place";
 import NotesIcon from "@mui/icons-material/Notes";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 
-import { getUserAddresses, addUserAddress } from "../../../api/controller/admin_controller/order/user_address_controller";
+import { getUserAddresses, addUserAddress, deleteUserAddress } from "../../../api/controller/admin_controller/order/user_address_controller";
 import { checkOutOrder } from "../../../api/controller/admin_controller/order/order_controller";
-import { getShippingCosts } from "../../../api/controller/admin_controller/delivery/delivery_controller";
+import { getShippingCosts , getDivisions, getDistricts} from "../../../api/controller/admin_controller/delivery/delivery_controller";
 import { getCartByUser, updateQuantity, deleteItem } from "../../../api/controller/admin_controller/order/cart_controller";
 import { tokens } from "../../../theme";
+import UserAddress from "./UserAddress";
 
 const ProceedOrder = () => {
   const theme = useTheme();
@@ -74,6 +70,7 @@ const ProceedOrder = () => {
   const [processing, setProcessing] = useState({});
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [shippingCost, setShippingCost] = useState(0);
+  const [addressDeleting, setAddressDeleting] = useState({});
 
   // IMPORTANT: this fixes your popup bug
   const [addrLoading, setAddrLoading] = useState(true);
@@ -82,13 +79,20 @@ const ProceedOrder = () => {
   // New address form
   const [newName, setNewName] = useState("");
   const [newMobile, setNewMobile] = useState("");
+  const [newDivision, setNewDivision] = useState("");
   const [newDistrict, setNewDistrict] = useState("");
   const [newArea, setNewArea] = useState("");
   const [newAddress, setNewAddress] = useState("");
 
+  const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [loadingDivisions, setLoadingDivisions] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
   const resetNewAddress = () => {
     setNewName("");
     setNewMobile("");
+    setNewDivision("");
     setNewDistrict("");
     setNewArea("");
     setNewAddress("");
@@ -181,6 +185,47 @@ const ProceedOrder = () => {
     loadShipping();
   }, []);
 
+  useEffect(() => {
+    const loadDivisions = async () => {
+      setLoadingDivisions(true);
+      try {
+        const res = await getDivisions();
+        const list = res?.data ?? res ?? [];
+        setDivisions(Array.isArray(list) ? list : []);
+      } catch (e) {
+        console.error("Error loading divisions", e);
+        setDivisions([]);
+      } finally {
+        setLoadingDivisions(false);
+      }
+    };
+    loadDivisions();
+  }, []);
+
+  useEffect(() => {
+    if (!newDivision) {
+      setDistricts([]);
+      setNewDistrict("");
+      return;
+    }
+
+    const loadDistricts = async () => {
+      setLoadingDistricts(true);
+      try {
+        const res = await getDistricts(newDivision);
+        const list = res?.data ?? res ?? [];
+        setDistricts(Array.isArray(list) ? list : []);
+      } catch (e) {
+        console.error("Error loading districts", e);
+        setDistricts([]);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+
+    loadDistricts();
+  }, [newDivision]);
+
   // AUTO-OPEN only AFTER addresses loaded, only if user logged in, only if still empty
   useEffect(() => {
     if (!userId) return;
@@ -197,8 +242,8 @@ const ProceedOrder = () => {
       setMsg("Please login to add an address.");
       return;
     }
-    if (!newName || !newMobile || !newAddress) {
-      setMsg("Please fill name, mobile and address");
+    if (!newName || !newMobile || !newAddress || !newDivision || !newDistrict) {
+      setMsg("Please fill name, mobile, division, district and address");
       return;
     }
 
@@ -208,6 +253,7 @@ const ProceedOrder = () => {
       form.append("user_id", userId);
       form.append("name", newName);
       form.append("mobile", newMobile);
+      form.append("division", newDivision);
       form.append("district", newDistrict);
       form.append("area", newArea);
       form.append("address", newAddress);
@@ -269,6 +315,31 @@ const ProceedOrder = () => {
     }
   };
 
+  const handleDeleteAddress = async (address) => {
+    if (!userId) {
+      setMsg("Please login to delete an address.");
+      return;
+    }
+    if (!window.confirm("Delete this address?")) return;
+
+    setAddressDeleting((prev) => ({ ...prev, [address.id]: true }));
+    try {
+      const res = await deleteUserAddress(address.id);
+      const ok = res?.data?.status === "success" || res?.status === 200 || res?.status === "success";
+      if (ok) {
+        setMsg(res?.data?.message || res?.message || "Address deleted");
+        await loadAddresses();
+      } else {
+        setMsg(res?.data?.message || res?.message || "Failed to delete address");
+      }
+    } catch (e) {
+      console.error("Delete address error", e);
+      setMsg("Error deleting address");
+    } finally {
+      setAddressDeleting((prev) => ({ ...prev, [address.id]: false }));
+    }
+  };
+
   const handleCheckout = async () => {
     if (!userId) {
       setMsg("Please login to place an order.");
@@ -318,68 +389,6 @@ const ProceedOrder = () => {
     } finally {
       setLoadingCheckout(false);
     }
-  };
-
-  const AddressCard = ({ a, selected }) => {
-    const labelLine = `${a.address}${a.area ? `, ${a.area}` : ""}${a.district ? `, ${a.district}` : ""}`;
-
-    return (
-      <Box
-        sx={{
-          p: 1.4,
-          borderRadius: 3,
-          border: `1px solid ${selected ? "transparent" : divider}`,
-          background: selected ? theme.palette.primary[100] : surface,
-          boxShadow: "none",
-          transition: "transform 140ms ease, box-shadow 200ms ease, filter 200ms ease",
-          color: selected ? colors.primary[800] : ink,
-          "&:hover": { transform: "translateY(-1px)" },
-        }}
-      >
-        <Stack direction="row" spacing={1} alignItems="flex-start">
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 2,
-              display: "grid",
-              placeItems: "center",
-              background: selected ? colors.primary[200] : surface2,
-              border: `1px solid ${selected ? colors.primary[300] : divider}`,
-              flexShrink: 0,
-            }}
-          >
-            <PlaceIcon fontSize="small" />
-          </Box>
-
-          <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontWeight: 950, lineHeight: 1.1 }}>
-              {a.name}{" "}
-              <Box component="span" sx={{ fontWeight: 800, opacity: 0.85 }}>
-                {a.mobile}
-              </Box>
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 0.4, fontWeight: 700, opacity: selected ? 0.9 : 0.78 }}>
-              {labelLine}
-            </Typography>
-          </Box>
-
-          <Box sx={{ ml: "auto" }}>
-            <Chip
-              size="small"
-              label={selected ? "Selected" : "Use"}
-              sx={{
-                borderRadius: 999,
-                fontWeight: 950,
-                background: selected ? colors.primary[200] : surface2,
-                border: `1px solid ${selected ? colors.primary[300] : divider}`,
-                color: selected ? colors.gray[10] : ink,
-              }}
-            />
-          </Box>
-        </Stack>
-      </Box>
-    );
   };
 
   return (
@@ -479,84 +488,21 @@ const ProceedOrder = () => {
       <Grid container spacing={2}>
         {/* Left */}
         <Grid item xs={12} md={7}>
-          <Paper
-            sx={{
-              p: 2,
-              borderRadius: 4,
-              border: `1px solid ${divider}`,
-              background: surface,
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <Box
-                sx={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 3,
-                  display: "grid",
-                  placeItems: "center",
-                  background: surface2,
-                  border: `1px solid ${divider}`,
-                }}
-              >
-                <PlaceIcon fontSize="small" />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 950, color: ink }}>
-                  Shipping Address
-                </Typography>
-                <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
-                  Choose a saved address.
-                </Typography>
-              </Box>
-            </Stack>
-
-            <Divider sx={{ my: 1.5, opacity: 0.12 }} />
-
-            {addrLoading ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, py: 3 }}>
-                <CircularProgress size={18} />
-                <Typography sx={{ color: subInk, fontWeight: 800 }}>Loading addresses...</Typography>
-              </Box>
-            ) : addresses.length === 0 ? (
-              <Paper
-                sx={{
-                  p: 2,
-                  borderRadius: 4,
-                  border: `1px dashed ${divider}`,
-                  background: surface2,
-                }}
-              >
-                <Typography sx={{ fontWeight: 950, color: ink }}>No saved addresses</Typography>
-                <Typography variant="body2" sx={{ color: subInk, fontWeight: 700, mt: 0.4 }}>
-                  Add one to continue checkout.
-                </Typography>
-              </Paper>
-            ) : (
-              <RadioGroup value={selectedAddress || ""} onChange={(e) => setSelectedAddress(e.target.value)}>
-                <List sx={{ p: 0, display: "grid", gap: 1.2 }}>
-                  {addresses.map((a) => {
-                    const isSelected = String(selectedAddress) === String(a.id);
-                    return (
-                      <ListItem key={a.id} sx={{ p: 0, borderRadius: 3 }}>
-                        <FormControlLabel
-                          value={String(a.id)}
-                          control={<Radio sx={{ ml: 1.2 }} />}
-                          sx={{ m: 0, width: "100%" }}
-                          label={
-                            <Box sx={{ width: "100%", pr: 1.2 }}>
-                              <AddressCard a={a} selected={isSelected} />
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                    );
-                  })}
-                </List>
-              </RadioGroup>
-            )}
-          </Paper>
+          <UserAddress
+            addresses={addresses}
+            selectedAddress={selectedAddress}
+            onSelectAddress={setSelectedAddress}
+            onDeleteAddress={handleDeleteAddress}
+            addressDeleting={addressDeleting}
+            addrLoading={addrLoading}
+            divider={divider}
+            surface={surface}
+            surface2={surface2}
+            ink={ink}
+            subInk={subInk}
+            theme={theme}
+            colors={colors}
+          />
         </Grid>
 
         {/* Right */}
@@ -901,11 +847,38 @@ const ProceedOrder = () => {
             <Grid container spacing={1.2}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  label="Division"
+                  value={newDivision}
+                  onChange={(e) => setNewDivision(e.target.value)}
+                  size="small"
+                  fullWidth
+                  select
+                  disabled={loadingDivisions}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      background: surface,
+                      border: `1px solid ${divider}`,
+                      "& fieldset": { borderColor: "transparent" },
+                    },
+                  }}
+                >
+                  {divisions.map((d) => (
+                    <MenuItem key={d.id} value={String(d.id)}>
+                      {d.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
                   label="District"
                   value={newDistrict}
                   onChange={(e) => setNewDistrict(e.target.value)}
                   size="small"
                   fullWidth
+                  select
+                  disabled={!newDivision || loadingDistricts}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
@@ -914,26 +887,31 @@ const ProceedOrder = () => {
                       "& fieldset": { borderColor: "transparent" },
                     },
                   }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Area"
-                  value={newArea}
-                  onChange={(e) => setNewArea(e.target.value)}
-                  size="small"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
-                      background: surface,
-                      border: `1px solid ${divider}`,
-                      "& fieldset": { borderColor: "transparent" },
-                    },
-                  }}
-                />
+                >
+                  {districts.map((d) => (
+                    <MenuItem key={d.id} value={String(d.id)}>
+                      {d.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
             </Grid>
+
+            <TextField
+              label="Area"
+              value={newArea}
+              onChange={(e) => setNewArea(e.target.value)}
+              size="small"
+              fullWidth
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  background: surface,
+                  border: `1px solid ${divider}`,
+                  "& fieldset": { borderColor: "transparent" },
+                },
+              }}
+            />
 
             <TextField
               label="Address"
@@ -963,6 +941,7 @@ const ProceedOrder = () => {
               borderRadius: 999,
               textTransform: "none",
               fontWeight: 900,
+               color: colors.gray[100],
               borderColor: divider,
               background: surface,
               "&:hover": { background: surface2 },

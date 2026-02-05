@@ -2,6 +2,7 @@ import Navbar from "./layout/navbar";
 import SideBar from "./layout/sidebar";
 import Dashboard from "./admin_panel/dashboard";
 import Login from "./auth/login";
+import LoginOtp from "./auth/LoginOtp";
 
 // Ecommerce imports
 import AddProductTab from "./admin_panel/product/add_product/AddProductTab";
@@ -58,6 +59,7 @@ export {
   SideBar,
   Dashboard,
   Login,
+  LoginOtp,
   AddProductTab,
   AllProducts,
   StockOutProduct,

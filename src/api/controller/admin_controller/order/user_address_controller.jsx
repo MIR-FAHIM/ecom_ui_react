@@ -34,3 +34,18 @@ export const addUserAddress = async (data) => {
     }
 
 }
+export const deleteUserAddress = async (id) => {
+    try {
+        const response = await axiosInstance.delete(`/api/addresses/delete/${id}`,
+            { headers: {
+                'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+            },
+        }
+        );
+        return response; // Return the response from the API
+    } catch (error) {
+        console.error("Error deleting data:", error);
+        throw error; // Rethrow the error for further handling in your component
+    }
+
+}

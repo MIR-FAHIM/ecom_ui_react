@@ -24,7 +24,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
 import LoginIcon from "@mui/icons-material/Login";
 import { loginController } from "../../api/controller/admin_controller/user_controller";
-
+//5822
 /** ---------------------------------------------
  *  Toggle & configure your demo credentials here
  *  --------------------------------------------- */
@@ -329,12 +329,28 @@ const Login = () => {
               {loading ? <CircularProgress size={22} color="inherit" /> : "Sign in"}
             </Button>
 
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={() => navigate("/login-otp")}
+              sx={{
+                mt: 1.2,
+                py: 1.1,
+                fontWeight: 700,
+                borderRadius: 2,
+                textTransform: "none",
+              }}
+            >
+              Login with OTP
+            </Button>
+
             <Divider sx={{ my: 2 }} />
 
             <Typography variant="body2" align="center">
               Don’t have an account?{" "}
               <Button
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/register")}
                 sx={{ textTransform: "none", fontWeight: 700, px: 0.5 }}
               >
                 Create one

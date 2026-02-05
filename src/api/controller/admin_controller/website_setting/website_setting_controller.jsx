@@ -22,6 +22,16 @@ export const getWebsiteSetting = async () => {
   }
 }
 
+export const sendOtp = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/sms/send`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sendOtp:", error);
+    return { status: 'error', data: [] };
+  }
+}
+
 
 
 
