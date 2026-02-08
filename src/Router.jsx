@@ -56,6 +56,14 @@ import ShopProducts from "./scenes/a_frontend_ui/seller/ShopProducts";
 import EditSellerTab from "./scenes/admin_panel/seller/EditSellerTab";
 import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
 
+// Seller panel
+import SellerLayout from "./scenes/seller_panel/layout/SellerLayout";
+import SellerDashboard from "./scenes/seller_panel/dashboard/index";
+import SellerPanelProducts from "./scenes/seller_panel/product/SellerPanelProducts";
+import SellerShopList from "./scenes/seller_panel/shop/SellerShopList";
+import SellerShopProduct from "./scenes/seller_panel/shop/SellerShopProduct";
+import AddProduct from "./scenes/seller_panel/product/AddProduct";
+
 
 
 const AppRouter = () => {
@@ -141,6 +149,14 @@ const AppRouter = () => {
           <Route path="/ecom/banner/add" element={<AddBanner />} />
           <Route path="/ecom/media/all" element={<AllMedia />} />
 
+        </Route>
+
+        <Route path="/seller" element={<SellerLayout />}>
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="products" element={<SellerPanelProducts />} />
+          <Route path="shops" element={<SellerShopList />} />
+          <Route path="shops/products" element={<SellerShopProduct />} />
+          <Route path="add/product" element={<AddProduct />} />
         </Route>
       </Routes>
     </Router>

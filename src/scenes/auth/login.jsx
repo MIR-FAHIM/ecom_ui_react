@@ -91,6 +91,9 @@ const Login = () => {
           res?.token || res?.data?.token || res?.data?.access_token;
         const userId =
           res?.user?.id || res?.data?.user?.id || res?.data?.id;
+        
+        const userType =
+          res?.user?.user_type || res?.data?.user?.user_type || res?.data?.user_type;
 
         if (!token || !userId) {
           setErrMsg("Login succeeded but token/user is missing.");
@@ -102,7 +105,11 @@ const Login = () => {
             sessionStorage.setItem("authToken", token);
             sessionStorage.setItem("userId", userId);
           }
-          navigate("/");
+          if (userType === "seller") {
+            navigate("/seller/dashboard");
+          } else {
+            navigate("/");
+          }
         }
       }
     } catch (err) {

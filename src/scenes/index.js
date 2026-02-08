@@ -54,6 +54,12 @@ import ShopProducts from "./a_frontend_ui/seller/ShopProducts";
 
 import Wish from "./a_frontend_ui/wish/Wish";
 
+//seller panel
+import SellerDashboard from "./seller_panel/dashboard/index";
+import SellerPanelProducts from "./seller_panel/product/SellerPanelProducts";
+import SellerShopList from "./seller_panel/shop/SellerShopList";
+import SellerShopProduct from "./seller_panel/shop/SellerShopProduct";
+
 export {
   Navbar,
   SideBar,
@@ -103,4 +109,12 @@ export {
   ProductReview,
   AddShop,
   ShopProducts,
+
+
+  // seller panel
+
+  SellerDashboard,
+  SellerPanelProducts,
+  SellerShopList,
+  SellerShopProduct,
 };

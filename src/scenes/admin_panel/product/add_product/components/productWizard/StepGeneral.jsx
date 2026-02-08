@@ -1,9 +1,24 @@
 import React, { useMemo } from "react";
-import { Grid, TextField, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { Grid, TextField, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, Box, Typography } from "@mui/material";
 
 function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [], shops = [], onOpenDropdown }) {
 	const localUserId = useMemo(() => localStorage.getItem("userId") || "", []);
 	const shopOptions = Array.isArray(shops) ? shops : [];
+  const quillModules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ align: [] }],
+        ["link", "image"],
+        ["clean"],
+      ],
+    }),
+    []
+  );
 
   return (
     <Grid container spacing={2}>
@@ -127,15 +142,30 @@ function StepGeneral({ value, onChange, errors = {}, categories = [], brands = [
       </Grid>
 
       <Grid item xs={12}>
-        <TextField
-          fullWidth
-          size="small"
-          multiline
-          minRows={3}
-          label="Description"
-          value={value.description}
-          onChange={(e) => onChange({ description: e.target.value })}
-        />
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Description
+        </Typography>
+        <Box
+          sx={{
+            "& .ql-container": { minHeight: 140 },
+            border: "1px solid",
+            borderColor: errors.description ? "error.main" : "divider",
+            borderRadius: 1,
+            overflow: "hidden",
+          }}
+        >
+          <ReactQuill
+            theme="snow"
+            modules={quillModules}
+            value={value.description || ""}
+            onChange={(html) => onChange({ description: html })}
+          />
+        </Box>
+        {errors.description && (
+          <Typography variant="caption" color="error">
+            {errors.description}
+          </Typography>
+        )}
       </Grid>
 
       <Grid item xs={12}>
