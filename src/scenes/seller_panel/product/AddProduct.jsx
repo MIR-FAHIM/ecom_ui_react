@@ -29,7 +29,7 @@ import StepGeneral from "../../admin_panel/product/add_product/components/produc
 import StepAttributes from "../../admin_panel/product/add_product/components/productWizard/StepAttributes";
 import StepImages from "../../admin_panel/product/add_product/components/productWizard/StepImages";
 
-function AddProduct() {
+function AddProductSeller() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
@@ -363,4 +363,4 @@ function AddProduct() {
   );
 }
 
-export default AddProduct;
+export default AddProductSeller;

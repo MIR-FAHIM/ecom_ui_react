@@ -196,5 +196,20 @@ export const getUserOrder = async (id, params = {}) => {
     return { status: 'error', data: null };
   }
 };
+export const getShopOrder = async (id, params = {}) => {
+  try {
+    // Backend endpoint: /api/orders/list/{userId} or similar; using /api/orders/list/{id}
+    const response = await axiosInstance.get(`/api/orders/shop/${id}`, {
+      params: params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching shop orders:", error);
+    return { status: 'error', data: null };
+  }
+};
 
 

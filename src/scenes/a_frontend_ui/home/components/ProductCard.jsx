@@ -19,6 +19,7 @@ import {
   ShoppingCart,
   LocalOffer,
   VisibilityOutlined,
+  EditOutlined,
 } from "@mui/icons-material";
 
 import { image_file_url } from "../../../../api/config/index.jsx";
@@ -118,6 +119,8 @@ export default function SmartProductCard({
   inCart: inCartProp,
   inWish: inWishProp,
   onView,
+  onEdit,
+  fromSeller = false,
 }) {
   const theme = useTheme();
 
@@ -429,74 +432,115 @@ export default function SmartProductCard({
           </Stack>
 
           <Stack spacing={1} sx={{ position: "absolute", right: 10, top: 10 }}>
-            <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
-              <IconButton
-                onClick={handleToggleWish}
-                sx={{
-                  borderRadius: 3,
-                  border: `1px solid ${divider}`,
-                  background: surface,
-                  backdropFilter: "blur(10px)",
-                  "&:hover": { background: surface2 },
-                }}
-              >
-                {inWish ? <Favorite color="error" /> : <FavoriteBorder />}
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title={outOfStock ? "Out of stock" : inCart ? "Remove from cart" : "Add to cart"}>
-              <span>
-                <IconButton
-                  disabled={outOfStock}
-                  onClick={handleAddToCart}
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 4,
-                    border: `1px solid ${divider}`,
-                    background: surface,
-                    
-                    boxShadow: `0 10px 22px ${accentSoft}`,
-                    transition: "transform 120ms ease, box-shadow 180ms ease, filter 180ms ease",
-                    "&:hover": {
-                      transform: "translateY(-1px) scale(1.03)",
-                      filter: "saturate(1.05)",
-                      boxShadow: `0 14px 28px ${accentSoft}`,
-                    },
-                    "&.Mui-disabled": { opacity: 0.5 },
-                    position: "relative",
-                    "&:after": {
-                      content: '""',
-                      position: "absolute",
-                      inset: -4,
-                      borderRadius: 18,
+            {fromSeller ? (
+              <>
+                <Tooltip title="Edit product">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit?.(product);
+                    }}
+                    sx={{
+                      borderRadius: 3,
                       border: `1px solid ${divider}`,
-                      opacity: theme.palette.mode === "dark" ? 0.9 : 0.7,
-                    },
-                  }}
-                >
-                  {inCart ? <ShoppingCart /> : <ShoppingCartOutlined />}
-                </IconButton>
-              </span>
-            </Tooltip>
+                      background: surface,
+                      backdropFilter: "blur(10px)",
+                      "&:hover": { background: surface2 },
+                    }}
+                  >
+                    <EditOutlined />
+                  </IconButton>
+                </Tooltip>
 
-            <Tooltip title="Quick view">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onView?.(product);
-                }}
-                sx={{
-                  borderRadius: 3,
-                  border: `1px solid ${divider}`,
-                  background: surface,
-                  backdropFilter: "blur(10px)",
-                  "&:hover": { background: surface2 },
-                }}
-              >
-                <VisibilityOutlined />
-              </IconButton>
-            </Tooltip>
+                <Tooltip title="Quick view">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onView?.(product);
+                    }}
+                    sx={{
+                      borderRadius: 3,
+                      border: `1px solid ${divider}`,
+                      background: surface,
+                      backdropFilter: "blur(10px)",
+                      "&:hover": { background: surface2 },
+                    }}
+                  >
+                    <VisibilityOutlined />
+                  </IconButton>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
+                  <IconButton
+                    onClick={handleToggleWish}
+                    sx={{
+                      borderRadius: 3,
+                      border: `1px solid ${divider}`,
+                      background: surface,
+                      backdropFilter: "blur(10px)",
+                      "&:hover": { background: surface2 },
+                    }}
+                  >
+                    {inWish ? <Favorite color="error" /> : <FavoriteBorder />}
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip title={outOfStock ? "Out of stock" : inCart ? "Remove from cart" : "Add to cart"}>
+                  <span>
+                    <IconButton
+                      disabled={outOfStock}
+                      onClick={handleAddToCart}
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 4,
+                        border: `1px solid ${divider}`,
+                        background: surface,
+                        boxShadow: `0 10px 22px ${accentSoft}`,
+                        transition: "transform 120ms ease, box-shadow 180ms ease, filter 180ms ease",
+                        "&:hover": {
+                          transform: "translateY(-1px) scale(1.03)",
+                          filter: "saturate(1.05)",
+                          boxShadow: `0 14px 28px ${accentSoft}`,
+                        },
+                        "&.Mui-disabled": { opacity: 0.5 },
+                        position: "relative",
+                        "&:after": {
+                          content: '""',
+                          position: "absolute",
+                          inset: -4,
+                          borderRadius: 18,
+                          border: `1px solid ${divider}`,
+                          opacity: theme.palette.mode === "dark" ? 0.9 : 0.7,
+                        },
+                      }}
+                    >
+                      {inCart ? <ShoppingCart /> : <ShoppingCartOutlined />}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+
+                <Tooltip title="Quick view">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onView?.(product);
+                    }}
+                    sx={{
+                      borderRadius: 3,
+                      border: `1px solid ${divider}`,
+                      background: surface,
+                      backdropFilter: "blur(10px)",
+                      "&:hover": { background: surface2 },
+                    }}
+                  >
+                    <VisibilityOutlined />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
           </Stack>
         </Box>
       </Box>

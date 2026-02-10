@@ -26,7 +26,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller";
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../../theme.js";
 import { image_file_url } from "../../../api/config/index.jsx";
@@ -43,6 +44,8 @@ const buildImageUrl = (media) => {
   if (fileName) return `${String(image_file_url || "").replace(/\/+$/, "")}/${String(fileName).replace(/^\/+/, "")}`;
   return "";
 };
+
+const safeArray = (value) => (Array.isArray(value) ? value : []);
 
 const Topbar = () => {
   const navigate = useNavigate();
@@ -66,6 +69,10 @@ const Topbar = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
+  const [categoryAnchor, setCategoryAnchor] = useState(null);
+  const categoryOpen = Boolean(categoryAnchor);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   const initials = useMemo(() => {
     const n = (user?.name || "").trim();
@@ -146,6 +153,23 @@ const Topbar = () => {
     loadUser();
     loadCounts();
 
+    const loadCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await getCategory();
+        const payload = res?.data ?? res;
+        const list = safeArray(payload?.data ?? payload);
+        setCategories(list);
+      } catch (e) {
+        console.error("Failed to load categories", e);
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+
     const onAuth = () => loadUser();
     const onCart = () => loadCounts();
     const onWish = () => loadCounts();
@@ -163,6 +187,8 @@ const Topbar = () => {
 
   const handleUserClick = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  const handleCategoryOpen = (event) => setCategoryAnchor(event.currentTarget);
+  const handleCategoryClose = () => setCategoryAnchor(null);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -187,7 +213,7 @@ const Topbar = () => {
       sx={{
         mb: 2,
         borderBottom: `1px solid ${border}`,
-          background: colors.primary[500],
+        background: colors.primary[500],
       }}
     >
       <Toolbar
@@ -416,6 +442,112 @@ const Topbar = () => {
           )}
         </Box>
       </Toolbar>
+
+      {/* Secondary nav */}
+      <Box
+        sx={{
+          borderTop: `1px solid ${border}`,
+          background: colors.primary[500],
+          px: 2,
+          py: 0.8,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          overflowX: "auto",
+          "&::-webkit-scrollbar": { height: 6 },
+          "&::-webkit-scrollbar-thumb": {
+            background: colors.primary[300],
+            borderRadius: 999,
+          },
+        }}
+      >
+        <Button
+          onClick={handleCategoryOpen}
+          endIcon={<KeyboardArrowDownIcon />}
+          sx={{
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 900,
+            px: 2,
+            background: colors.yellowAccent ? colors.yellowAccent[500] : "#f5d000",
+            color: colors.gray[100],
+            border: `1px solid ${border}`,
+            whiteSpace: "nowrap",
+            "&:hover": { opacity: 0.92 },
+          }}
+        >
+          Categories
+        </Button>
+
+        <Menu
+          anchorEl={categoryAnchor}
+          open={categoryOpen}
+          onClose={handleCategoryClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              borderRadius: 3,
+              minWidth: 220,
+              border: `1px solid ${border}`,
+              background: colors.primary[500],
+            },
+          }}
+        >
+          {loadingCategories ? (
+            <MenuItem disabled>Loading categories...</MenuItem>
+          ) : categories.length === 0 ? (
+            <MenuItem disabled>No categories found</MenuItem>
+          ) : (
+            categories.map((item) => (
+              <MenuItem
+                key={item?.id ?? item?.name ?? Math.random()}
+                onClick={() => {
+                  handleCategoryClose();
+                  if (item?.id) navigate(`/category/${item.id}`);
+                }}
+              >
+                {item?.name || item?.title || "Category"}
+              </MenuItem>
+            ))
+          )}
+          <Divider sx={{ opacity: 0.12 }} />
+          <MenuItem
+            onClick={() => {
+              handleCategoryClose();
+              navigate("/categories");
+            }}
+          >
+            See all categories
+          </MenuItem>
+        </Menu>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, whiteSpace: "nowrap" }}>
+          {[
+            { label: "Home", path: "/" },
+            { label: "Flash Sale", path: "/" },
+            { label: "Blogs", path: "/" },
+            { label: "All Brands", path: "/brands" },
+            { label: "All categories", path: "/categories" },
+          ].map((item) => (
+            <Button
+              key={item.label}
+              onClick={() => navigate(item.path)}
+              sx={{
+                textTransform: "none",
+                fontWeight: 800,
+                color: colors.gray[100],
+                borderRadius: 2,
+                px: 1.2,
+                "&:hover": { background: colors.primary[400] },
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </Box>
+      </Box>
 
       {/* Mobile Search bar */}
       <Box sx={{ px: 2, pb: 1.4, display: { xs: "block", sm: "none" } }}>

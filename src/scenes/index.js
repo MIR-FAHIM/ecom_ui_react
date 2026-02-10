@@ -51,6 +51,8 @@ import RelatedProduct from "./a_frontend_ui/product/related_product/RelatedProdu
 import ProductReview from "./a_frontend_ui/product/review_product/ProductReview";
 import AddShop from "./a_frontend_ui/seller/AddShop";
 import ShopProducts from "./a_frontend_ui/seller/ShopProducts";
+import Brand from "./a_frontend_ui/brand/brand";
+import AllCategory from "./a_frontend_ui/category/AllCategory";
 
 import Wish from "./a_frontend_ui/wish/Wish";
 
@@ -59,6 +61,9 @@ import SellerDashboard from "./seller_panel/dashboard/index";
 import SellerPanelProducts from "./seller_panel/product/SellerPanelProducts";
 import SellerShopList from "./seller_panel/shop/SellerShopList";
 import SellerShopProduct from "./seller_panel/shop/SellerShopProduct";
+import AddProductSeller from "./seller_panel/product/AddProduct";
+import EditProductSeller from "./seller_panel/product/EditProduct";
+import OrderShop from "./seller_panel/order/OrderShop";
 
 export {
   Navbar,
@@ -109,6 +114,8 @@ export {
   ProductReview,
   AddShop,
   ShopProducts,
+  Brand,
+  AllCategory,
 
 
   // seller panel
@@ -117,4 +124,7 @@ export {
   SellerPanelProducts,
   SellerShopList,
   SellerShopProduct,
+  AddProductSeller,
+  EditProductSeller,
+  OrderShop,
 };

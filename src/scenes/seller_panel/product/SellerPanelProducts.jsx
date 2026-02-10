@@ -15,7 +15,8 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AddOutlined from "@mui/icons-material/AddOutlined";
 import { tokens } from "../../../theme.js";
-import { getShopDetails, getShopProduct } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
+
+import { getProduct } from "../../../api/controller/admin_controller/product/product_controller.jsx";
 import ProductCard from "../../a_frontend_ui/home/components/ProductCard.jsx";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
@@ -81,7 +82,8 @@ const SellerPanelProducts = () => {
       setLoadingProducts(true);
       setErrorProducts("");
       try {
-        const res = await getShopProduct(shopId, {
+        const res = await getProduct({
+          user_id: shopId,
           page: pagination.current_page,
           per_page: pagination.per_page,
         });
@@ -194,11 +196,7 @@ const SellerPanelProducts = () => {
                   {(loadingShop || loadingProducts) && <CircularProgress size={20} />}
                 </Box>
 
-                {errorShop ? (
-                  <Typography variant="body2" color="error" sx={{ mb: 2 }}>
-                    {errorShop}
-                  </Typography>
-                ) : null}
+
 
                 {errorProducts ? (
                   <Typography variant="body2" color="error" sx={{ mb: 2 }}>
@@ -217,8 +215,12 @@ const SellerPanelProducts = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3} key={product?.id ?? Math.random()}>
                       <ProductCard
                         product={product}
+                        fromSeller={true}
                         onView={(p) => {
                           if (p?.id) navigate(`/product/${p.id}`);
+                        }}
+                        onEdit={(p) => {
+                          if (p?.id) navigate(`/seller/edit/product/${p.id}`);
                         }}
                       />
                     </Grid>

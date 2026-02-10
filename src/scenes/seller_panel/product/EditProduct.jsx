@@ -50,7 +50,7 @@ const DEFAULT_GENERAL = {
   weight: "",
 };
 
-function EditProduct() {
+function EditProductSeller() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
@@ -443,4 +443,4 @@ function EditProduct() {
   );
 }
 
-export default EditProduct;
+export default EditProductSeller;

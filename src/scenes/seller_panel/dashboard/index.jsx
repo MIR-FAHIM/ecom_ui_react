@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Card,
@@ -9,64 +9,28 @@ import {
   Chip,
   Button,
   Divider,
-  LinearProgress,
   useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
-  TrendingUpOutlined,
   ShoppingCartOutlined,
   Inventory2Outlined,
   PaymentsOutlined,
-  StarRounded,
   LocalShippingOutlined,
   CampaignOutlined,
   AddOutlined,
+  StorefrontOutlined,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
+import { useNavigate } from "react-router-dom";
+import { getShopReport, getShopMonthReport } from "../../../api/controller/admin_controller/report/report_controller";
+import { getShopOrder } from "../../../api/controller/admin_controller/order/order_controller";
+import { getAllShops } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
 
-const stats = [
-  {
-    label: "Revenue (30d)",
-    value: "BDT 248,620",
-    delta: "+12.4%",
-    icon: <TrendingUpOutlined />,
-    accent: "linear-gradient(135deg, rgba(104,112,250,0.25), rgba(76,206,172,0.12))",
-  },
-  {
-    label: "Orders",
-    value: "1,284",
-    delta: "+4.1%",
-    icon: <ShoppingCartOutlined />,
-    accent: "linear-gradient(135deg, rgba(226,114,110,0.22), rgba(104,112,250,0.12))",
-  },
-  {
-    label: "Active Products",
-    value: "412",
-    delta: "+18",
-    icon: <Inventory2Outlined />,
-    accent: "linear-gradient(135deg, rgba(76,206,172,0.28), rgba(104,112,250,0.12))",
-  },
-  {
-    label: "Avg. Rating",
-    value: "4.7",
-    delta: "Top 8%",
-    icon: <StarRounded />,
-    accent: "linear-gradient(135deg, rgba(255,199,64,0.28), rgba(104,112,250,0.12))",
-  },
-];
-
-const pulse = [
-  { label: "Packed", value: 72, color: "#4cceac" },
-  { label: "Shipped", value: 54, color: "#6870fa" },
-  { label: "Delivered", value: 38, color: "#e2726e" },
-];
-
-const recentOrders = [
-  { id: "#OR-4521", status: "Packed", amount: "BDT 4,220", time: "15 min ago" },
-  { id: "#OR-4512", status: "Shipped", amount: "BDT 6,900", time: "1 hr ago" },
-  { id: "#OR-4499", status: "Delivered", amount: "BDT 2,180", time: "3 hr ago" },
-  { id: "#OR-4492", status: "Packed", amount: "BDT 1,520", time: "6 hr ago" },
-];
+const safeArray = (x) => (Array.isArray(x) ? x : []);
 
 const topProducts = [
   { name: "Lumen Sneakers", orders: 142, stock: "In stock" },
@@ -77,7 +41,178 @@ const topProducts = [
 const SellerDashboard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
+  const [report, setReport] = useState({
+    shops_count: 0,
+    orders_count: 0,
+    orders_amount: 0,
+    products_count: 0,
+  });
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [loadingRecentOrders, setLoadingRecentOrders] = useState(false);
+  const [monthReport, setMonthReport] = useState({ months: [] });
+  const [loadingMonthReport, setLoadingMonthReport] = useState(false);
+  const [shops, setShops] = useState([]);
+  const [loadingShops, setLoadingShops] = useState(false);
+  const [selectedShopId, setSelectedShopId] = useState("");
 
+  useEffect(() => {
+    const loadShops = async () => {
+      const userId = localStorage.getItem("userId");
+      if (!userId) return;
+
+      setLoadingShops(true);
+      try {
+        const res = await getAllShops({ user_id: userId, page: 1, per_page: 200 });
+        const payload = res?.data ?? res;
+        const list = safeArray(payload?.data ?? payload);
+        setShops(list);
+
+        if (list.length === 1) {
+          setSelectedShopId(String(list[0]?.id ?? ""));
+        } else if (!selectedShopId && list.length > 0) {
+          setSelectedShopId(String(list[0]?.id ?? ""));
+        }
+      } catch (error) {
+        console.error("Failed to load shops", error);
+        setShops([]);
+      } finally {
+        setLoadingShops(false);
+      }
+    };
+
+    loadShops();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const loadReport = async () => {
+     
+
+      setLoadingReport(true);
+      try {
+        const res = await getShopReport(userId);
+        const data = res?.data ?? res?.data?.data ?? res ?? null;
+        if (data && typeof data === "object") {
+          setReport({
+            shops_count: Number(data?.shops_count ?? 0),
+            orders_count: Number(data?.orders_count ?? 0),
+            orders_amount: Number(data?.orders_amount ?? 0),
+            products_count: Number(data?.products_count ?? 0),
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load shop report", error);
+      } finally {
+        setLoadingReport(false);
+      }
+    };
+
+    loadReport();
+  }, [selectedShopId]);
+
+  useEffect(() => {
+    const loadRecentOrders = async () => {
+   
+  
+      if (!userId) return;
+
+
+
+
+      setLoadingRecentOrders(true);
+      try {
+        const res = await getShopOrder(userId, { page: 1, per_page: 4 });
+        const pageData = res?.data ?? {};
+        const list = safeArray(pageData?.data);
+        setRecentOrders(list);
+      } catch (error) {
+        console.error("Failed to load recent orders", error);
+        setRecentOrders([]);
+      } finally {
+        setLoadingRecentOrders(false);
+      }
+    };
+
+    loadRecentOrders();
+  }, [selectedShopId]);
+
+  useEffect(() => {
+    const loadMonthReport = async () => {
+      if (!selectedShopId) return;
+
+      setLoadingMonthReport(true);
+      try {
+        const res = await getShopMonthReport(selectedShopId);
+        const data = res?.data?.data ?? res?.data ?? res ?? null;
+        const months = safeArray(data?.months);
+        setMonthReport({ months });
+      } catch (error) {
+        console.error("Failed to load month report", error);
+        setMonthReport({ months: [] });
+      } finally {
+        setLoadingMonthReport(false);
+      }
+    };
+
+    loadMonthReport();
+  }, [selectedShopId]);
+
+  const formatCurrency = (amount) =>
+    new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(amount || 0);
+
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-BD", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+  const formatMonthLabel = (value) => {
+    if (!value) return "-";
+    const parts = String(value).split("-");
+    if (parts.length < 2) return String(value);
+    const year = parts[0];
+    const monthIndex = Math.max(0, Math.min(11, Number(parts[1]) - 1));
+    const short = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][monthIndex];
+    return `${short} ${String(year).slice(2)}`;
+  };
+
+  const stats = useMemo(
+    () => [
+      {
+        label: "Revenue",
+        value: formatCurrency(report.orders_amount),
+        delta: loadingReport ? "Loading" : "Updated",
+        icon: <PaymentsOutlined />,
+        accent: "linear-gradient(135deg, rgba(104,112,250,0.25), rgba(76,206,172,0.12))",
+      },
+      {
+        label: "Orders",
+        value: String(report.orders_count ?? 0),
+        delta: loadingReport ? "Loading" : "Updated",
+        icon: <ShoppingCartOutlined />,
+        accent: "linear-gradient(135deg, rgba(226,114,110,0.22), rgba(104,112,250,0.12))",
+      },
+      {
+        label: "Products",
+        value: String(report.products_count ?? 0),
+        delta: loadingReport ? "Loading" : "Updated",
+        icon: <Inventory2Outlined />,
+        accent: "linear-gradient(135deg, rgba(76,206,172,0.28), rgba(104,112,250,0.12))",
+      },
+      {
+        label: "Shops",
+        value: String(report.shops_count ?? 0),
+        delta: loadingReport ? "Loading" : "Updated",
+        icon: <StorefrontOutlined />,
+        accent: "linear-gradient(135deg, rgba(255,199,64,0.28), rgba(104,112,250,0.12))",
+      },
+    ],
+    [report.orders_amount, report.orders_count, report.products_count, report.shops_count, loadingReport]
+  );
   return (
     <Box
       sx={{
@@ -112,6 +247,22 @@ const SellerDashboard = () => {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel id="seller-shop-select-label">Shop</InputLabel>
+            <Select
+              labelId="seller-shop-select-label"
+              label="Shop"
+              value={selectedShopId}
+              onChange={(event) => setSelectedShopId(String(event.target.value))}
+              disabled={loadingShops || shops.length === 0}
+            >
+              {shops.map((shop) => (
+                <MenuItem key={shop?.id ?? Math.random()} value={String(shop?.id ?? "")}>
+                  {shop?.name || `Shop ${shop?.id}`}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Chip
             icon={<CampaignOutlined />}
             label="Campaign live"
@@ -126,6 +277,7 @@ const SellerDashboard = () => {
           <Button
             variant="contained"
             startIcon={<AddOutlined />}
+            onClick={() => navigate("/seller/add/product")}
             sx={{
               borderRadius: 999,
               textTransform: "none",
@@ -210,15 +362,15 @@ const SellerDashboard = () => {
               <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 900, color: colors.gray[100] }}>
-                    Fulfillment Pulse
+                    Monthly Sales
                   </Typography>
                   <Typography variant="caption" sx={{ color: colors.gray[300] }}>
-                    Orders moving through the pipeline today
+                    Last 12 months performance
                   </Typography>
                 </Box>
                 <Chip
                   icon={<LocalShippingOutlined />}
-                  label="Today"
+                  label="Month-wise"
                   size="small"
                   sx={{
                     borderRadius: 999,
@@ -229,33 +381,54 @@ const SellerDashboard = () => {
                 />
               </Stack>
 
-              <Stack spacing={2.2} sx={{ mt: 3 }}>
-                {pulse.map((step) => (
-                  <Box key={step.label}>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.8 }}>
-                      <Typography variant="subtitle2" sx={{ color: colors.gray[200], fontWeight: 700 }}>
-                        {step.label}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: colors.gray[400] }}>
-                        {step.value}%
-                      </Typography>
-                    </Stack>
-                    <LinearProgress
-                      variant="determinate"
-                      value={step.value}
-                      sx={{
-                        height: 8,
-                        borderRadius: 999,
-                        backgroundColor: colors.primary[300],
-                        "& .MuiLinearProgress-bar": {
-                          backgroundColor: step.color,
-                          borderRadius: 999,
-                        },
-                      }}
-                    />
+              <Box sx={{ mt: 3 }}>
+                {loadingMonthReport ? (
+                  <Typography variant="caption" sx={{ color: colors.gray[400] }}>
+                    Loading report...
+                  </Typography>
+                ) : monthReport.months.length === 0 ? (
+                  <Typography variant="caption" sx={{ color: colors.gray[400] }}>
+                    No report data yet.
+                  </Typography>
+                ) : (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+                      gap: 1.2,
+                      alignItems: "end",
+                      height: 180,
+                    }}
+                  >
+                    {monthReport.months.map((entry, index) => {
+                      const maxAmount = Math.max(
+                        1,
+                        ...monthReport.months.map((m) => Number(m?.amount ?? 0))
+                      );
+                      const amount = Number(entry?.amount ?? 0);
+                      const height = Math.round((amount / maxAmount) * 140) + 20;
+                      return (
+                        <Box key={`${entry?.month ?? "month"}-${index}`} sx={{ textAlign: "center" }}>
+                          <Box
+                            sx={{
+                              height,
+                              borderRadius: 2,
+                              background: `linear-gradient(180deg, ${colors.blueAccent[400]}, ${colors.greenAccent[400]})`,
+                              border: `1px solid ${colors.primary[300]}`,
+                            }}
+                          />
+                          <Typography variant="caption" sx={{ color: colors.gray[400], mt: 0.6, display: "block" }}>
+                            {formatMonthLabel(entry?.month)}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: colors.gray[300] }}>
+                            {formatCurrency(amount)}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
                   </Box>
-                ))}
-              </Stack>
+                )}
+              </Box>
 
               <Divider sx={{ my: 3, borderColor: colors.primary[300] }} />
 
@@ -313,43 +486,53 @@ const SellerDashboard = () => {
               </Typography>
 
               <Stack spacing={1.6} sx={{ mt: 2.4 }}>
-                {recentOrders.map((order) => (
-                  <Box
-                    key={order.id}
-                    sx={{
-                      p: 1.4,
-                      borderRadius: 3,
-                      border: `1px solid ${colors.primary[300]}`,
-                      backgroundColor: colors.primary[400],
-                    }}
-                  >
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ color: colors.gray[100], fontWeight: 800 }}>
-                          {order.id}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: colors.gray[400] }}>
-                          {order.time}
-                        </Typography>
-                      </Box>
-                      <Stack alignItems="flex-end">
-                        <Typography variant="subtitle2" sx={{ color: colors.gray[100], fontWeight: 800 }}>
-                          {order.amount}
-                        </Typography>
-                        <Chip
-                          label={order.status}
-                          size="small"
-                          sx={{
-                            borderRadius: 999,
-                            fontWeight: 700,
-                            backgroundColor: colors.primary[300],
-                            color: colors.gray[100],
-                          }}
-                        />
+                {loadingRecentOrders ? (
+                  <Typography variant="caption" sx={{ color: colors.gray[400] }}>
+                    Loading recent orders...
+                  </Typography>
+                ) : recentOrders.length === 0 ? (
+                  <Typography variant="caption" sx={{ color: colors.gray[400] }}>
+                    No recent orders yet.
+                  </Typography>
+                ) : (
+                  recentOrders.map((order) => (
+                    <Box
+                      key={order?.id ?? Math.random()}
+                      sx={{
+                        p: 1.4,
+                        borderRadius: 3,
+                        border: `1px solid ${colors.primary[300]}`,
+                        backgroundColor: colors.primary[400],
+                      }}
+                    >
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ color: colors.gray[100], fontWeight: 800 }}>
+                            {order?.order?.order_number || `#${order?.id ?? ""}`}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: colors.gray[400] }}>
+                            {order?.created_at ? formatDate(order.created_at) : "-"}
+                          </Typography>
+                        </Box>
+                        <Stack alignItems="flex-end">
+                          <Typography variant="subtitle2" sx={{ color: colors.gray[100], fontWeight: 800 }}>
+                            {formatCurrency(order?.line_total)}
+                          </Typography>
+                          <Chip
+                            label={order?.status || "pending"}
+                            size="small"
+                            sx={{
+                              borderRadius: 999,
+                              fontWeight: 700,
+                              backgroundColor: colors.primary[300],
+                              color: colors.gray[100],
+                            }}
+                          />
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  </Box>
-                ))}
+                    </Box>
+                  ))
+                )}
               </Stack>
             </CardContent>
           </Card>

@@ -18,15 +18,14 @@ export const addAttribute = async (data) => {
   
   }
 
-export const getBrand = async () => {
+export const getBrand = async (params = {}) => {
   try {
-    const response = await axiosInstance.get(`/api/brands/list`,
-        {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
-            },
-        }
-    );
+    const response = await axiosInstance.get(`/api/brands/list`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching getBrand:", error);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Drawer,
@@ -8,6 +8,7 @@ import {
   ListItemText,
   Typography,
   Divider,
+  Button,
   Stack,
   Chip,
   useTheme,
@@ -23,8 +24,9 @@ import {
   SettingsOutlined,
   SupportAgentOutlined,
 } from "@mui/icons-material";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { tokens } from "../../../theme";
+import { getUserDetail } from "../../../api/controller/admin_controller/user_controller";
 
 const drawerWidth = 264;
 
@@ -33,7 +35,7 @@ const navGroups = [
     title: "Overview",
     items: [
       { label: "Dashboard", icon: <DashboardOutlined />, path: "/seller/dashboard" },
-      { label: "Analytics", icon: <InsightsOutlined />, path: "/seller/analytics" },
+      { label: "Analytics", icon: <InsightsOutlined />, path: "/seller/dashboard" },
     ],
   },
   {
@@ -48,9 +50,9 @@ const navGroups = [
   {
     title: "Store",
     items: [
-      { label: "Shop Profile", icon: <StorefrontOutlined />, path: "/seller/shop" },
-      { label: "Settings", icon: <SettingsOutlined />, path: "/seller/settings" },
-      { label: "Support", icon: <SupportAgentOutlined />, path: "/seller/support" },
+      // { label: "Shop Profile", icon: <StorefrontOutlined />, path: "/seller/shop" },
+      // { label: "Settings", icon: <SettingsOutlined />, path: "/seller/settings" },
+      // { label: "Support", icon: <SupportAgentOutlined />, path: "/seller/support" },
     ],
   },
 ];
@@ -60,6 +62,42 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
   const colors = tokens(theme.palette.mode);
   const location = useLocation();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState("Seller");
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const storedId = localStorage.getItem("userId");
+        if (!storedId) {
+          setUserName("Seller");
+          return;
+        }
+
+        const res = await getUserDetail(storedId);
+        const user = res?.data?.data ?? res?.data ?? null;
+        const name = user?.name || user?.full_name || user?.user_name;
+        setUserName(name || "Seller");
+      } catch (e) {
+        console.error("Failed to load seller name", e);
+        setUserName("Seller");
+      }
+    };
+
+    loadUser();
+    const onAuth = () => loadUser();
+    window.addEventListener("auth-changed", onAuth);
+
+    return () => window.removeEventListener("auth-changed", onAuth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userId");
+    setUserName("Seller");
+    window.dispatchEvent(new Event("auth-changed"));
+    navigate("/");
+  };
 
   const renderItem = (item) => {
     const active = location.pathname === item.path;
@@ -118,11 +156,25 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
           Seller Console
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: 900, letterSpacing: -0.4 }}>
-          Prime Store
+          {userName}
         </Typography>
-        <Typography variant="caption" sx={{ color: colors.gray[300] }}>
-          Manage inventory, orders, and payouts
-        </Typography>
+        <Button
+          size="small"
+          onClick={handleLogout}
+          sx={{
+            mt: 1,
+            textTransform: "none",
+            fontWeight: 800,
+            color: colors.gray[100],
+            border: `1px solid ${colors.redAccent[300]}`,
+            borderRadius: 999,
+            px: 2,
+            "&:hover": { backgroundColor: colors.primary[300] },
+          }}
+        >
+          Logout
+        </Button>
+      
       </Box>
 
       <Divider sx={{ borderColor: colors.primary[300] }} />

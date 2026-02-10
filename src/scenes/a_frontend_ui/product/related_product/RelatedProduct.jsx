@@ -16,15 +16,13 @@ import { tokens } from "../../../../theme";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
-const buildImageUrl = (fileOrUrl) => {
-	if (!fileOrUrl) return null;
-	const raw = String(fileOrUrl);
-	const cleaned = raw.replaceAll("\\/", "/");
-	if (/^https?:\/\//i.test(cleaned)) return cleaned;
-	const base = String(image_file_url || "").replace(/\/+$/, "");
-	const path = cleaned.replace(/^\/+/, "");
-	return `${base}/${path}`;
-};
+  const getPrimaryImage = (product) => {
+	const imgPath =
+	  product?.primary_image?.file_name ;
+
+	if (imgPath) return `${image_file_url}/${imgPath}`;
+	return "https://placehold.co/600x400";
+  };
 
 const RelatedProduct = ({ productId }) => {
 	const theme = useTheme();
@@ -93,7 +91,7 @@ const RelatedProduct = ({ productId }) => {
 				) : (
 					<Stack spacing={1}>
 						{items.map((p) => {
-							const img = buildImageUrl(p?.primary_image?.file_name || p?.thumbnail_img || p?.photos || p?.image);
+							
 							return (
 								<Box
 									key={p?.id}
@@ -112,19 +110,20 @@ const RelatedProduct = ({ productId }) => {
 								>
 									<Box
 										component="img"
-										src={img || "https://via.placeholder.com/80x80?text=No+Image"}
+										src={getPrimaryImage(p)}
 										alt={p?.name || "product"}
 										sx={{ width: 56, height: 56, borderRadius: 2, objectFit: "cover" }}
 										onError={(e) => {
 											e.currentTarget.onerror = null;
-											e.currentTarget.src = "https://via.placeholder.com/80x80?text=No+Image";
+											e.currentTarget.src = "https://placehold.co/600x400";
 										}}
 									/>
 									<Box sx={{ minWidth: 0 }}>
 										<Typography
 											sx={{
-												fontWeight: 900,
+												fontWeight: 700,
 												color: ink,
+												fontSize: 12,
 												display: "-webkit-box",
 												WebkitLineClamp: 1,
 												WebkitBoxOrient: "vertical",

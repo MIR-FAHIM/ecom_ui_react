@@ -38,6 +38,8 @@ import HomeP1 from "./scenes/a_frontend_ui/home/Home";
 import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
 import CategoryWiseProduct from "./scenes/a_frontend_ui/product/category_wise/CategoryWiseProduct";
 import Cart from "./scenes/a_frontend_ui/order/cart";
+import Brand from "./scenes/a_frontend_ui/brand/brand";
+import AllCategory from "./scenes/a_frontend_ui/category/AllCategory";
 
 import FrontendLayout from "./scenes/a_frontend_ui/layout/FrontendLayout";
 import Privacy from "./scenes/a_frontend_ui/pages/Privacy";
@@ -62,7 +64,9 @@ import SellerDashboard from "./scenes/seller_panel/dashboard/index";
 import SellerPanelProducts from "./scenes/seller_panel/product/SellerPanelProducts";
 import SellerShopList from "./scenes/seller_panel/shop/SellerShopList";
 import SellerShopProduct from "./scenes/seller_panel/shop/SellerShopProduct";
-import AddProduct from "./scenes/seller_panel/product/AddProduct";
+import AddProductSeller from "./scenes/seller_panel/product/AddProduct";
+import EditProductSeller from "./scenes/seller_panel/product/EditProduct";
+import OrderShop from "./scenes/seller_panel/order/OrderShop";
 
 
 
@@ -96,6 +100,8 @@ const AppRouter = () => {
           <Route path="related-product" element={<RelatedProduct />} />
           <Route path="product-review" element={<ProductReview />} />
           <Route path="seller/add" element={<AddShop />} />
+          <Route path="brands" element={<Brand />} />
+          <Route path="categories" element={<AllCategory />} />
         </Route>
 
          
@@ -156,7 +162,10 @@ const AppRouter = () => {
           <Route path="products" element={<SellerPanelProducts />} />
           <Route path="shops" element={<SellerShopList />} />
           <Route path="shops/products" element={<SellerShopProduct />} />
-          <Route path="add/product" element={<AddProduct />} />
+          <Route path="add/product" element={<AddProductTab />} />
+          <Route path="edit/product/:id" element={<EditProduct />} />
+          <Route path="orders" element={<OrderShop />} />
+          
         </Route>
       </Routes>
     </Router>

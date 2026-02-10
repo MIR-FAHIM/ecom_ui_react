@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
 	Box,
+	Button,
 	Card,
 	CardContent,
 	CircularProgress,
@@ -16,24 +17,21 @@ import {
 	Chip,
 	Stack,
 	Paper,
-	Button,
 } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { tokens } from "../../../theme";
-import { getShopProduct } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
+import { getShopOrder } from "../../../api/controller/admin_controller/order/order_controller";
+
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
-const SellerShopProduct = () => {
+const OrderShop = () => {
 	const theme = useTheme();
 	const colors = tokens(theme.palette.mode);
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 
-	const shopId = useMemo(
-		() => searchParams.get("shop_id") || searchParams.get("id") || "",
-		[searchParams]
-	);
+	const userId = localStorage.getItem("userId");
 
 	const [rows, setRows] = useState([]);
 	const [total, setTotal] = useState(0);
@@ -42,9 +40,11 @@ const SellerShopProduct = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
-	const fetchProducts = async (pageZero = page, perPage = rowsPerPage) => {
-		if (!shopId) {
-			setError("Shop id not found.");
+	const fetchOrders = async (pageZero = page, perPage = rowsPerPage) => {
+		if (!userId) {
+			setError("User id not found.");
+			setRows([]);
+			setTotal(0);
 			return;
 		}
 
@@ -52,10 +52,7 @@ const SellerShopProduct = () => {
 		setError("");
 		try {
 			const apiPage = pageZero + 1;
-			const response = await getShopProduct(shopId, {
-				page: apiPage,
-				per_page: perPage,
-			});
+			const response = await getShopOrder(userId, { page: apiPage, per_page: perPage });
 
 			if (response?.status === "success") {
 				const paginator = response?.data ?? {};
@@ -67,49 +64,79 @@ const SellerShopProduct = () => {
 			} else {
 				setRows([]);
 				setTotal(0);
-				setError(response?.message || "Failed to load products.");
+				setError(response?.message || "Failed to load orders.");
 			}
 		} catch (err) {
 			setRows([]);
 			setTotal(0);
-			setError(err?.message || "Failed to load products.");
+			setError(err?.message || "Failed to load orders.");
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	useEffect(() => {
-		fetchProducts(0, rowsPerPage);
+		fetchOrders(0, rowsPerPage);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [shopId]);
+	}, [userId]);
 
 	const handleChangePage = (_, newPage) => {
 		setPage(newPage);
-		fetchProducts(newPage, rowsPerPage);
+		fetchOrders(newPage, rowsPerPage);
 	};
 
 	const handleChangeRowsPerPage = (event) => {
 		const next = parseInt(event.target.value, 10);
 		setRowsPerPage(next);
 		setPage(0);
-		fetchProducts(0, next);
+		fetchOrders(0, next);
 	};
 
-	const renderStatus = (row) => {
-		const published = row?.published ?? row?.status;
-		if (published === 1 || published === true || String(published).toLowerCase() === "published") {
-			return <Chip label="Published" size="small" color="success" variant="outlined" />;
-		}
-		if (published === 0 || published === false || String(published).toLowerCase() === "draft") {
-			return <Chip label="Draft" size="small" color="warning" variant="outlined" />;
-		}
-		return <Chip label="N/A" size="small" variant="outlined" />;
+	const getStatusColor = (status) => {
+		const value = String(status || "").toLowerCase();
+		if (value === "pending") return "warning";
+		if (value === "completed" || value === "delivered") return "success";
+		if (value === "cancelled") return "error";
+		if (value === "on the way") return "info";
+		return "default";
 	};
 
-	const renderPrice = (row) => {
-		const value = row?.unit_price ?? row?.price ?? row?.sale_price;
-		if (value === undefined || value === null || value === "") return "-";
-		return Number(value).toLocaleString();
+	const getPaymentStatusColor = (status) => {
+		const value = String(status || "").toLowerCase();
+		if (value === "paid") return "success";
+		if (value === "unpaid") return "error";
+		if (value === "pending") return "warning";
+		if (value === "refunded") return "info";
+		return "default";
+	};
+
+	const formatCurrency = (amount) =>
+		new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(amount || 0);
+
+	const formatDate = (dateString) =>
+		new Date(dateString).toLocaleDateString("en-BD", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		});
+
+	const renderProducts = (order) => {
+		const items = safeArray(order?.items);
+		if (!items.length) return "-";
+		const first = items[0]?.product_name || "Product";
+		const extra = items.length - 1;
+		return (
+			<Box>
+				<Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+					{first}
+				</Typography>
+				{extra > 0 ? (
+					<Typography variant="caption" sx={{ color: colors.gray[300] }}>
+						+{extra} more
+					</Typography>
+				) : null}
+			</Box>
+		);
 	};
 
 	return (
@@ -117,10 +144,10 @@ const SellerShopProduct = () => {
 			<Stack spacing={1} sx={{ mb: 2 }} direction={{ xs: "column", md: "row" }} alignItems={{ md: "center" }}>
 				<Box sx={{ flex: 1 }}>
 					<Typography variant="h4" sx={{ fontWeight: 900 }}>
-						Shop Products
+						Shop Orders
 					</Typography>
 					<Typography variant="body2" sx={{ color: colors.gray[300] }}>
-						{total ? `${total} items in this shop` : "Review your shop catalog"}
+						{total ? `${total} orders in this shop` : "Review your shop orders"}
 					</Typography>
 				</Box>
 				<Button
@@ -147,7 +174,17 @@ const SellerShopProduct = () => {
 							<Table stickyHeader>
 								<TableHead>
 									<TableRow>
-										{["ID", "Product", "SKU", "Price", "Stock", "Status", "Updated", "Actions"].map((header) => (
+										{[
+											"Order #",
+											"Products",
+											"Quantity",
+											"Customer",
+								
+											"Status",
+											"Payment",
+											"Total",
+											"Date",
+										].map((header) => (
 											<TableCell
 												key={header}
 												sx={{
@@ -164,30 +201,28 @@ const SellerShopProduct = () => {
 								<TableBody>
 									{rows.map((row) => (
 										<TableRow key={row?.id ?? Math.random()} hover>
-											<TableCell>{row?.id ?? "-"}</TableCell>
 											<TableCell>
 												<Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-													{row?.name || row?.title || "Product"}
-												</Typography>
-												<Typography variant="caption" sx={{ color: colors.gray[300] }}>
-													{row?.category?.name || row?.category_name || ""}
+													{row?.order?.order_number || row?.id || "-"}
 												</Typography>
 											</TableCell>
-											<TableCell>{row?.sku || row?.slug || "-"}</TableCell>
-											<TableCell>{renderPrice(row)}</TableCell>
-											<TableCell>{row?.current_stock ?? row?.stock ?? "-"}</TableCell>
-											<TableCell>{renderStatus(row)}</TableCell>
-											<TableCell>{row?.updated_at ? String(row.updated_at).slice(0, 10) : "-"}</TableCell>
+											<TableCell>{row?.product_name || "-"}</TableCell>
+											<TableCell>{row?.qty || "-"}</TableCell>
+											<TableCell>{row?.order?.customer_name || "-"}</TableCell>
+										
 											<TableCell>
-												<Button
-													variant="contained"
-													size="small"
-													onClick={() => row?.id && navigate(`/seller/edit/product/${row.id}`)}
-													sx={{ borderRadius: 999, textTransform: "none", fontWeight: 700 }}
-												>
-													Edit
-												</Button>
+												<Chip label={row?.status || "N/A"} size="small" color={getStatusColor(row?.status)} />
 											</TableCell>
+											<TableCell>
+												<Chip
+													label={row?.order?.payment_status || "N/A"}
+													size="small"
+													variant="outlined"
+													color={getPaymentStatusColor(row?.order?.payment_status)}
+												/>
+											</TableCell>
+											<TableCell>{formatCurrency(row?.line_total)}</TableCell>
+											<TableCell>{row?.created_at ? formatDate(row.created_at) : "-"}</TableCell>
 										</TableRow>
 									))}
 								</TableBody>
@@ -217,4 +252,4 @@ const SellerShopProduct = () => {
 	);
 };
 
-export default SellerShopProduct;
+export default OrderShop;

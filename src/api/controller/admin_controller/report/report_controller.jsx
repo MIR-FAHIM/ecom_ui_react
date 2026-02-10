@@ -49,6 +49,49 @@ export const dashboardReport = async () => {
     return [];
   }
 }
+export const getShopReport = async (userId) => {
+  
+  try {
+    const response = await axiosInstance.get(`/api/reports/shop/${userId}`,
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching shop report:", error);
+    return [];
+  }
+}
+
+export const getShopMonthReport = async (shopId) => {
+  
+  try {
+    const response = await axiosInstance.get(`/api/reports/shop/sales/${shopId}`,
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching shop month report:", error);
+    return [];
+  }
+}
+
+
+
+
+
+
+
+
+
+
 export const addNotices = async (data) => {
   const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
 

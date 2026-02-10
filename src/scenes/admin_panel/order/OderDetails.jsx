@@ -653,6 +653,9 @@ const OderDetails = () => {
                           <Typography variant="body2" fontWeight={600}>
                             {item.product_name}
                           </Typography>
+                          <Typography variant="caption" sx={{ color: colors.blueAccent[700] }}>
+                            {item?.shop?.name || item?.product?.shop?.name || ""}
+                          </Typography>
                         </TableCell>
                         <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
                           <Typography variant="body2">{item.sku}</Typography>
