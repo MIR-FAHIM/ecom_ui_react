@@ -1,9 +1,9 @@
 import React from "react";
 import { Typography } from "@mui/material";
 
-export default function FeaturedTitle({ children }) {
+export default function FeaturedTitle({ children, variant = "h5", mb = 2 }) {
   return (
-    <Typography variant="h5" fontWeight={700} mb={2}>
+    <Typography variant={variant} fontWeight={800} mb={mb}>
       {children}
     </Typography>
   );

@@ -112,6 +112,11 @@ const SellerShopProduct = () => {
 		return Number(value).toLocaleString();
 	};
 
+	const handleAddProduct = () => {
+		const target = shopId ? `/seller/add/product?shop_id=${shopId}` : "/seller/add/product";
+		navigate(target);
+	};
+
 	return (
 		<Box sx={{ p: { xs: 2, md: 3 } }}>
 			<Stack spacing={1} sx={{ mb: 2 }} direction={{ xs: "column", md: "row" }} alignItems={{ md: "center" }}>
@@ -123,13 +128,22 @@ const SellerShopProduct = () => {
 						{total ? `${total} items in this shop` : "Review your shop catalog"}
 					</Typography>
 				</Box>
-				<Button
-					variant="outlined"
-					onClick={() => navigate(-1)}
-					sx={{ borderRadius: 999, textTransform: "none", fontWeight: 700 }}
-				>
-					Back
-				</Button>
+				<Box sx={{ display: "flex", gap: 1, alignItems: "center", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+					<Button
+						variant="contained"
+						onClick={handleAddProduct}
+						sx={{ borderRadius: 999, textTransform: "none", fontWeight: 700 }}
+					>
+						Add Product
+					</Button>
+					<Button
+						variant="outlined"
+						onClick={() => navigate(-1)}
+						sx={{ borderRadius: 999, textTransform: "none", fontWeight: 700 }}
+					>
+						Back
+					</Button>
+				</Box>
 			</Stack>
 
 			<Card sx={{ background: colors.primary[400], borderRadius: 2, border: `1px solid ${colors.primary[500]}` }}>

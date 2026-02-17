@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Container,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -9,18 +10,28 @@ import { useNavigate } from "react-router-dom";
 import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller";
 import Hero from "./components/Hero";
 import CategoryGrid from "./components/CategoryGrid";
+import FeaturedCategory from "./components/FeaturedCategory";
 import FeaturedProduct from "./components/FeaturedProduct";
+import CategoryWiseProductHome from "./components/category_wise_product_home";
 import TodayDealProduct from "./components/TodayDealProduct";
 import AllProduct from "./components/AllProduct";
 import HomeShopList from "./components/HomeShopList";
+import TodayDealBox from "./components/TodayDealBox";
+import BannerRow from "./components/BannerRow";
+
+import BestSellingProduct from "./components/BestSellingProduct";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
 const HomeP1 = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
   const pageBg = theme.palette.background?.default || "#fff";
+
+  const categoryBlockColor =
+    theme.palette.mode === "dark" ? "#2f3b2c" : "#cfe1b8";
 
   const [categories, setCategories] = useState([]);
 
@@ -56,25 +67,87 @@ const HomeP1 = () => {
                radial-gradient(1200px 700px at 50% 95%, rgba(254,194,136,0.14), transparent 55%)`,
       }}
     >
-      <Container sx={{ py: 3 }}>
-        <Hero />
+      <Container sx={{ py: { xs: 2, md: 3 } }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2.5, md: 3 } }}>
+          {isMobile ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              <Hero />
+              <CategoryGrid categories={categories} />
+              <TodayDealProduct
+                compact
+                title="Today Deals"
+                onView={(product) => navigate(`/product/${product.id}`)}
+              />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "grid",
+                gap: 2.5,
+                gridTemplateColumns: {
+                  md: "1.1fr 0.9fr",
+                  lg: "1.35fr 0.65fr",
+                },
+                alignItems: "stretch",
+              }}
+            >
+              <Box sx={{ height: { md: 520 } }}>
+                <Hero />
+              </Box>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, height: { md: 520 } }}>
+                <Box sx={{ height: { md: 320 } }}>
+                  <CategoryGrid categories={categories} />
+                </Box>
+                <Box sx={{ height: { md: 180 } }}>
+                  <TodayDealProduct
+                    compact
+                    title="Today Deals"
+                    onView={(product) => navigate(`/product/${product.id}`)}
+                  />
+                </Box>
+              </Box>
+            </Box>
+          )}
+          <FeaturedCategory categories={categories} />
+           
+       
 
-      
+        
 
-      
-        <CategoryGrid categories={categories} />
-
-        <HomeShopList />
-
-        <FeaturedProduct
-          onView={(product) => navigate(`/product/${product.id}`)}
-        />
-
-        <TodayDealProduct
-          onView={(product) => navigate(`/product/${product.id}`)}
-        />
-
-        <AllProduct />
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2.5,
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "2.8fr 0.8fr",
+              },
+              alignItems: "stretch",
+            }}
+          >
+            <FeaturedProduct
+              onView={(product) => navigate(`/product/${product.id}`)}
+            />
+            <TodayDealBox onView={(product) => navigate(`/product/${product.id}`)} />
+          </Box>
+          <BannerRow />
+          <BestSellingProduct onView={(product) => navigate(`/product/${product.id}`)} />
+          <CategoryWiseProductHome
+            onView={(product) => navigate(`/product/${product.id}`)}
+            category_id={4}
+            color={"#ecddec"}
+          
+          />
+          <CategoryWiseProductHome
+            onView={(product) => navigate(`/product/${product.id}`)}
+            category_id={5}
+            color={"#f5d9e4"}
+          
+          />
+          <HomeShopList />
+          <AllProduct />
+        
+        </Box>
       </Container>
     </Box>
   );

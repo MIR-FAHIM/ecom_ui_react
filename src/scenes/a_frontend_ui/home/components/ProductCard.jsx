@@ -23,9 +23,9 @@ import {
 } from "@mui/icons-material";
 
 import { image_file_url } from "../../../../api/config/index.jsx";
-import { tokens } from "../../../../theme";
-import { addCart, getCartByUser } from "../../../../api/controller/admin_controller/order/cart_controller";
-import { getUserWish, addWish, deleteWish } from "../../../../api/controller/admin_controller/wishlist/wish_controller";
+import { tokens } from "../../../../theme.js";
+import { addCart, getCartByUser } from "../../../../api/controller/admin_controller/order/cart_controller.jsx";
+import { getUserWish, addWish, deleteWish } from "../../../../api/controller/admin_controller/wishlist/wish_controller.jsx";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 

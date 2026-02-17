@@ -174,6 +174,7 @@ const SideBar = () => {
             <Item title="All Orders" path="/ecom/order/all" colors={colors} icon={<ShoppingCartOutlined sx={iconStyle} />} />
             <Item title="Completed Orders" path="/ecom/order/completed" colors={colors} icon={<ShoppingCartOutlined sx={iconStyle} />} />
             <Item title="Order Report" path="/ecom/order/report" colors={colors} icon={<ReceiptOutlined sx={iconStyle} />} />
+            <Item title="POS Management" path="/admin/pos" colors={colors} icon={<ShoppingCartOutlined sx={iconStyle} />} />
           </Menu>
         </Collapse>
 
@@ -400,7 +401,8 @@ const SideBar = () => {
           </Menu>
         </Collapse>
         {/* Accounts */}
-        <Typography
+
+                <Typography
           variant="h6"
           color={colors.gray[300]}
           sx={{
@@ -413,11 +415,29 @@ const SideBar = () => {
               color: colors.blueAccent[700],
             },
           }}
-          onClick={() => navigate("/ecom/accounts/transactions")}
+          onClick={() => toggleCategory("accounts")}
         >
-          <AccountBalanceOutlined sx={iconStyle} />
+          <SettingsOutlined sx={iconStyle} />
           {!collapsed ? "Accounts" : ""}
         </Typography>
+        <Collapse in={expandedCategory === "accounts"}>
+          <Menu
+            menuItemStyles={{
+              button: {
+                ":hover": {
+                  color: "#868dfb",
+                  background: "transparent",
+                  transition: ".4s ease",
+                },
+              },
+            }}
+          >
+            <Item title="Ledgers" path="/ecom/accounts/transactions" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+            <Item title="Settlements" path="/ecom/accounts/settlements" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
+        
+          </Menu>
+        </Collapse>
+      
 
       </Box>
     </Sidebar>

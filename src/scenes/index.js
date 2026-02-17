@@ -29,9 +29,11 @@ import AllMedia from "./admin_panel/media/AllMedia";
 import EditProduct from "./admin_panel/product/edit_product/EditProduct";
 import DeliveryManDetail from "./admin_panel/delivery/DeliveryManDetail";
 import AllTransaction from "./admin_panel/accounts/AllTransaction";
+import Settlement from "./admin_panel/accounts/Settlement";
 import ShopManage from "./admin_panel/seller/EditSellerTab";
 import WebsiteLogoSetting from "./admin_panel/setting/website_logo_setting";
 import ShippingCostSetting from "./admin_panel/setting/shipping_cost";
+import PosManagement from "./admin_panel/pos_management/PosManagement";
 
 
 
@@ -53,17 +55,21 @@ import AddShop from "./a_frontend_ui/seller/AddShop";
 import ShopProducts from "./a_frontend_ui/seller/ShopProducts";
 import Brand from "./a_frontend_ui/brand/brand";
 import AllCategory from "./a_frontend_ui/category/AllCategory";
+import CategoryWiseProductHome from "./a_frontend_ui/home/components/category_wise_product_home";
 
 import Wish from "./a_frontend_ui/wish/Wish";
+import Privacy from "./a_frontend_ui/pages/Privacy";
 
 //seller panel
 import SellerDashboard from "./seller_panel/dashboard/index";
-import SellerPanelProducts from "./seller_panel/product/SellerPanelProducts";
+import SellerPanelProducts from "./seller_panel/product/SellerProducts";
 import SellerShopList from "./seller_panel/shop/SellerShopList";
 import SellerShopProduct from "./seller_panel/shop/SellerShopProduct";
-import AddProductSeller from "./seller_panel/product/AddProduct";
-import EditProductSeller from "./seller_panel/product/EditProduct";
+import AddProductTabSeller from "./seller_panel/product/add_product/AddProductTab";
+import EditProductSeller from "./seller_panel/product/edit_product/EditProduct";
 import OrderShop from "./seller_panel/order/OrderShop";
+import SellerBankAccount from "./seller_panel/accounting/bank_account";
+
 
 export {
   Navbar,
@@ -95,13 +101,16 @@ export {
   EditProduct,
   DeliveryManDetail,
   AllTransaction,
+  Settlement,
   ShopManage,
   WebsiteLogoSetting,
   ShippingCostSetting,
+  PosManagement,
+Privacy,
 
-  
   // user frontend
   HomeP1,
+
   Profile,
   UserOrderDetails,
   UserOrder,
@@ -115,7 +124,7 @@ export {
   AddShop,
   ShopProducts,
   Brand,
-  AllCategory,
+  CategoryWiseProductHome,
 
 
   // seller panel
@@ -124,7 +133,8 @@ export {
   SellerPanelProducts,
   SellerShopList,
   SellerShopProduct,
-  AddProductSeller,
+  AddProductTabSeller,
   EditProductSeller,
   OrderShop,
+  SellerBankAccount,
 };

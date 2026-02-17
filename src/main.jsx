@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import AppRouter from './Router';
+import './i18n';
 import './index.css';
 import { appname } from '../src/api/config'; // adjust path as needed
 import { ProfileProvider } from './scenes/provider/profile_context';

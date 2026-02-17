@@ -42,9 +42,17 @@ const navGroups = [
     title: "Commerce",
     items: [
       { label: "Shops", icon: <Inventory2Outlined />, path: "/seller/shops" },
-      { label: "Products", icon: <Inventory2Outlined />, path: "/seller/products" },
+      // { label: "Products", icon: <Inventory2Outlined />, path: "/seller/products" },
       { label: "Orders", icon: <ShoppingCartOutlined />, path: "/seller/orders" },
-      { label: "Accounting", icon: <AccountBalanceWalletOutlined />, path: "/seller/accounting" },
+    
+    ],
+  },
+  {
+    title: "Accounting",
+    items: [
+     
+      { label: "Account", icon: <AccountBalanceWalletOutlined />, path: "/seller/accounting" },
+      { label: "Transaction", icon: <AccountBalanceWalletOutlined />, path: "/seller/transaction" },
     ],
   },
   {

@@ -21,7 +21,8 @@ import {
   TextField,
   MenuItem,
 } from "@mui/material";
-import { ArrowBack, Print } from "@mui/icons-material";
+import { ArrowBack, Print, PictureAsPdf } from "@mui/icons-material";
+import jsPDF from "jspdf";
 import { tokens } from "../../../theme";
 import { getOrderDetails, updateOrderStatusPatch, assignDeliveryBoy , unassignDeliveryBoy} from "../../../api/controller/admin_controller/order/order_controller";
 import {getDeliveryMen } from "../../../api/controller/admin_controller/user_controller";
@@ -166,6 +167,88 @@ const OderDetails = () => {
     });
   };
 
+  const generateReceiptPdf = () => {
+    if (!order) return;
+
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 40;
+    let y = 50;
+
+    doc.setFontSize(18);
+    doc.text("Order Receipt", margin, y);
+    y += 18;
+
+    doc.setFontSize(10);
+    doc.text(`Order: ${order.order_number || order.id}`, margin, y);
+    doc.text(`Date: ${formatDate(order.created_at)}`, pageWidth - margin - 160, y);
+    y += 18;
+
+    doc.setFontSize(11);
+    doc.text(`Customer: ${order.customer_name || "N/A"}`, margin, y);
+    y += 14;
+    doc.text(`Phone: ${order.customer_phone || "N/A"}`, margin, y);
+    y += 14;
+    doc.text(`Address: ${order.shipping_address || "N/A"}`, margin, y);
+    y += 20;
+
+    const columns = [
+      { label: "Item", width: 260 },
+      { label: "Qty", width: 40 },
+      { label: "Unit", width: 90 },
+      { label: "Total", width: 90 },
+    ];
+
+    const tableX = margin;
+    const rowHeight = 18;
+
+    doc.setFontSize(11);
+    let x = tableX;
+    columns.forEach((col) => {
+      doc.text(col.label, x, y);
+      x += col.width;
+    });
+    y += 8;
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 14;
+
+    const items = Array.isArray(order.items) ? order.items : [];
+    items.forEach((item) => {
+      const name = item.product_name || "Item";
+      const nameLines = doc.splitTextToSize(name, columns[0].width - 6);    
+      const lineCount = Math.max(1, nameLines.length);
+      const lineY = y + 2;
+
+      doc.text(nameLines, tableX, lineY);
+      doc.text(String(item.qty || 0), tableX + columns[0].width, lineY);
+      doc.text(formatCurrency(item.unit_price), tableX + columns[0].width + columns[1].width, lineY);
+      doc.text(formatCurrency(item.line_total), tableX + columns[0].width + columns[1].width + columns[2].width, lineY);
+
+      y += rowHeight * lineCount;
+      if (y > doc.internal.pageSize.getHeight() - 140) {
+        doc.addPage();
+        y = 50;
+      }
+    });
+
+    y += 10;
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 16;
+
+    doc.setFontSize(11);
+    doc.text(`Subtotal: ${formatCurrency(order.subtotal)}`, pageWidth - margin - 200, y);
+    y += 14;
+    doc.text(`Shipping: ${formatCurrency(order.shipping_fee)}`, pageWidth - margin - 200, y);
+    y += 14;
+    doc.text(`Discount: -${formatCurrency(order.discount)}`, pageWidth - margin - 200, y);
+    y += 18;
+    doc.setFontSize(12);
+    doc.text(`Total: ${formatCurrency(order.total)}`, pageWidth - margin - 200, y);
+
+    const fileName = `order-${order.order_number || order.id}.pdf`;
+    doc.save(fileName);
+  };
+
   const getDeliveryStatusColor = (status) => {
     const statusMap = {
       assigned: "info",
@@ -257,7 +340,7 @@ const OderDetails = () => {
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
         <Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Button variant="outlined" size="small" startIcon={<ArrowBack />} onClick={() => navigate(-1)}>
@@ -273,7 +356,10 @@ const OderDetails = () => {
             </Box>
           </Box>
         </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Button variant="contained" startIcon={<PictureAsPdf />} onClick={generateReceiptPdf}>
+            Receipt PDF
+          </Button>
           <Button variant="outlined" startIcon={<Print />} onClick={() => window.print()}>
             Print
           </Button>
@@ -285,6 +371,39 @@ const OderDetails = () => {
           {errMsg}
         </Alert>
       )}
+
+      {/* Quick Summary */}
+      <Card sx={{ background: colors.primary[400], mb: 2 }}>
+        <CardContent>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                ORDER NUMBER
+              </Typography>
+              <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5 }}>
+                {order.order_number || order.id}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                STATUS
+              </Typography>
+              <Box sx={{ mt: 0.5, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                <Chip label={order.status} color={getOrderStatusColor(order.status)} />
+                <Chip label={order.payment_status} color={getPaymentStatusColor(order.payment_status)} variant="outlined" />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                TOTAL
+              </Typography>
+              <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5, color: colors.blueAccent[500] }}>
+                {formatCurrency(order.total)}
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Status Change Row */}
       <Card sx={{ background: colors.primary[400], mb: 2 }}>

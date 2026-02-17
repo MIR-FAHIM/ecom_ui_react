@@ -11,6 +11,7 @@ import StockOutProduct from "./scenes/admin_panel/product/StockOutProduct";
 import SellerProducts from "./scenes/admin_panel/product/SellerProducts";
 import AllOrdersEcom from "./scenes/admin_panel/order/AllOrders";
 import AllTransaction from "./scenes/admin_panel/accounts/AllTransaction";
+import Settlement from "./scenes/admin_panel/accounts/Settlement";
 import OderDetails from "./scenes/admin_panel/order/OderDetails";
 import CompletedOrders from "./scenes/admin_panel/order/CompletedOrders";
 import OrderReport from "./scenes/admin_panel/order/OrderReport";
@@ -41,7 +42,9 @@ import Cart from "./scenes/a_frontend_ui/order/cart";
 import Brand from "./scenes/a_frontend_ui/brand/brand";
 import AllCategory from "./scenes/a_frontend_ui/category/AllCategory";
 
+
 import FrontendLayout from "./scenes/a_frontend_ui/layout/FrontendLayout";
+import CategoryWiseProductHome from "./scenes/a_frontend_ui/home/components/category_wise_product_home";
 import Privacy from "./scenes/a_frontend_ui/pages/Privacy";
 import Terms from "./scenes/a_frontend_ui/pages/Terms";
 import About from "./scenes/a_frontend_ui/pages/About";
@@ -57,16 +60,18 @@ import AddShop from "./scenes/a_frontend_ui/seller/AddShop";
 import ShopProducts from "./scenes/a_frontend_ui/seller/ShopProducts";
 import EditSellerTab from "./scenes/admin_panel/seller/EditSellerTab";
 import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
+import PosManagement from "./scenes/admin_panel/pos_management/PosManagement";
 
 // Seller panel
 import SellerLayout from "./scenes/seller_panel/layout/SellerLayout";
 import SellerDashboard from "./scenes/seller_panel/dashboard/index";
-import SellerPanelProducts from "./scenes/seller_panel/product/SellerPanelProducts";
+import SellerPanelProducts from "./scenes/seller_panel/product/SellerProducts";
 import SellerShopList from "./scenes/seller_panel/shop/SellerShopList";
 import SellerShopProduct from "./scenes/seller_panel/shop/SellerShopProduct";
-import AddProductSeller from "./scenes/seller_panel/product/AddProduct";
-import EditProductSeller from "./scenes/seller_panel/product/EditProduct";
+import AddProductTabSeller from "./scenes/seller_panel/product/add_product/AddProductTab";
+import EditProductSeller from "./scenes/seller_panel/product/edit_product/EditProduct";
 import OrderShop from "./scenes/seller_panel/order/OrderShop";
+import SellerBankAccount from "./scenes/seller_panel/accounting/bank_account";
 
 
 
@@ -81,7 +86,7 @@ const AppRouter = () => {
         <Route path="/" element={<FrontendLayout />}>
           <Route index element={<HomeP1 />} />
           <Route path="home" element={<HomeP1 />} />
-          
+
           <Route path="profile" element={<Profile />} />
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="shop/:id" element={<ShopProducts />} />
@@ -102,13 +107,16 @@ const AppRouter = () => {
           <Route path="seller/add" element={<AddShop />} />
           <Route path="brands" element={<Brand />} />
           <Route path="categories" element={<AllCategory />} />
+          <Route path="categories/home" element={<CategoryWiseProductHome />} />
+
         </Route>
 
-         
+
 
         <Route path="/" element={<App />}>
 
           <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/pos" element={<PosManagement />} />
 
           {/* Product Routes */}
           <Route path="/ecom/product/add" element={<AddProductTab />} />
@@ -129,7 +137,7 @@ const AppRouter = () => {
           <Route path="/ecom/seller/all" element={<AllSellers />} />
           <Route path="/ecom/admin/seller/:id" element={<EditSellerTab />} />
           <Route path="/ecom/admin/seller/edit/:id" element={<EditSellerTab />} />
-    
+
 
           {/* Customer Routes */}
           <Route path="/ecom/customer/add" element={<AddCustomer />} />
@@ -146,10 +154,11 @@ const AppRouter = () => {
 
           {/* Settings & Accounts */}
           <Route path="/ecom/setting" element={<EcommerceSetting />} />
-          <Route path="/ecom/accounts"  element={<EcommerceAccounts />} />
-          <Route path="/ecom/accounts/transactions"  element={<AllTransaction />} />
-          <Route path="/ecom/setting/website-logo"  element={<WebsiteLogoSetting />} />
-          <Route path="/ecom/setting/shipping-cost"  element={<ShippingCostSetting />} />
+          <Route path="/ecom/accounts" element={<EcommerceAccounts />} />
+          <Route path="/ecom/accounts/transactions" element={<AllTransaction />} />
+          <Route path="/ecom/accounts/settlements" element={<Settlement />} />
+          <Route path="/ecom/setting/website-logo" element={<WebsiteLogoSetting />} />
+          <Route path="/ecom/setting/shipping-cost" element={<ShippingCostSetting />} />
 
 
           <Route path="/ecom/banner/add" element={<AddBanner />} />
@@ -161,11 +170,13 @@ const AppRouter = () => {
           <Route path="dashboard" element={<SellerDashboard />} />
           <Route path="products" element={<SellerPanelProducts />} />
           <Route path="shops" element={<SellerShopList />} />
+          <Route path="shops/add" element={<AddShop />} />
           <Route path="shops/products" element={<SellerShopProduct />} />
-          <Route path="add/product" element={<AddProductTab />} />
+          <Route path="accounting" element={<SellerBankAccount />} />
+          <Route path="add/product" element={<AddProductTabSeller />} />
           <Route path="edit/product/:id" element={<EditProduct />} />
           <Route path="orders" element={<OrderShop />} />
-          
+
         </Route>
       </Routes>
     </Router>

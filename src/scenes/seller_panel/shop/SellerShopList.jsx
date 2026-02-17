@@ -99,6 +99,10 @@ const SellerShopList = () => {
 		return <Chip label={status} size="small" variant="outlined" />;
 	};
 
+	const handleAddShop = () => {
+		navigate("/seller/shops/add");
+	};
+
 	const handleViewProducts = (shopId) => {
 		if (!shopId) return;
 		navigate(`/seller/shops/products?shop_id=${shopId}`);
@@ -106,14 +110,23 @@ const SellerShopList = () => {
 
 	return (
 		<Box sx={{ p: { xs: 2, md: 3 } }}>
-			<Stack spacing={0.6} sx={{ mb: 2 }}>
-				<Typography variant="h4" sx={{ fontWeight: 900 }}>
-					My Shops
-				</Typography>
-				<Typography variant="body2" sx={{ color: colors.gray[300] }}>
-					{total ? `${total} shops linked to your account` : "Review your storefronts"}
-				</Typography>
-			</Stack>
+			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 2 }}>
+				<Stack spacing={0.6}>
+					<Typography variant="h4" sx={{ fontWeight: 900 }}>
+						My Shops
+					</Typography>
+					<Typography variant="body2" sx={{ color: colors.gray[300] }}>
+						{total ? `${total} shops linked to your account` : "Review your storefronts"}
+					</Typography>
+				</Stack>
+				<Button
+					variant="contained"
+					onClick={handleAddShop}
+					sx={{ textTransform: "none", fontWeight: 700, borderRadius: 999 }}
+				>
+					Add Shop
+				</Button>
+			</Box>
 
 			<Card sx={{ background: colors.primary[400], borderRadius: 2, border: `1px solid ${colors.primary[500]}` }}>
 				<CardContent>

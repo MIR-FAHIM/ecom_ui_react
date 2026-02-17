@@ -45,6 +45,9 @@ const Navbar = () => {
     localStorage.removeItem("authToken");
     navigate('/login');
   };
+  const handlePOS = () => {
+    navigate('/admin/pos');
+  };
   const [permissions, setPermissions] = useState({});
 
   // Fetch notifications when the component mounts
@@ -103,6 +106,9 @@ const Navbar = () => {
         )}
         <Button variant="contained" color="primary" onClick={handleLogout}>
           Log Out
+        </Button>
+        <Button variant="contained" color="primary" onClick={handlePOS}>
+          POS
         </Button>
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}

@@ -2,28 +2,37 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, CircularProgress, IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { getFeaturedProduct } from "../../../../api/controller/admin_controller/product/product_controller";
+import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
+import { getCategoryInfo } from "../../../../api/controller/admin_controller/category/category_controller";
 import FeaturedTitle from "./FeaturedTitle";
-import SquareProductCard from "../../../a_frontend_ui/product/components/SquareProductCard";
+import SquareProductCard from "../../product/components/SquareProductCard";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
-export default function FeaturedProduct({ onView }) {
+export default function CategoryWiseProductHome({
+	onView,
+	category_id = "",
+	categoryId = "",
+	color = "#cfe1b8",
+	title = "",
+}) {
 	const theme = useTheme();
 	const navigate = useNavigate();
 	const upXl = useMediaQuery(theme.breakpoints.up("xl"));
 	const upLg = useMediaQuery(theme.breakpoints.up("lg"));
 	const upMd = useMediaQuery(theme.breakpoints.up("md"));
 	const upSm = useMediaQuery(theme.breakpoints.up("sm"));
+	const resolvedCategoryId = category_id || categoryId || "";
 
 	const [loading, setLoading] = useState(false);
 	const [items, setItems] = useState([]);
 	const [startIndex, setStartIndex] = useState(0);
+	const [categoryName, setCategoryName] = useState("");
 
 	const perView = useMemo(() => {
-		if (upXl) return 5;
-		if (upLg) return 4;
-		if (upMd) return 3;
+		if (upXl) return 7;
+		if (upLg) return 5;
+		if (upMd) return 4;
 		if (upSm) return 2;
 		return 1;
 	}, [upXl, upLg, upMd, upSm]);
@@ -33,24 +42,55 @@ export default function FeaturedProduct({ onView }) {
 	useEffect(() => {
 		let mounted = true;
 		const load = async () => {
+			if (!resolvedCategoryId) {
+				if (mounted) setItems([]);
+				return;
+			}
+
 			setLoading(true);
 			try {
-				const res = await getFeaturedProduct({ page: 1, per_page: 12 });
-				const list = res?.data?.data ?? res?.data ?? res ?? [];
+				const res = await getProduct({ page: 1, per_page: 12, category_id: resolvedCategoryId });
+				const payload = res?.data ?? res ?? {};
+				const list = payload?.data ?? payload ?? [];
 				if (mounted) setItems(safeArray(list));
 			} catch (e) {
-				console.error("loadFeaturedProducts error:", e);
+				console.error("loadCategoryProducts error:", e);
 				if (mounted) setItems([]);
 			} finally {
 				if (mounted) setLoading(false);
 			}
 		};
 
+		setStartIndex(0);
 		load();
 		return () => {
 			mounted = false;
 		};
-	}, []);
+	}, [resolvedCategoryId]);
+
+	useEffect(() => {
+		let mounted = true;
+		const loadCategory = async () => {
+			if (!resolvedCategoryId) {
+				if (mounted) setCategoryName("");
+				return;
+			}
+
+			try {
+				const res = await getCategoryInfo(resolvedCategoryId);
+				const payload = res?.data ?? res ?? {};
+				const name = payload?.name ?? payload?.data?.name ?? payload?.data?.data?.name ?? "";
+				if (mounted) setCategoryName(String(name || ""));
+			} catch (e) {
+				if (mounted) setCategoryName("");
+			}
+		};
+
+		loadCategory();
+		return () => {
+			mounted = false;
+		};
+	}, [resolvedCategoryId]);
 
 	const content = useMemo(() => {
 		if (loading) {
@@ -64,7 +104,7 @@ export default function FeaturedProduct({ onView }) {
 		if (!items.length) {
 			return (
 				<Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-					No featured products yet.
+					No products found for this category.
 				</Typography>
 			);
 		}
@@ -72,7 +112,7 @@ export default function FeaturedProduct({ onView }) {
 		const slice = items.slice(startIndex, startIndex + perView);
 
 		return (
-			<Box sx={{ display: "grid", gap: 2, gridTemplateColumns: `repeat(${perView}, minmax(0, 1fr))` }}>
+			<Box sx={{ display: "grid", gap: 0.5, gridTemplateColumns: `repeat(${perView}, minmax(0, 1fr))` }}>
 				{slice.map((product) => (
 					<Box key={product.id} sx={{ minWidth: 0, display: "flex", justifyContent: "center" }}>
 						<SquareProductCard product={product} onView={() => onView?.(product)} size={150} />
@@ -91,8 +131,10 @@ export default function FeaturedProduct({ onView }) {
 	};
 
 	const handleSeeAll = () => {
-		navigate("/home#all-products");
+		navigate("/category/" + resolvedCategoryId);
 	};
+
+	const displayTitle = title || (categoryName ? `${categoryName} Products` : "Featured Products");
 
 	return (
 		<Box
@@ -100,12 +142,12 @@ export default function FeaturedProduct({ onView }) {
 				mt: 3,
 				p: { xs: 2, sm: 2.5 },
 				borderRadius: 3,
-				bgcolor: "#cfe1b8",
+				bgcolor: color,
 				boxShadow: "0 16px 32px rgba(0,0,0,0.08)",
 			}}
 		>
 			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1 }}>
-				<FeaturedTitle>Featured Products</FeaturedTitle>
+				<FeaturedTitle>{displayTitle}</FeaturedTitle>
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 					<Typography
 						variant="body2"

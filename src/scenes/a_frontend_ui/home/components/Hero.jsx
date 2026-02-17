@@ -82,9 +82,9 @@ export default function Hero() {
 
   // Responsive sizing (mobile smaller)
   const heroHeight = useMemo(() => {
-    if (isXs) return 220;   // mobile smaller
-    if (isSm) return 320;   // small tablets
-    if (isMdUp) return 520; // desktop+
+    if (isXs) return 220;
+    if (isSm) return 320;
+    if (isMdUp) return 520;
     return 420;
   }, [isXs, isSm, isMdUp]);
 
@@ -105,11 +105,17 @@ export default function Hero() {
     <Box
       sx={{
         width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
         height: heroHeight,
-        borderRadius: { xs: 1.5, sm: 2 },
-        mb: { xs: 2, sm: 3, md: 4 },
+        borderRadius: { xs: 2, sm: 3 },
         position: "relative",
         overflow: "hidden",
+        overflowX: "hidden",
+        boxSizing: "border-box",
+        mx: "auto",
+        boxShadow: { xs: "0 10px 24px rgba(0,0,0,0.12)", md: "0 16px 32px rgba(0,0,0,0.12)" },
+        bgcolor: "rgba(0,0,0,0.02)",
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -124,10 +130,8 @@ export default function Hero() {
           height: "100%",
           backgroundImage: `url("${bg}")`,
           backgroundPosition: "center",
-          // On mobile, show more of the image without looking over-zoomed
-          backgroundSize: { xs: "contain", sm: "cover" },
+          backgroundSize: { xs: "cover", sm: "cover" },
           backgroundRepeat: "no-repeat",
-          // Optional subtle background color to avoid empty edges when using "contain"
           bgcolor: "rgba(0,0,0,0.06)",
           transition: "background-image 300ms ease",
         }}
@@ -136,11 +140,11 @@ export default function Hero() {
       {/* Navigation */}
       {banners.length > 1 && (
         <>
-          <IconButton onClick={prev} size={arrowSize} sx={{ ...arrowSx, left: { xs: 6, sm: 8 } }}>
+            <IconButton onClick={prev} size={arrowSize} sx={{ ...arrowSx, left: { xs: 6, sm: 8 } }}>
             <ChevronLeft />
           </IconButton>
 
-          <IconButton onClick={next} size={arrowSize} sx={{ ...arrowSx, right: { xs: 6, sm: 8 } }}>
+            <IconButton onClick={next} size={arrowSize} sx={{ ...arrowSx, right: { xs: 6, sm: 8 } }}>
             <ChevronRight />
           </IconButton>
 

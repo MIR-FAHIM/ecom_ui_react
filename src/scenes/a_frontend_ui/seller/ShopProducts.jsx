@@ -16,7 +16,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { tokens } from "../../../theme";
 import { getShopDetails, getShopProduct } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
-import ProductCard from "../home/components/ProductCard";
+import ProductCard from "../home/components/ProductCard.jsx";
 import GeneralInfoBar from "./components/GeneralInfoBar";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);

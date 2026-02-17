@@ -41,6 +41,7 @@ import {
 import { getOrderDetails } from "../../../api/controller/admin_controller/order/order_controller";
 import { tokens } from "../../../theme";
 import ProductReviewForm from "../review/review_page.jsx";
+import { blueGrey } from "@mui/material/colors";
 
 const UserOrderDetails = () => {
   const { id } = useParams();
@@ -49,8 +50,9 @@ const UserOrderDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const border = theme.palette.divider || colors.primary[200];
-  const surface = colors.primary[400];
-  const surface2 = colors.primary[200];
+  const pageBg = theme.palette.mode === "dark" ? colors.primary[500] : "#faf8ff";
+  const surface = theme.palette.mode === "dark" ? colors.primary[400] : "#ffffff";
+  const surface2 = theme.palette.mode === "dark" ? colors.primary[300] : "#f3efff";
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -170,8 +172,8 @@ const UserOrderDetails = () => {
             width: { xs: "100%", sm: 460 },
             borderRadius: 4,
             overflow: "hidden",
-          
             background: surface,
+            boxShadow: theme.palette.mode === "dark" ? "none" : "0 14px 28px rgba(65, 40, 120, 0.08)",
           }}
         >
           <CardContent sx={{ p: 3 }}>
@@ -204,10 +206,10 @@ const UserOrderDetails = () => {
           Order not found
         </Alert>
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={<ArrowBack />}
           onClick={() => navigate(-1)}
-          sx={{ mt: 2, borderRadius: 3, textTransform: "none", fontWeight: 700 }}
+          sx={{ mt: 2, borderRadius: 3, textTransform: "none", fontWeight: 700, color: surface, background: theme.palette.secondary.main }}  
         >
           Back
         </Button>
@@ -220,7 +222,7 @@ const UserOrderDetails = () => {
       sx={{
         p: { xs: 2, md: 3 },
         minHeight: "100vh",
-        background: theme.palette.background?.default || colors.primary[500],
+        background: pageBg,
       }}
     >
       {/* Header */}
@@ -229,8 +231,8 @@ const UserOrderDetails = () => {
           mb: 2,
           borderRadius: 4,
           overflow: "hidden",
-          border: `1px solid `,
           background: surface,
+          boxShadow: theme.palette.mode === "dark" ? "none" : "0 16px 32px rgba(65, 40, 120, 0.1)",
         }}
       >
         <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
@@ -246,8 +248,8 @@ const UserOrderDetails = () => {
                   textTransform: "none",
                   fontWeight: 800,
                   px: 2,
-                  borderColor: border,
-                  background: surface,
+                  borderColor: "transparent",
+                  background: blueGrey[500],
                 }}
               >
                 Back
@@ -288,7 +290,7 @@ const UserOrderDetails = () => {
                     sx={{
                       borderRadius: 999,
                       fontWeight: 800,
-                      borderColor: border,
+                      borderColor: "transparent",
                       background: surface2,
                     }}
                   />
@@ -302,8 +304,8 @@ const UserOrderDetails = () => {
                   onClick={() => window.print()}
                   sx={{
                     borderRadius: 3,
-                    border: `1px solid `,
                     background: surface,
+                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 8px 16px rgba(65, 40, 120, 0.1)",
                   }}
                 >
                   <Print />
@@ -321,9 +323,9 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: `1px solid `,
               background: surface,
               overflow: "hidden",
+              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
             }}
           >
             <CardContent sx={{ p: 2.2 }}>
@@ -336,13 +338,13 @@ const UserOrderDetails = () => {
                     display: "grid",
                     placeItems: "center",
                     background: surface2,
-                    border: `1px solid `,
+                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
                   }}
                 >
                   <CalendarMonth fontSize="small" />
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                     ORDER DATE
                   </Typography>
                   <Typography fontWeight={800} sx={{ mt: 0.4 }}>
@@ -359,9 +361,9 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: `1px solid `,
               background: surface,
               overflow: "hidden",
+              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
             }}
           >
             <CardContent sx={{ p: 2.2 }}>
@@ -374,13 +376,13 @@ const UserOrderDetails = () => {
                     display: "grid",
                     placeItems: "center",
                     background: surface2,
-                    border: `1px solid `,
+                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
                   }}
                 >
                   <ReceiptLong fontSize="small" />
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                     ITEMS
                   </Typography>
                   <Typography fontWeight={900} sx={{ mt: 0.4, fontSize: 22 }}>
@@ -397,9 +399,9 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: `1px solid `,
               background: surface,
               overflow: "hidden",
+              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
             }}
           >
             <CardContent sx={{ p: 2.2 }}>
@@ -412,13 +414,13 @@ const UserOrderDetails = () => {
                     display: "grid",
                     placeItems: "center",
                     background: surface2,
-                    border: `1px solid `,
+                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
                   }}
                 >
                   <Payments fontSize="small" />
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                     TOTAL
                   </Typography>
                   <Typography
@@ -445,9 +447,9 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: `1px solid`,
               background: surface,
               overflow: "hidden",
+              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
             }}
           >
             <CardContent sx={{ p: 2.5 }}>
@@ -460,7 +462,7 @@ const UserOrderDetails = () => {
                     display: "grid",
                     placeItems: "center",
                     background: surface2,
-                    border: `1px solid `,
+                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
                   }}
                 >
                   <Person fontSize="small" />
@@ -482,13 +484,13 @@ const UserOrderDetails = () => {
                       borderRadius: 3,
                       background: theme.palette.secondary.main,
                       color: colors.gray[900],
-                      border: `1px solid `,
+                      boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
                     }}
                   >
                     {getInitials(order.customer_name)}
                   </Avatar>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                       NAME
                     </Typography>
                     <Typography fontWeight={850} noWrap>
@@ -500,7 +502,7 @@ const UserOrderDetails = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                         PHONE
                       </Typography>
                       <Typography fontWeight={800}>{order.customer_phone || "N/A"}</Typography>
@@ -509,7 +511,7 @@ const UserOrderDetails = () => {
 
                   <Grid item xs={12} sm={6}>
                     <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                         USER ID
                       </Typography>
                       <Typography fontWeight={800}>{order.user_id ?? "N/A"}</Typography>
@@ -527,9 +529,9 @@ const UserOrderDetails = () => {
             sx={{
               height: "100%",
               borderRadius: 4,
-              border: `1px solid`,
               background: surface,
               overflow: "hidden",
+              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
             }}
           >
             <CardContent sx={{ p: 2.5 }}>
@@ -542,7 +544,7 @@ const UserOrderDetails = () => {
                     display: "grid",
                     placeItems: "center",
                     background: surface2,
-                    border: `1px solid`,
+                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
                   }}
                 >
                   <LocationOn fontSize="small" />
@@ -556,7 +558,7 @@ const UserOrderDetails = () => {
 
               <Stack spacing={1.7}>
                 <Box>
-                  <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                     ADDRESS
                   </Typography>
                   <Typography fontWeight={800} sx={{ mt: 0.3 }}>
@@ -567,7 +569,7 @@ const UserOrderDetails = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
                     <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                         ZONE
                       </Typography>
                       <Typography fontWeight={800}>{order.zone || "N/A"}</Typography>
@@ -575,7 +577,7 @@ const UserOrderDetails = () => {
                   </Grid>
                   <Grid item xs={12} sm={4}>
                     <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                         DISTRICT
                       </Typography>
                       <Typography fontWeight={800}>{order.district || "N/A"}</Typography>
@@ -583,7 +585,7 @@ const UserOrderDetails = () => {
                   </Grid>
                   <Grid item xs={12} sm={4}>
                     <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                         AREA
                       </Typography>
                       <Typography fontWeight={800}>{order.area || "N/A"}</Typography>
@@ -597,11 +599,11 @@ const UserOrderDetails = () => {
                       mt: 0.5,
                       p: 1.4,
                       borderRadius: 3,
-                      border: `1px solid`,
                       background: surface2,
+                      boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.1)",
                     }}
                   >
-                    <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
                       NOTE
                     </Typography>
                     <Typography sx={{ mt: 0.5, fontWeight: 700 }}>{order.note}</Typography>
@@ -619,8 +621,8 @@ const UserOrderDetails = () => {
           mt: 2,
           borderRadius: 4,
           overflow: "hidden",
-          border: `1px solid`,
           background: surface,
+          boxShadow: theme.palette.mode === "dark" ? "none" : "0 14px 28px rgba(65, 40, 120, 0.08)",
         }}
       >
         <Box
@@ -642,7 +644,7 @@ const UserOrderDetails = () => {
                 display: "grid",
                 placeItems: "center",
                 background: surface2,
-                border: `1px solid`,
+                boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
               }}
             >
               <ShoppingBag fontSize="small" />
@@ -667,7 +669,6 @@ const UserOrderDetails = () => {
                 sx={{
                   "& th": {
                     fontWeight: 900,
-                    borderBottom: `1px solid`,
                     background: surface2,
                   },
                 }}
@@ -729,7 +730,7 @@ const UserOrderDetails = () => {
                             borderRadius: 999,
                             fontWeight: 900,
                             background: surface,
-                            border: `1px solid`,
+                            border: "none",
                           }}
                         />
                       </TableCell>
@@ -781,9 +782,9 @@ const UserOrderDetails = () => {
         sx={{
           mt: 2,
           borderRadius: 4,
-          border: `1px solid`,
           background: surface,
           overflow: "hidden",
+          boxShadow: theme.palette.mode === "dark" ? "none" : "0 14px 28px rgba(65, 40, 120, 0.08)",
         }}
       >
         <CardContent sx={{ p: 2.5 }}>
@@ -796,7 +797,7 @@ const UserOrderDetails = () => {
                 display: "grid",
                 placeItems: "center",
                 background: surface2,
-                border: `1px solid`,
+                boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
               }}
             >
               <ReceiptLong fontSize="small" />
@@ -814,8 +815,8 @@ const UserOrderDetails = () => {
                 sx={{
                   p: 2,
                   borderRadius: 4,
-               
                   background: surface2,
+                  boxShadow: theme.palette.mode === "dark" ? "none" : "0 10px 20px rgba(65, 40, 120, 0.08)",
                 }}
               >
                 <Stack spacing={1.2}>
@@ -846,8 +847,8 @@ const UserOrderDetails = () => {
                 sx={{
                   p: 2,
                   borderRadius: 4,
-                 
                   background: surface2,
+                  boxShadow: theme.palette.mode === "dark" ? "none" : "0 10px 20px rgba(65, 40, 120, 0.08)",
                 }}
               >
                 <Typography sx={{ fontWeight: 950, mb: 1.2 }}>Timeline</Typography>
@@ -917,7 +918,6 @@ function MiniMeta({ icon, label, value, valueChip, border, surface2 }) {
           borderRadius: 3,
           display: "grid",
           placeItems: "center",
-          border: `1px solid ${border}`,
           background: surface2,
           flexShrink: 0,
         }}
@@ -926,7 +926,7 @@ function MiniMeta({ icon, label, value, valueChip, border, surface2 }) {
       </Box>
 
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 900, letterSpacing: 0.6, color: "text.secondary" }}>
+        <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.6, color: "text.secondary" }}>
           {label}
         </Typography>
 

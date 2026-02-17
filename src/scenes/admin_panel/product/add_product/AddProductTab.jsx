@@ -17,12 +17,36 @@ import {
 import { tokens } from "../../../../theme";
 import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
-import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller"; 
+import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller";
+import { getCategoryChildren } from "../../../../api/controller/admin_controller/product/product_setting_controller.jsx";
 
 import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/components/productWizard/steps";
 import StepGeneral from "../../../admin_panel/product/add_product/components/productWizard/StepGeneral";
 import StepAttributes from "../../../admin_panel/product/add_product/components/productWizard/StepAttributes";
 import StepImages from "../../../admin_panel/product/add_product/components/productWizard/StepImages";
+
+const normalizeList = (x) => {
+  if (!x) return [];
+  if (Array.isArray(x)) return x;
+
+  if (Array.isArray(x?.data)) return x.data;
+  if (Array.isArray(x?.data?.data)) return x.data.data;
+  if (Array.isArray(x?.data?.data?.data)) return x.data.data.data;
+
+  if (Array.isArray(x?.data?.items)) return x.data.items;
+  if (Array.isArray(x?.data?.rows)) return x.data.rows;
+  if (Array.isArray(x?.results)) return x.results;
+  if (Array.isArray(x?.data?.results)) return x.data.results;
+
+  const inner = x?.data ?? x;
+  if (inner && typeof inner === "object") {
+    for (const k of Object.keys(inner)) {
+      if (Array.isArray(inner[k])) return inner[k];
+    }
+  }
+
+  return [];
+};
 
 function AddProductTab() {
   const theme = useTheme();
@@ -40,6 +64,7 @@ function AddProductTab() {
   name: "",
   slug: "",
   category_id: "",
+  brand_id: "",
   user_id: localStorage.getItem("userId") || "",
   added_by: 1,
 
@@ -69,6 +94,9 @@ function AddProductTab() {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [shops, setShops] = useState([]);
+  const [parentCategoryId, setParentCategoryId] = useState("");
+  const [subCategories, setSubCategories] = useState([]);
+  const [loadingSubCategories, setLoadingSubCategories] = useState(false);
 
   const loadDropdowns = async () => {
     try {
@@ -77,29 +105,6 @@ function AddProductTab() {
         getBrand(),
         getAllShops({ page: 1, per_page: 100 }),
       ]);
-
-      const normalizeList = (x) => {
-        if (!x) return [];
-        if (Array.isArray(x)) return x;
-
-        if (Array.isArray(x?.data)) return x.data;
-        if (Array.isArray(x?.data?.data)) return x.data.data;
-        if (Array.isArray(x?.data?.data?.data)) return x.data.data.data;
-
-        if (Array.isArray(x?.data?.items)) return x.data.items;
-        if (Array.isArray(x?.data?.rows)) return x.data.rows;
-        if (Array.isArray(x?.results)) return x.results;
-        if (Array.isArray(x?.data?.results)) return x.data.results;
-
-        const inner = x?.data ?? x;
-        if (inner && typeof inner === 'object') {
-          for (const k of Object.keys(inner)) {
-            if (Array.isArray(inner[k])) return inner[k];
-          }
-        }
-
-        return [];
-      };
 
       const cats = normalizeList(cRes);
       const brs = normalizeList(bRes);
@@ -125,6 +130,35 @@ function AddProductTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const loadSubCategories = async () => {
+      if (!parentCategoryId) {
+        setSubCategories([]);
+        setGeneral((prev) => ({ ...prev, category_id: "" }));
+        return;
+      }
+
+      setLoadingSubCategories(true);
+      try {
+        const res = await getCategoryChildren(parentCategoryId);
+        const list = normalizeList(res);
+        setSubCategories(list);
+        setGeneral((prev) => {
+          if (list.length === 0) return { ...prev, category_id: parentCategoryId };
+          const exists = list.some((c) => String(c?.id ?? c?._id) === String(prev.category_id));
+          return exists ? prev : { ...prev, category_id: "" };
+        });
+      } catch (e) {
+        console.error("Error loading sub categories:", e);
+        setSubCategories([]);
+      } finally {
+        setLoadingSubCategories(false);
+      }
+    };
+
+    loadSubCategories();
+  }, [parentCategoryId]);
+
   const canGoBack = step > 0;
   const canGoNext = step < PRODUCT_WIZARD_STEPS.length - 1;
 
@@ -135,6 +169,9 @@ function AddProductTab() {
       if (!general.name || !general.name.trim()) nextErrors.name = "Product name is required";
       if (!general.slug || !general.slug.trim()) nextErrors.slug = "Slug is required";
       if (!general.category_id) nextErrors.category_id = "Category is required";
+      if (parentCategoryId && subCategories.length > 0 && !general.category_id) {
+        nextErrors.category_id = "Sub category is required";
+      }
       if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
     }
 
@@ -164,6 +201,7 @@ function AddProductTab() {
 productFormData.append("name", general.name);
 productFormData.append("slug", general.slug);
 productFormData.append("category_id", general.category_id);
+if (general.brand_id) productFormData.append("brand_id", general.brand_id);
 
 productFormData.append("added_by", localStorage.getItem("userId") );
 productFormData.append("user_id", general.user_id || localStorage.getItem("userId") );
@@ -205,6 +243,7 @@ productFormData.append("weight", general.weight || "");
         return;
       }
 
+      // Step 2: Upload images (only those with a file to upload)
       // Step 2: Upload images (only those with a file to upload)
       const imagesToUpload = images
         .filter((img) => img.file)
@@ -264,6 +303,14 @@ productFormData.append("weight", general.weight || "");
         <StepGeneral
           value={general}
           onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
+          parentCategoryId={parentCategoryId}
+          subCategories={subCategories}
+          loadingSubCategories={loadingSubCategories}
+          onParentCategoryChange={(id) => {
+            setParentCategoryId(id);
+            setGeneral((prev) => ({ ...prev, category_id: "" }));
+          }}
+          onSubCategoryChange={(id) => setGeneral((prev) => ({ ...prev, category_id: id }))}
           onOpenDropdown={loadDropdowns}
           errors={errors}
           categories={categories}

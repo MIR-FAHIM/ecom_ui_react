@@ -1,41 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Box, CircularProgress, IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { getTodayDealProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import FeaturedTitle from "./FeaturedTitle";
-import SmartProductCard from "./ProductCard";
+import HorizontalProductCard from "../../../a_frontend_ui/product/components/HorizontalProductCard";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
-export default function TodayDealProduct({ onView }) {
-    const theme = useTheme();
+export default function TodayDealProduct({ onView, compact = false, title }) {
     const navigate = useNavigate();
-    const upXl = useMediaQuery(theme.breakpoints.up("xl"));
-    const upLg = useMediaQuery(theme.breakpoints.up("lg"));
-    const upMd = useMediaQuery(theme.breakpoints.up("md"));
-    const upSm = useMediaQuery(theme.breakpoints.up("sm"));
+    const scrollRef = useRef(null);
 
     const [loading, setLoading] = useState(false);
     const [items, setItems] = useState([]);
-    const [startIndex, setStartIndex] = useState(0);
-
-    const perView = useMemo(() => {
-        if (upXl) return 5;
-        if (upLg) return 4;
-        if (upMd) return 3;
-        if (upSm) return 2;
-        return 1;
-    }, [upXl, upLg, upMd, upSm]);
-
-    const maxIndex = Math.max(0, items.length - perView);
+    const [scrollState, setScrollState] = useState({ canLeft: false, canRight: false });
 
     useEffect(() => {
         let mounted = true;
         const load = async () => {
             setLoading(true);
             try {
-                const res = await getTodayDealProduct({ page: 1, per_page: 12 });
+                const res = await getTodayDealProduct({ page: 1, per_page: 50 });
                 const list = res?.data?.data ?? res?.data ?? res ?? [];
                 if (mounted) setItems(safeArray(list));
             } catch (e) {
@@ -69,51 +55,99 @@ export default function TodayDealProduct({ onView }) {
             );
         }
 
-        const slice = items.slice(startIndex, startIndex + perView);
-
         return (
-            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: `repeat(${perView}, minmax(0, 1fr))` }}>
-                {slice.map((product) => (
-                    <Box key={product.id} sx={{ minWidth: 0 }}>
-                        <SmartProductCard
-                            product={product}
-                            onView={() => onView?.(product)}
-                        />
-                    </Box>
+            <Box
+                ref={scrollRef}
+                onScroll={() => {
+                    const el = scrollRef.current;
+                    if (!el) return;
+                    const maxScroll = el.scrollWidth - el.clientWidth;
+                    setScrollState({
+                        canLeft: el.scrollLeft > 4,
+                        canRight: el.scrollLeft < maxScroll - 4,
+                    });
+                }}
+                sx={{
+                    display: "flex",
+                    gap: 1.5,
+                    overflowX: "auto",
+                    pb: 1,
+                    pr: 1,
+                    scrollSnapType: "x mandatory",
+                    "& > *": { scrollSnapAlign: "start" },
+                    msOverflowStyle: "none",
+                    scrollbarWidth: "none",
+                    "&::-webkit-scrollbar": { display: "none" },
+                }}
+            >
+                {items.map((product) => (
+                    <HorizontalProductCard
+                        key={product.id}
+                        product={product}
+                        onView={() => onView?.(product)}
+                    />
                 ))}
             </Box>
         );
-    }, [items, loading, onView, perView, startIndex]);
+    }, [items, loading, onView]);
 
-    const handlePrev = () => {
-        setStartIndex((prev) => Math.max(0, prev - perView));
-    };
-
-    const handleNext = () => {
-        setStartIndex((prev) => Math.min(maxIndex, prev + perView));
+    const handleScroll = (dir) => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const amount = Math.max(260, Math.floor(el.clientWidth * 0.7));
+        el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
     };
 
     const handleSeeAll = () => {
         navigate("/home#all-products");
     };
 
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        setScrollState({
+            canLeft: el.scrollLeft > 4,
+            canRight: el.scrollLeft < maxScroll - 4,
+        });
+    }, [items, loading]);
+
     return (
-        <Box sx={{ mt: 3 }}>
+        <Box
+            sx={{
+                mt: 0,
+                p: compact ? 2 : 2,
+                borderRadius: 3,
+                bgcolor: "background.paper",
+                boxShadow: "0 16px 32px rgba(0,0,0,0.06)",
+                width: { xs: "100%", md: 820 },
+                maxWidth: "100%",
+                minWidth: 0,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+            }}
+        >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1 }}>
-                <FeaturedTitle>Today Deals</FeaturedTitle>
+                <FeaturedTitle variant={compact ? "h6" : "h5"} mb={compact ? 1 : 2}>
+                    {title || (compact ? "Flash Sale" : "Today Deals")}
+                </FeaturedTitle>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 700, cursor: "pointer" }} onClick={handleSeeAll}>
                         See all
                     </Typography>
-                    <IconButton size="small" onClick={handlePrev} disabled={startIndex === 0}>
+                    <IconButton size="small" onClick={() => handleScroll("left")} disabled={!scrollState.canLeft}>
                         <ChevronLeft fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" onClick={handleNext} disabled={startIndex >= maxIndex}>
+                    <IconButton size="small" onClick={() => handleScroll("right")} disabled={!scrollState.canRight}>
                         <ChevronRight fontSize="small" />
                     </IconButton>
                 </Box>
             </Box>
-            {content}
+            <Box sx={{ flex: 1 }}>
+                {content}
+            </Box>
         </Box>
     );
 }

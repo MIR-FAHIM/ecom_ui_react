@@ -27,6 +27,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import LanguageIcon from "@mui/icons-material/Language";
 import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller";
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../../theme.js";
@@ -35,6 +36,7 @@ import { getUserDetail } from "../../../api/controller/admin_controller/user_con
 import { getWebsiteSetting } from "../../../api/controller/admin_controller/website_setting/website_setting_controller.jsx";
 import { getUserWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import SearchProduct from "../search_product/SearchProduct.jsx";
+import { useTranslation } from "react-i18next";
 
 const buildImageUrl = (media) => {
   if (!media) return "";
@@ -50,6 +52,7 @@ const safeArray = (value) => (Array.isArray(value) ? value : []);
 const Topbar = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { t, i18n } = useTranslation();
 
   // Theme tokens
   const colors = tokens(theme.palette.mode);
@@ -73,6 +76,8 @@ const Topbar = () => {
   const categoryOpen = Boolean(categoryAnchor);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [langAnchor, setLangAnchor] = useState(null);
+  const langOpen = Boolean(langAnchor);
 
   const initials = useMemo(() => {
     const n = (user?.name || "").trim();
@@ -189,6 +194,13 @@ const Topbar = () => {
   const handleMenuClose = () => setAnchorEl(null);
   const handleCategoryOpen = (event) => setCategoryAnchor(event.currentTarget);
   const handleCategoryClose = () => setCategoryAnchor(null);
+  const handleLangOpen = (event) => setLangAnchor(event.currentTarget);
+  const handleLangClose = () => setLangAnchor(null);
+  const handleLangChange = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("lang", lang);
+    handleLangClose();
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -211,7 +223,7 @@ const Topbar = () => {
       position="sticky"
       elevation={0}
       sx={{
-        mb: 2,
+        mb: { xs: 1, md: 2 },
         borderBottom: `1px solid ${border}`,
         background: colors.primary[500],
       }}
@@ -219,18 +231,19 @@ const Topbar = () => {
       <Toolbar
         sx={{
           display: "flex",
-          gap: 2,
+          flexWrap: { xs: "wrap", md: "nowrap" },
+          gap: { xs: 1.2, sm: 2 },
           justifyContent: "space-between",
-          py: 1.1,
+          py: { xs: 0.8, sm: 1.1 },
         }}
       >
         {/* Left: Brand */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, minWidth: 220 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, minWidth: { xs: 0, sm: 200 } }}>
           <IconButton
             onClick={() => navigate("/")}
             sx={{
-              width: 40,
-              height: 40,
+              width: { xs: 36, sm: 40 },
+              height: { xs: 36, sm: 40 },
               borderRadius: 3,
               border: `1px solid ${border}`,
               background: glass,
@@ -256,11 +269,15 @@ const Topbar = () => {
                 fontWeight: 950,
                 letterSpacing: -0.7,
                 color: colors.greenAccent[500],
+                fontSize: { xs: 16, sm: 18 },
               }}
             >
               {brand.name}
             </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 800 }}>
+            <Typography
+              variant="body3"
+              sx={{ color: "text.secondary", fontWeight: 800, display: { xs: "none", sm: "block" } }}
+            >
               {brand.slogan}
             </Typography>
           </Box>
@@ -268,24 +285,65 @@ const Topbar = () => {
 
         {/* Middle: Search */}
         <Box sx={{ flex: 1, maxWidth: 820, display: { xs: "none", sm: "block" } }}>
-          <SearchProduct placeholder="Search products by name or SKU" />
+          <SearchProduct placeholder={t("topbar.searchPlaceholder")} />
         </Box>
 
         {/* Right: Actions */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Tooltip title="Become Seller">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: { xs: 0.6, sm: 1 },
+            flexWrap: { xs: "wrap", sm: "nowrap" },
+            justifyContent: { xs: "flex-end", sm: "flex-end" },
+            width: { xs: "100%", sm: "auto" },
+          }}
+        >
+          <Tooltip title={t("topbar.becomeSeller")}>
             <IconButton onClick={() => navigate("/seller/add")} sx={{ ...pillIconSx, display: { xs: "none", md: "inline-flex" } }}>
               <StorefrontIcon />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="About">
+          <Tooltip title={t("topbar.about")}>
             <IconButton onClick={() => navigate("/about")} sx={{ ...pillIconSx, display: { xs: "none", md: "inline-flex" } }}>
               <InfoOutlinedIcon />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Wishlist">
+          <Tooltip title={t("lang.label")}>
+            <Button
+              onClick={handleLangOpen}
+              startIcon={<LanguageIcon />}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 900,
+                border: `1px solid ${border}`,
+                background: colors.blueAccent[400],
+                px: 1.1,
+                minWidth: 70,
+                "&:hover": { background: glass2 },
+              }}
+            >
+              {i18n.language === "bn" ? "BN" : "EN"}
+            </Button>
+          </Tooltip>
+
+          <Menu
+            anchorEl={langAnchor}
+            open={langOpen}
+            sx={{ color: colors.primary[900] }}
+            onClose={handleLangClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+
+          >
+            <MenuItem  onClick={() => handleLangChange("en")}>{t("lang.english")}</MenuItem>
+            <MenuItem onClick={() => handleLangChange("bn")}>{t("lang.bangla")}</MenuItem>
+          </Menu>
+
+          <Tooltip title={t("topbar.wishlist")}>
             <IconButton onClick={() => navigate("/wish")} sx={pillIconSx}>
               <Badge badgeContent={wishCount} color="secondary">
                 <FavoriteIcon />
@@ -294,7 +352,7 @@ const Topbar = () => {
           </Tooltip>
 
           {/* Cart (highlighted, brand gradient) */}
-          <Tooltip title="Cart">
+          <Tooltip title={t("topbar.cart")}>
             <IconButton
               onClick={() => navigate("/cart")}
               sx={{
@@ -316,7 +374,7 @@ const Topbar = () => {
           {/* Profile */}
           {user ? (
             <>
-              <Tooltip title="Account">
+              <Tooltip title={t("topbar.menu.account")}>
                 <Button
                   onClick={handleUserClick}
                   aria-controls={menuOpen ? "user-menu" : undefined}
@@ -350,7 +408,7 @@ const Topbar = () => {
                   }
                 >
                   <Box sx={{color: colors.primary[600], display: { xs: "none", md: "block" } }}>
-                    {user?.name || "Profile"}
+                    {user?.name || t("topbar.menu.profile")}
                   </Box>
                 </Button>
               </Tooltip>
@@ -374,15 +432,15 @@ const Topbar = () => {
                 }}
               >
                 <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-                  <Typography sx={{  color: "text.secondary", fontWeight: 950 }}>{user?.name || "Account"}</Typography>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                  <Typography sx={{  color: "text.secondary", fontWeight: 950 }}>{user?.name || t("topbar.menu.account")}</Typography>
+                  <Typography variant="body3" sx={{ color: "text.secondary", fontWeight: 700 }}>
                     {user?.email || " "}
                   </Typography>
 
                   <Box sx={{ mt: 1 }}>
                     <Chip
                       size="small"
-                      label="Verified"
+                      label={t("topbar.menu.verified")}
                       sx={{
                         borderRadius: 999,
                         fontWeight: 900,
@@ -397,24 +455,24 @@ const Topbar = () => {
 
                 <MenuItem onClick={() => { handleMenuClose(); navigate("/orders"); }}>
                   <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
-                  Order history
+                  {t("topbar.menu.orderHistory")}
                 </MenuItem>
 
                 <MenuItem onClick={() => { handleMenuClose(); navigate("/profile"); }}>
                   <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
-                  Profile
+                  {t("topbar.menu.profile")}
                 </MenuItem>
 
                 <MenuItem onClick={() => { handleMenuClose(); navigate("/wishlist"); }}>
                   <ListItemIcon><FavoriteIcon fontSize="small" /></ListItemIcon>
-                  Wish list
+                  {t("topbar.menu.wishList")}
                 </MenuItem>
 
                 <Divider sx={{ opacity: 0.12 }} />
 
                 <MenuItem onClick={handleLogout}>
                   <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
-                  Logout
+                  {t("topbar.menu.logout")}
                 </MenuItem>
               </Menu>
             </>
@@ -469,6 +527,7 @@ const Topbar = () => {
             textTransform: "none",
             fontWeight: 900,
             px: 2,
+            width: { xs: "auto", sm: 200 },
             background: colors.yellowAccent ? colors.yellowAccent[500] : "#f5d000",
             color: colors.gray[100],
             border: `1px solid ${border}`,
@@ -539,6 +598,7 @@ const Topbar = () => {
                 fontWeight: 800,
                 color: colors.gray[100],
                 borderRadius: 2,
+               // variant:"body3",
                 px: 1.2,
                 "&:hover": { background: colors.primary[400] },
               }}
