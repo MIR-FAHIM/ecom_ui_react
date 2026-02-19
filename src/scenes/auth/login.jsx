@@ -358,7 +358,7 @@ const Login = () => {
               Don’t have an account?{" "}
               <Button
                 onClick={() => navigate("/register")}
-                sx={{ textTransform: "none", fontWeight: 700, px: 0.5 }}
+                sx={{ textTransform: "none", fontWeight: 700, px: 0.5 , color: theme.palette.secondary.main}}
               >
                 Create one
               </Button>

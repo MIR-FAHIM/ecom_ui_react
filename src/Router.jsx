@@ -23,6 +23,7 @@ import TodayReport from "./scenes/admin_panel/report/TodayReport";
 import MonthWiseReport from "./scenes/admin_panel/report/MonthWiseReport";
 import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
 import DeliveryManDetail from "./scenes/admin_panel/delivery/DeliveryManDetail";
+import RelatedProductAdd from "./scenes/admin_panel/product/add_product/components/RelatedProductAdd";
 
 import EcommerceSetting from "./scenes/admin_panel/setting/EcommerceSetting";
 import EcommerceAccounts from "./scenes/admin_panel/accounts/EcommerceAccounts";
@@ -72,6 +73,9 @@ import AddProductTabSeller from "./scenes/seller_panel/product/add_product/AddPr
 import EditProductSeller from "./scenes/seller_panel/product/edit_product/EditProduct";
 import OrderShop from "./scenes/seller_panel/order/OrderShop";
 import SellerBankAccount from "./scenes/seller_panel/accounting/bank_account";
+import PosManagementSeller from "./scenes/seller_panel/pos_management/PosManagement";
+import SellerOrderDetails from "./scenes/seller_panel/order/SellerOrderDetails";
+import SettledAmountHistory from "./scenes/seller_panel/accounting/settled_amount_history";
 
 
 
@@ -88,6 +92,7 @@ const AppRouter = () => {
           <Route path="home" element={<HomeP1 />} />
 
           <Route path="profile" element={<Profile />} />
+
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="shop/:id" element={<ShopProducts />} />
           <Route path="shops" element={<ShopList />} />
@@ -125,7 +130,7 @@ const AppRouter = () => {
           <Route path="/ecom/product/seller" element={<SellerProducts />} />
           <Route path="/ecom/product/attribute" element={<Attribute />} />
           <Route path="/ecom/product/edit/:id" element={<EditProduct />} />
-
+          <Route path="related-product-add" element={<RelatedProductAdd />} />
           {/* Order Routes */}
           <Route path="/ecom/order/all" element={<AllOrdersEcom />} />
           <Route path="/ecom/order/completed" element={<CompletedOrders />} />
@@ -176,6 +181,9 @@ const AppRouter = () => {
           <Route path="add/product" element={<AddProductTabSeller />} />
           <Route path="edit/product/:id" element={<EditProduct />} />
           <Route path="orders" element={<OrderShop />} />
+          <Route path="pos" element={<PosManagementSeller />} />
+          <Route path="orders/:id" element={<SellerOrderDetails />} />
+          <Route path="accounting/settled-amount-history" element={<SettledAmountHistory />} />
 
         </Route>
       </Routes>

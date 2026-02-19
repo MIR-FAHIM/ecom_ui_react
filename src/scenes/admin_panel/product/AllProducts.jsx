@@ -20,7 +20,7 @@ import {
   Tooltip,
   MenuItem ,
 } from "@mui/material";
-import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
+import { Visibility, Edit, Delete, Refresh, Search, Link } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import { image_file_url } from "../../../api/config/index.jsx";
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller.jsx";
@@ -168,6 +168,10 @@ const AllProducts = () => {
     console.log("Edit product:", productId);
     // TODO: Navigate to edit product page
 navigate(`/ecom/product/edit/${productId}`);
+  };
+
+  const handleRelated = (productId) => {
+    navigate(`/related-product-add?product_id=${productId}`);
   };
 
   const handleDelete = (productId) => {
@@ -464,6 +468,15 @@ navigate(`/ecom/product/edit/${productId}`);
                              
                             >
                               <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Related">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRelated(product.id)}
+                              sx={{ color: colors.blueAccent[300] }}
+                            >
+                              <Link fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         </TableCell>

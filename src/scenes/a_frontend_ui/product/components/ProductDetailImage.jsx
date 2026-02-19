@@ -56,14 +56,18 @@ const ProductDetailImage = ({
 						e.currentTarget.src = "/assets/images/placeholder.png";
 					}}
 					sx={{
-						width: "100%",
-						height: "100%",
+						width: "auto",
+						height: "auto",
+						maxWidth: "100%",
+						maxHeight: "100%",
 						objectFit: "contain",
-						transform: `scale(${zoom})`,
+						objectPosition: "center",
+						transform: `scale(${Math.min(zoom, 1)})`,
 						transformOrigin: "center",
 						transition: "transform 180ms ease",
 						filter: "saturate(1.06)",
-						p: 2,
+						display: "block",
+						p: 0,
 					}}
 				/>
 
@@ -84,7 +88,7 @@ const ProductDetailImage = ({
 					<Tooltip title="Zoom out">
 						<IconButton
 							size="small"
-							onClick={() => setZoom((z) => clamp(Number((z - 0.25).toFixed(2)), 0.75, 2.5))}
+							onClick={() => setZoom((z) => clamp(Number((z - 0.25).toFixed(2)), 0.75, 1))}
 							sx={{ borderRadius: 999 }}
 						>
 							<ZoomOutIcon fontSize="small" />
@@ -94,7 +98,7 @@ const ProductDetailImage = ({
 					<Tooltip title="Zoom in">
 						<IconButton
 							size="small"
-							onClick={() => setZoom((z) => clamp(Number((z + 0.25).toFixed(2)), 0.75, 2.5))}
+							onClick={() => setZoom((z) => clamp(Number((z + 0.25).toFixed(2)), 0.75, 1))}
 							sx={{ borderRadius: 999 }}
 						>
 							<ZoomInIcon fontSize="small" />
@@ -122,14 +126,20 @@ const ProductDetailImage = ({
 					}}
 				>
 					{images.map((img) => {
-						const src = buildImageUrl(img.file_name);
-						const selected = img.file_name === mainImagePath;
+						const uploadPath = img?.upload?.file_name || img?.upload?.url || "";
+						const src = uploadPath
+							? buildImageUrl
+								? buildImageUrl(uploadPath)
+								: `https://api.jashorebro.com/public/storage/${uploadPath}`
+							: "";
+						console.log("Image src:", src);
+						const selected = img.upload?.file_name === mainImagePath;
 
 						return (
 							<Box
 								key={img.id}
 								onClick={() => {
-									onSelectImage(img.file_name);
+									onSelectImage(img.upload?.file_name);
 									setZoom(1);
 								}}
 								sx={{

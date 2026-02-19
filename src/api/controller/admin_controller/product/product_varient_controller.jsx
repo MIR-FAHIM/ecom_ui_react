@@ -23,3 +23,23 @@ export const getRelatedProducts = async (id) => {
     return [];
   }
 }
+export const addRelatedProducts = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/related-products/add`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching addRelatedProducts:", error);
+    return [];
+  }
+}
+export const getProductAttributes = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/api/product-attributes/list?product_id=${id}`,
+       
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getProductAttributes:", error);
+    return [];
+  }
+}

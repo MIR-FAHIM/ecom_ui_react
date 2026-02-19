@@ -100,7 +100,7 @@ function EditProduct() {
 			const [cRes, bRes, vRes] = await Promise.all([
 				getCategory(),
 				getBrand(),
-				getAllShops({ page: 1, per_page: 100 }),
+				getAllShops(),
 			]);
 
 			setCategories(normalizeList(cRes));
@@ -111,31 +111,40 @@ function EditProduct() {
 		}
 	};
 
+				productId={id}
 	const buildImageList = (product) => {
 		const list = [];
+		const primary = product?.primary_image || null;
 
-		if (product?.primary_image) {
+		if (primary?.file_name || primary?.url) {
 			list.push({
 				file: null,
-				media_id: product.primary_image.id,
-				file_name: product.primary_image.file_name,
-				filename: product.primary_image.file_original_name || product.primary_image.file_name,
-				url: product.primary_image.url,
+				media_id: primary?.id ?? primary?.media_id,
+				file_name: primary?.file_name || primary?.url || "",
+				filename: primary?.file_original_name || primary?.file_name || "",
+				url: primary?.url || null,
 				is_primary: true,
 			});
 		}
 
 		const extra = Array.isArray(product?.images) ? product.images : [];
 		extra.forEach((img) => {
-			const mediaId = img?.id ?? img?.media_id;
+			const upload = img?.upload || null;
+			const mediaId = upload?.id ?? img?.id ?? img?.media_id;
 			if (!mediaId) return;
 			if (list.some((x) => String(x.media_id) === String(mediaId))) return;
 			list.push({
 				file: null,
 				media_id: mediaId,
-				file_name: img?.file_name || img?.image,
-				filename: img?.file_original_name || img?.file_name || img?.image,
-				url: img?.url,
+				file_name: upload?.file_name || upload?.url || img?.file_name || img?.image || "",
+				filename:
+					upload?.file_original_name ||
+					upload?.file_name ||
+					img?.file_original_name ||
+					img?.file_name ||
+					img?.image ||
+					"",
+				url: upload?.url || img?.url || null,
 				is_primary: !!img?.is_primary,
 			});
 		});
@@ -271,7 +280,7 @@ function EditProduct() {
 				nextErrors.images = "At least one image is required";
 			} else {
 				const primaryCount = images.filter((i) => i.is_primary).length;
-				if (primaryCount !== 1) nextErrors.images = "Exactly one image must be primary";
+			
 			}
 		}
 
@@ -382,6 +391,7 @@ function EditProduct() {
 					value={attributes}
 					onAdd={(attr) => setAttributes((prev) => [...prev, attr])}
 					onRemove={(idx) => setAttributes((prev) => prev.filter((_, i) => i !== idx))}
+					productId={id}
 				/>
 			);
 		}
@@ -391,15 +401,7 @@ function EditProduct() {
 				value={images}
 				error={errors.images}
 				onAdd={(img) => setImages((prev) => [...prev, img])}
-				onRemove={(idx) => {
-					setImages((prev) => {
-						const next = prev.filter((_, i) => i !== idx);
-						if (next.length > 0 && !next.some((x) => x.is_primary)) {
-							next[0] = { ...next[0], is_primary: true };
-						}
-						return next;
-					});
-				}}
+				onChange={setImages}
 				onPrimary={(idx) => {
 					setImages((prev) =>
 						prev.map((x, i) => ({

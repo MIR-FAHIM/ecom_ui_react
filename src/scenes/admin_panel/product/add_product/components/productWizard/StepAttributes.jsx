@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Grid,
@@ -16,13 +16,17 @@ import {
   getAttributes,
   getAttributeDetails,
 } from "../../../../../../api/controller/admin_controller/product/setting_controller";
+import { getProductAttributes } from "../../../../../../api/controller/admin_controller/product/product_varient_controller";
 
-function StepAttributes({ value = [], onAdd, onRemove }) {
+function StepAttributes({ value = [], onAdd, onRemove, productId }) {
   const [attributesList, setAttributesList] = useState([]);
   const [selectedAttrId, setSelectedAttrId] = useState("");
   const [attrValues, setAttrValues] = useState([]);
   const [selectedValue, setSelectedValue] = useState("");
   const [stock, setStock] = useState(0);
+  const loadedExistingRef = useRef(false);
+
+  const getAttributeKey = (attrId, valueId) => `${attrId ?? ""}-${valueId ?? ""}`;
 
   useEffect(() => {
     const fetchAttributes = async () => {
@@ -38,6 +42,44 @@ function StepAttributes({ value = [], onAdd, onRemove }) {
 
     fetchAttributes();
   }, []);
+
+  useEffect(() => {
+    const loadExistingAttributes = async () => {
+      if (!productId || loadedExistingRef.current || value.length > 0) return;
+      loadedExistingRef.current = true;
+      try {
+        const res = await getProductAttributes(productId);
+        const payload = res?.data?.data ?? res?.data ?? {};
+        const rows = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
+        if (rows.length === 0) return;
+
+        const existing = new Set(
+          value.map((item) => getAttributeKey(item?.attribute_id, item?.attribute_value_id))
+        );
+
+        rows.forEach((row) => {
+          const key = getAttributeKey(row?.attribute_id, row?.attribute_value_id);
+          if (existing.has(key)) return;
+          existing.add(key);
+          onAdd({
+            attribute_id: Number(row?.attribute_id),
+            attribute_value_id: Number(row?.attribute_value_id),
+            name: row?.attribute?.name || "",
+            value: row?.value?.value || "",
+            stock: Number(row?.stock) || 0,
+          });
+        });
+      } catch (err) {
+        console.error("Failed to load product attributes", err);
+      }
+    };
+
+    loadExistingAttributes();
+  }, [productId, value, onAdd]);
 
   useEffect(() => {
     const fetchValues = async () => {

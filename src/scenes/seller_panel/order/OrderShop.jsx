@@ -92,6 +92,11 @@ const OrderShop = () => {
 		fetchOrders(0, next);
 	};
 
+	const handleViewDetails = (orderId) => {
+		if (!orderId) return;
+		navigate(`/seller/orders/${orderId}`);
+	};
+
 	const getStatusColor = (status) => {
 		const value = String(status || "").toLowerCase();
 		if (value === "pending") return "warning";
@@ -184,6 +189,7 @@ const OrderShop = () => {
 											"Payment",
 											"Total",
 											"Date",
+											"Actions",
 										].map((header) => (
 											<TableCell
 												key={header}
@@ -223,6 +229,19 @@ const OrderShop = () => {
 											</TableCell>
 											<TableCell>{formatCurrency(row?.line_total)}</TableCell>
 											<TableCell>{row?.created_at ? formatDate(row.created_at) : "-"}</TableCell>
+											<TableCell>
+												<Button
+													variant="outlined"
+													size="small"
+													sx={{ textTransform: "none", fontWeight: 700, color: colors.blueAccent[500], borderColor: colors.primary[500] }}
+													onClick={() =>
+														handleViewDetails(row?.order?.id ?? row?.order_id ?? row?.id)
+													}
+													disabled={!row?.order?.id && !row?.order_id && !row?.id}
+												>
+													View Details
+												</Button>
+											</TableCell>
 										</TableRow>
 									))}
 								</TableBody>

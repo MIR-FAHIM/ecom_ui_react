@@ -139,17 +139,9 @@ const ProductDetail = () => {
   // If you later add images[] with same shape, this will work.
   const images = useMemo(() => {
     const list = Array.isArray(product?.images) ? product.images : [];
-    // If item shape includes file_name, we can use it; otherwise ignore safely
-    const normalized = list
-      .map((x) => ({
-        id: x?.id ?? `${x?.file_name ?? x?.image ?? Math.random()}`,
-        file_name: x?.file_name ?? x?.image ?? null,
-        is_primary: Boolean(x?.is_primary),
-      }))
-      .filter((x) => !!x.file_name);
 
     // Ensure primary first
-    return normalized.sort((a, b) => Number(b.is_primary) - Number(a.is_primary));
+    return list;
   }, [product?.images]);
 
   const mainImagePath = useMemo(() => {

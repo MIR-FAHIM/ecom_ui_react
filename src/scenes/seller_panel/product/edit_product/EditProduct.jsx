@@ -100,7 +100,6 @@ function EditProduct() {
 			const [cRes, bRes, vRes] = await Promise.all([
 				getCategory(),
 				getBrand(),
-				getAllShops({ page: 1, per_page: 100 }),
 			]);
 
 			setCategories(normalizeList(cRes));
@@ -159,7 +158,6 @@ function EditProduct() {
 	};
 
 	const loadProduct = async () => {
-		if (!id) return;
 		setFetching(true);
 		setErrorMessage("");
 		try {
@@ -169,6 +167,7 @@ function EditProduct() {
 				setErrorMessage("Unable to load product details.");
 				return;
 			}
+				productId={id}
 
 			setGeneral({
 				...DEFAULT_GENERAL,
@@ -382,6 +381,7 @@ function EditProduct() {
 					value={attributes}
 					onAdd={(attr) => setAttributes((prev) => [...prev, attr])}
 					onRemove={(idx) => setAttributes((prev) => prev.filter((_, i) => i !== idx))}
+					productId={id}
 				/>
 			);
 		}
@@ -391,15 +391,7 @@ function EditProduct() {
 				value={images}
 				error={errors.images}
 				onAdd={(img) => setImages((prev) => [...prev, img])}
-				onRemove={(idx) => {
-					setImages((prev) => {
-						const next = prev.filter((_, i) => i !== idx);
-						if (next.length > 0 && !next.some((x) => x.is_primary)) {
-							next[0] = { ...next[0], is_primary: true };
-						}
-						return next;
-					});
-				}}
+				onChange={setImages}
 				onPrimary={(idx) => {
 					setImages((prev) =>
 						prev.map((x, i) => ({

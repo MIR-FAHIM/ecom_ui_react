@@ -34,6 +34,7 @@ import ShopManage from "./admin_panel/seller/EditSellerTab";
 import WebsiteLogoSetting from "./admin_panel/setting/website_logo_setting";
 import ShippingCostSetting from "./admin_panel/setting/shipping_cost";
 import PosManagement from "./admin_panel/pos_management/PosManagement";
+import RelatedProductAdd from "./admin_panel/product/add_product/components/RelatedProductAdd";
 
 
 
@@ -69,6 +70,9 @@ import AddProductTabSeller from "./seller_panel/product/add_product/AddProductTa
 import EditProductSeller from "./seller_panel/product/edit_product/EditProduct";
 import OrderShop from "./seller_panel/order/OrderShop";
 import SellerBankAccount from "./seller_panel/accounting/bank_account";
+import PosManagementSeller from "./seller_panel/pos_management/PosManagement";
+import SellerOrderDetails from "./seller_panel/order/SellerOrderDetails";
+import SettledAmountHistory from "./seller_panel/accounting/settled_amount_history";
 
 
 export {
@@ -107,6 +111,7 @@ export {
   ShippingCostSetting,
   PosManagement,
 Privacy,
+RelatedProductAdd,
 
   // user frontend
   HomeP1,
@@ -137,4 +142,7 @@ Privacy,
   EditProductSeller,
   OrderShop,
   SellerBankAccount,
+  PosManagementSeller,
+  SellerOrderDetails,
+  SettledAmountHistory,
 };

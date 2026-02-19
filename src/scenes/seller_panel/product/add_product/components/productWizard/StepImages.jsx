@@ -1,25 +1,96 @@
-import React, { useRef, useState } from "react";
-import {
-  Box,
-  Grid,
-  Button,
-  Typography,
-  Divider,
-  Card,
-  CardContent,
-  Chip,
-  FormHelperText,
-} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import { Box, Button, Typography, Divider, Card, CardContent, Chip, FormHelperText } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import AllMedia from "../../../../../admin_panel/media/AllMedia";
 import { image_file_url } from "../../../../../../api/config";
+import {
+  deleteProductImage,
+  getProductImages,
+} from "../../../../../../api/controller/admin_controller/product/product_setting_controller";
 
-function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
+function StepImages({ value = [], onChange, onPrimary, error = "", productId }) {
   const fileInputRef = useRef(null);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
+  const [loadingImages, setLoadingImages] = useState(false);
+
+  const ensurePrimary = (list) => {
+    if (list.length === 0) return list;
+    if (list.some((x) => x.is_primary)) return list;
+    const next = [...list];
+    next[0] = { ...next[0], is_primary: true };
+    return next;
+  };
+
+  const updateImages = (next) => {
+    if (!onChange) return;
+    onChange(ensurePrimary(next));
+  };
+
+  const removeAtIndex = (idx) => {
+    updateImages(value.filter((_, i) => i !== idx));
+  };
+
+  const getImageKey = (img) => String(img?.media_id ?? img?.id ?? img?.file_name ?? img?.filename ?? "");
+
+  const mapServerImage = (img) => {
+    const upload = img?.upload || null;
+    const mediaId = img?.media_id ?? upload?.id ?? img?.id ?? null;
+    return {
+      file: null,
+      media_id: mediaId,
+      file_name: upload?.file_name || img?.file_name || img?.image || "",
+      filename:
+        upload?.file_original_name ||
+        upload?.file_name ||
+        img?.file_original_name ||
+        img?.file_name ||
+        img?.image ||
+        "",
+      url: upload?.url || img?.url || null,
+      is_primary: Boolean(img?.is_primary ?? img?.is_primary_image ?? img?.primary),
+    };
+  };
+
+  const normalizeList = (x) => {
+    if (!x) return [];
+    if (Array.isArray(x)) return x;
+    if (Array.isArray(x?.data)) return x.data;
+    if (Array.isArray(x?.data?.data)) return x.data.data;
+    if (Array.isArray(x?.data?.data?.data)) return x.data.data.data;
+    return [];
+  };
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!productId || !onChange) return;
+      setLoadingImages(true);
+      try {
+        const res = await getProductImages(productId);
+        const list = normalizeList(res?.data ?? res);
+        const serverImages = list.map(mapServerImage).filter((img) => img.media_id || img.file_name);
+        const existingKeys = new Set(value.map(getImageKey));
+        const merged = [...value];
+        serverImages.forEach((img) => {
+          const key = getImageKey(img);
+          if (!key || existingKeys.has(key)) return;
+          existingKeys.add(key);
+          merged.push(img);
+        });
+        updateImages(merged);
+      } catch (err) {
+        console.error("Failed to load product images", err);
+      } finally {
+        setLoadingImages(false);
+      }
+    };
+
+    loadImages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId]);
 
   const handleFileSelect = (event) => {
     const files = event.target.files;
@@ -33,11 +104,15 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
       }
 
       // Add file object with is_primary flag
-      onAdd({
-        file: file,
-        filename: file.name,
-        is_primary: value.length === 0, // first image is primary by default
-      });
+      const next = [
+        ...value,
+        {
+          file: file,
+          filename: file.name,
+          is_primary: value.length === 0, // first image is primary by default
+        },
+      ];
+      updateImages(next);
     });
 
     // Reset input
@@ -48,13 +123,40 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
     if (!itemOrItems) return;
     const items = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
     items.forEach((it) => {
-      onAdd({
-        file: null,
-        media_id: it.id,
-        filename: it.file_original_name || it.file_name,
-        is_primary: value.length === 0 || !value.some((v) => v.is_primary),
-      });
+      const next = [
+        ...value,
+        {
+          file: null,
+          media_id: it.id,
+          filename: it.file_original_name || it.file_name,
+          is_primary: value.length === 0 || !value.some((v) => v.is_primary),
+        },
+      ];
+      updateImages(next);
     });
+  };
+
+  const handleRemove = async (img, idx) => {
+    if (!img || !onChange) return;
+    const mediaId = img?.media_id ?? img?.id ?? null;
+    if (!mediaId || img?.file) {
+      removeAtIndex(idx);
+      return;
+    }
+
+    try {
+      setRemovingId(mediaId);
+      const res = await deleteProductImage(mediaId);
+      if (res?.status && res.status !== "success") {
+        console.error("Failed to delete product image", res);
+        return;
+      }
+      removeAtIndex(idx);
+    } catch (err) {
+      console.error("Failed to delete product image", err);
+    } finally {
+      setRemovingId(null);
+    }
   };
 
   return (
@@ -111,6 +213,11 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
       <Divider sx={{ my: 2, opacity: 0.2 }} />
 
       {/* Images List */}
+      {loadingImages ? (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Loading images...
+        </Typography>
+      ) : null}
       {value.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           No images added yet. Upload at least one image.
@@ -166,7 +273,13 @@ function StepImages({ value = [], onAdd, onRemove, onPrimary, error = "" }) {
                     </Button>
                   )}
 
-                  <Button size="small" color="error" variant="outlined" onClick={() => onRemove(idx)}>
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    onClick={() => handleRemove(img, idx)}
+                    disabled={removingId != null}
+                  >
                     Remove
                   </Button>
                 </Box>
