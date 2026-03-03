@@ -7,15 +7,9 @@ import {
   Grid,
   Typography,
   Button,
-  Divider,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
   Stack,
   Chip,
-  IconButton,
-  Tooltip,
   useTheme,
 } from "@mui/material";
 
@@ -24,8 +18,11 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import InsightsIcon from "@mui/icons-material/Insights";
-import AddIcon from "@mui/icons-material/Add";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CategoryIcon from "@mui/icons-material/Category";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 
 import { dashboardReport } from "../../../api/controller/admin_controller/report/report_controller";
 import { tokens } from "../../../theme";
@@ -33,8 +30,8 @@ import { tokens } from "../../../theme";
 const moneyBDT = (n) =>
   new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
 
-const MetricCard = ({ title, value, icon, themeBits, onClick, accent = "a" }) => {
-  const { divider, surface, surface2, ink, subInk, brandGradient, brandGlow, accents } = themeBits;
+const StatCard = ({ title, value, icon, themeBits, accent = "a", footer, onClick }) => {
+  const { divider, surface, surface2, ink, subInk, brandGlow, accents } = themeBits;
 
   const accentBg =
     accent === "a" ? accents.a :
@@ -49,14 +46,13 @@ const MetricCard = ({ title, value, icon, themeBits, onClick, accent = "a" }) =>
         borderRadius: 4,
         border: `1px solid ${divider}`,
         background: surface,
-        backdropFilter: "blur(12px)",
         cursor: onClick ? "pointer" : "default",
         transition: "transform 140ms ease, box-shadow 200ms ease, border-color 200ms ease",
         "&:hover": onClick
           ? {
               transform: "translateY(-2px)",
               boxShadow: `0 18px 38px ${brandGlow}`,
-              borderColor: "rgba(255,255,255,0.20)",
+              borderColor: "rgba(0,0,0,0.06)",
             }
           : undefined,
       }}
@@ -64,10 +60,10 @@ const MetricCard = ({ title, value, icon, themeBits, onClick, accent = "a" }) =>
       <CardContent sx={{ p: 2 }}>
         <Stack direction="row" spacing={1.2} alignItems="center" justifyContent="space-between">
           <Box>
-            <Typography variant="body2" sx={{ color: subInk, fontWeight: 900 }}>
+            <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
               {title}
             </Typography>
-            <Typography sx={{ fontSize: 22, fontWeight: 950, color: ink, lineHeight: 1.1, mt: 0.6 }}>
+            <Typography sx={{ fontSize: 22, fontWeight: 900, color: ink, lineHeight: 1.1, mt: 0.6 }}>
               {value}
             </Typography>
           </Box>
@@ -81,35 +77,16 @@ const MetricCard = ({ title, value, icon, themeBits, onClick, accent = "a" }) =>
               placeItems: "center",
               border: `1px solid ${divider}`,
               background: accentBg,
-              boxShadow: `0 14px 28px ${brandGlow}`,
+              color: ink,
             }}
           >
             {icon}
           </Box>
         </Stack>
 
-        <Box sx={{ mt: 1.2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Chip
-            size="small"
-            label="View"
-            sx={{
-              borderRadius: 999,
-              fontWeight: 900,
-              background: surface2,
-              border: `1px solid ${divider}`,
-              color: ink,
-            }}
-          />
-          <Box
-            sx={{
-              width: 60,
-              height: 4,
-              borderRadius: 999,
-              background: brandGradient,
-              opacity: 0.9,
-            }}
-          />
-        </Box>
+        {footer ? (
+          <Box sx={{ mt: 1.6 }}>{footer}</Box>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -128,7 +105,6 @@ function Dashboard() {
     const ink = colors.blueAccent[800];
     const subInk =  colors.blueAccent[900];
 
-    const brandGradient = `linear-gradient(90deg, ${colors.blueAccent[400]}, ${colors.greenAccent[500]})`;
     const brandGlow = theme.palette.mode === "dark" ? "rgba(72, 90, 200, 0.25)" : "rgba(72, 90, 200, 0.18)";
 
     const accents = {
@@ -138,10 +114,10 @@ function Dashboard() {
       d: theme.palette.mode === "dark" ? "rgba(250,92,92,0.20)" : "rgba(250,92,92,0.12)",
     };
 
-    return { divider, surface, surface2, ink, subInk, brandGradient, brandGlow, accents };
+    return { divider, surface, surface2, ink, subInk, brandGlow, accents };
   }, [theme.palette, colors]);
 
-  const { divider, surface, surface2, ink, subInk, brandGradient, brandGlow } = themeBits;
+  const { divider, surface, surface2, ink, subInk, brandGlow } = themeBits;
 
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -166,422 +142,579 @@ function Dashboard() {
     load();
   }, []);
 
-  const breakdown = Array.isArray(metrics?.last_7_days_breakdown) ? metrics.last_7_days_breakdown : [];
+  const topCustomers = metrics?.top_customers ?? ["AR", "MS", "KT", "TL", "VR"];
+  const topBrands = metrics?.top_brands ?? [
+    { name: "Not Found", total: 4637393.25 },
+    { name: "Akij Health And Hygiene", total: 19046.39 },
+    { name: "Nautica", total: 2880 },
+  ];
+  const topCategories = metrics?.top_categories ?? [
+    { name: "Fruits & Vegetables", total: 25495 },
+    { name: "Cigars & Cigarettes", total: 18790 },
+    { name: "Breakfast", total: 11165.5 },
+  ];
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
-          background: theme.palette.background?.default || colors.primary[500],
-        backgroundImage:
-          theme.palette.mode === "dark"
-            ? `radial-gradient(1200px 700px at 10% 0%, rgba(104,112,250,0.12), transparent 55%),
-              radial-gradient(1200px 700px at 90% 5%, rgba(76,206,172,0.10), transparent 55%),
-              radial-gradient(1200px 700px at 50% 95%, rgba(226,114,110,0.10), transparent 55%)`
-            : `radial-gradient(1200px 700px at 10% 0%, rgba(104,112,250,0.20), transparent 55%),
-              radial-gradient(1200px 700px at 90% 5%, rgba(76,206,172,0.18), transparent 55%),
-              radial-gradient(1200px 700px at 50% 95%, rgba(226,114,110,0.16), transparent 55%)`,
-        p: 2.5,
+        background: theme.palette.background?.default || colors.primary[500],
+        p: { xs: 2, md: 2.5 },
       }}
     >
-      {/* Header */}
-      <Box
-        sx={{
-          mb: 2,
-          p: 2,
-          borderRadius: 4,
-          border: `1px solid ${divider}`,
-          background: surface,
-          backdropFilter: "blur(12px)",
-          display: "flex",
-          alignItems: { xs: "flex-start", md: "center" },
-          justifyContent: "space-between",
-          gap: 2,
-          flexWrap: "wrap",
-        }}
-      >
+      <Stack spacing={2.5}>
         <Box>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 950,
-              letterSpacing: -0.7,
-              background: brandGradient,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              lineHeight: 1.05,
-            }}
-          >
+          <Typography variant="h4" sx={{ fontWeight: 900, color: ink }}>
             Dashboard
           </Typography>
-          <Typography variant="body2" sx={{ mt: 0.6, color: subInk, fontWeight: 700 }}>
-            Live overview of products, orders, customers, and sales.
+          <Typography variant="body2" sx={{ mt: 0.5, color: subInk, fontWeight: 700 }}>
+            Overview of customers, sales, orders, and catalog performance.
           </Typography>
         </Box>
 
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Chip
-            icon={<InsightsIcon />}
-            label={loading ? "Refreshing..." : "Overview"}
-            sx={{
-              borderRadius: 999,
-              fontWeight: 900,
-              background: surface2,
-              border: `1px solid ${divider}`,
-              color: ink,
-            }}
-          />
-          <Button
-            onClick={() => navigate("/ecom/product/add")}
-            startIcon={<AddIcon />}
-            variant="contained"
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 950,
-              px: 2,
-              background: brandGradient,
-              color: colors.gray[900],
-              boxShadow: `0 16px 34px ${brandGlow}`,
-              "&:hover": { filter: "saturate(1.1)", boxShadow: `0 20px 40px ${brandGlow}` },
-            }}
-          >
-            Add product
-          </Button>
-        </Stack>
-      </Box>
-
-      <Divider sx={{ mb: 2.5, opacity: 0.12 }} />
-
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <Stack direction="row" spacing={1.2} alignItems="center">
-            <CircularProgress size={18} />
-            <Typography sx={{ color: subInk, fontWeight: 800 }}>Loading metrics...</Typography>
-          </Stack>
-        </Box>
-      ) : (
-        <>
-          {/* Metrics */}
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard
-                title="Products"
-                value={metrics?.products_count ?? 0}
-                icon={<Inventory2Icon />}
-                themeBits={themeBits}
-                accent="a"
-                onClick={() => navigate("/ecom/product/all")}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard
-                title="Shops"
-                value={metrics?.shops_count ?? 0}
-                icon={<StorefrontIcon />}
-                themeBits={themeBits}
-                accent="b"
-                onClick={() => navigate("/ecom/shop/all")}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard
-                title="Customers"
-                value={metrics?.customers_count ?? 0}
-                icon={<PeopleAltIcon />}
-                themeBits={themeBits}
-                accent="c"
-                onClick={() => navigate("/ecom/customer/all")}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <MetricCard
-                title="Orders"
-                value={metrics?.orders_count ?? 0}
-                icon={<ReceiptLongIcon />}
-                themeBits={themeBits}
-                accent="d"
-                onClick={() => navigate("/ecom/order/all")}
-              />
-            </Grid>
-          </Grid>
-
-          {/* Sales */}
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} md={4}>
-              <MetricCard
-                title="Total Sell"
-                value={moneyBDT(metrics?.total_sell ?? 0)}
-                icon={<InsightsIcon />}
-                themeBits={themeBits}
-                accent="c"
-                onClick={() => navigate("/ecom/report/all")}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <MetricCard
-                title="Today Sell"
-                value={moneyBDT(metrics?.today_sell ?? 0)}
-                icon={<InsightsIcon />}
-                themeBits={themeBits}
-                accent="a"
-                onClick={() => navigate("/ecom/report/today")}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <MetricCard
-                title="Last 7 Days"
-                value={moneyBDT(metrics?.last_7_days_sell ?? 0)}
-                icon={<InsightsIcon />}
-                themeBits={themeBits}
-                accent="b"
-                onClick={() => navigate("/ecom/report/weekly")}
-              />
-            </Grid>
-          </Grid>
-
-          {/* Breakdown + Summary */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={8}>
-              <Card
-                sx={{
-                  borderRadius: 4,
-                  border: `1px solid ${divider}`,
-                  background: surface,
-                  backdropFilter: "blur(12px)",
-                }}
-              >
-                <CardContent sx={{ p: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                    <Box>
-                      <Typography sx={{ fontWeight: 950, color: ink }}>
-                        Sales Breakdown (Last 7 Days)
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: subInk, fontWeight: 700, mt: 0.4 }}>
-                        Daily totals for quick monitoring.
-                      </Typography>
-                    </Box>
-
-                    <Tooltip title="View reports">
-                      <IconButton
-                        onClick={() => navigate("/ecom/report/weekly")}
-                        sx={{
-                          borderRadius: 3,
-                          border: `1px solid ${divider}`,
-                          background: surface2,
-                          "&:hover": { background: surface },
-                        }}
-                      >
-                        <ArrowForwardIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-
-                  <Divider sx={{ my: 1.2, opacity: 0.12 }} />
-
-                  {breakdown.length === 0 ? (
-                    <Box sx={{ p: 2, borderRadius: 3, border: `1px solid ${divider}`, background: surface2 }}>
-                      <Typography sx={{ fontWeight: 900, color: ink }}>No breakdown data</Typography>
-                      <Typography variant="body2" sx={{ color: subInk, fontWeight: 700, mt: 0.4 }}>
-                        The API did not return last_7_days_breakdown.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <List dense sx={{ p: 0 }}>
-                      {breakdown.map((d) => (
-                        <ListItem
-                          key={d.date}
-                          sx={{
-                            borderRadius: 3,
-                            mb: 1,
-                            border: `1px solid ${divider}`,
-                            background: surface2,
-                          }}
-                        >
-                          <ListItemText
-                            primary={
-                              <Typography sx={{ fontWeight: 900, color: ink }}>
-                                {d.date}
-                              </Typography>
-                            }
-                            secondary={
-                              <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
-                                {moneyBDT(d.total)}
-                              </Typography>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  borderRadius: 4,
-                  border: `1px solid ${divider}`,
-                  background: surface,
-                  backdropFilter: "blur(12px)",
-                  height: "100%",
-                }}
-              >
-                <CardContent sx={{ p: 2 }}>
-                  <Typography sx={{ fontWeight: 950, color: ink }}>Summary</Typography>
-                  <Divider sx={{ my: 1.2, opacity: 0.12 }} />
-
-                  <Stack spacing={1}>
-                    <Box
-                      sx={{
-                        p: 1.2,
-                        borderRadius: 3,
-                        border: `1px solid ${divider}`,
-                        background: surface2,
-                      }}
-                    >
-                      <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
-                        Active Carts
-                      </Typography>
-                      <Typography sx={{ fontWeight: 950, color: ink, fontSize: 18 }}>
-                        {metrics?.active_carts ?? 0}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        p: 1.2,
-                        borderRadius: 3,
-                        border: `1px solid ${divider}`,
-                        background: surface2,
-                      }}
-                    >
-                      <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
-                        Yesterday Sell
-                      </Typography>
-                      <Typography sx={{ fontWeight: 950, color: ink, fontSize: 18 }}>
-                        {moneyBDT(metrics?.yesterday_sell ?? 0)}
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <Divider sx={{ my: 1.6, opacity: 0.12 }} />
-
-                  <Button
-                    fullWidth
-                    onClick={() => navigate("/ecom/order/all")}
-                    sx={{
-                      borderRadius: 999,
-                      textTransform: "none",
-                      fontWeight: 950,
-                      background: brandGradient,
-                      color: colors.gray[900],
-                      boxShadow: `0 16px 34px ${brandGlow}`,
-                      "&:hover": { filter: "saturate(1.1)", boxShadow: `0 20px 40px ${brandGlow}` },
-                    }}
-                    variant="contained"
-                  >
-                    Manage orders
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Quick actions */}
-          <Box sx={{ mt: 3 }}>
-            <Typography sx={{ fontWeight: 950, color: ink, mb: 1.2 }}>Quick Actions</Typography>
-
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <Stack direction="row" spacing={1.2} alignItems="center">
+              <CircularProgress size={18} />
+              <Typography sx={{ color: subInk, fontWeight: 800 }}>Loading metrics...</Typography>
+            </Stack>
+          </Box>
+        ) : (
+          <Stack spacing={2.5}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={3}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 950,
-                    py: 1.25,
-                    background: brandGradient,
-                    color: colors.gray[900],
-                    boxShadow: `0 14px 30px ${brandGlow}`,
-                    "&:hover": { filter: "saturate(1.1)", boxShadow: `0 18px 36px ${brandGlow}` },
-                  }}
-                  onClick={() => navigate("/ecom/product/add")}
-                >
-                  Add Product
-                </Button>
+                <StatCard
+                  title="Total Customer"
+                  value={metrics?.customers_count ?? 0}
+                  icon={<PeopleAltIcon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="a"
+                  footer={
+                    <Stack spacing={1}>
+                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                        Top Customers
+                      </Typography>
+                      <Stack direction="row" spacing={0.8}>
+                        {topCustomers.map((initials, idx) => (
+                          <Box
+                            key={`${initials}-${idx}`}
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              border: `1px solid ${divider}`,
+                              background: surface2,
+                              display: "grid",
+                              placeItems: "center",
+                              fontSize: 11,
+                              fontWeight: 800,
+                              color: ink,
+                            }}
+                          >
+                            {initials}
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Stack>
+                  }
+                />
               </Grid>
 
               <Grid item xs={12} sm={6} md={3}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                       background: brandGradient,
-                    fontWeight: 950,
-                    py: 1.25,
-                    borderColor: divider,
-                    background: surface,
-                    "&:hover": { background: surface2, borderColor: theme.palette.primary.main },
-                  }}
-                  onClick={() => navigate("/ecom/order/all")}
-                >
-                  View Orders
-                </Button>
+                <StatCard
+                  title="Total Products"
+                  value={metrics?.products_count ?? 0}
+                  icon={<Inventory2Icon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="b"
+                  footer={
+                    <Stack spacing={0.7}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#33c24d" }} />
+                        <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                          Inhouse Products
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: ink, fontWeight: 800, ml: "auto" }}>
+                          {metrics?.inhouse_products_count ?? 0}
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#1f9ef4" }} />
+                        <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                          Sellers Products
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: ink, fontWeight: 800, ml: "auto" }}>
+                          {metrics?.seller_products_count ?? 0}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  }
+                />
               </Grid>
 
               <Grid item xs={12} sm={6} md={3}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 950,
-                       background: brandGradient,
-                    py: 1.25,
-                    borderColor: divider,
-                    background: surface,
-                    "&:hover": {  borderColor: theme.palette.primary.main },
-                  }}
-                  onClick={() => navigate("/ecom/product/all")}
-                >
-                  Manage Products
-                </Button>
+                <StatCard
+                  title="Total Sales"
+                  value={moneyBDT(metrics?.total_sell ?? 0)}
+                  icon={<InsightsIcon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="c"
+                  footer={
+                    <Stack spacing={1}>
+                      <Button
+                        onClick={() => navigate("/ecom/report/monthly")}
+                        variant="contained"
+                        sx={{
+                          borderRadius: 2.5,
+                          textTransform: "none",
+                          fontWeight: 800,
+                          background: "#0a8ef2",
+                          color: "#fff",
+                          justifyContent: "space-between",
+                          px: 1.8,
+                        }}
+                      >
+                        Sales this month
+                        <Typography component="span" sx={{ fontWeight: 900 }}>
+                          {moneyBDT(metrics?.this_month_sell ?? metrics?.today_sell ?? 0)}
+                        </Typography>
+                      </Button>
+                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                        Sales Stat
+                      </Typography>
+                      <Box sx={{ height: 12, display: "flex", alignItems: "center" }}>
+                        <Box sx={{ flex: 1, height: 3, borderRadius: 999, background: "#d8ecff" }} />
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: "#0a8ef2",
+                            ml: -1.2,
+                          }}
+                        />
+                      </Box>
+                      <Stack direction="row" spacing={1.5} sx={{ mt: 0.5 }}>
+                        <Stack direction="row" spacing={0.6} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#7a6bf6" }} />
+                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                            In-house Sales
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: ink, fontWeight: 800 }}>
+                            {moneyBDT(metrics?.inhouse_sell ?? 0)}
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={0.6} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#34c759" }} />
+                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                            Sellers Sales
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: ink, fontWeight: 800 }}>
+                            {moneyBDT(metrics?.seller_sell ?? 0)}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    </Stack>
+                  }
+                />
               </Grid>
 
               <Grid item xs={12} sm={6} md={3}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 950,
-                       background: brandGradient,
-                    py: 1.25,
-                    borderColor: divider,
-               
-                    "&:hover": {  borderColor: theme.palette.primary.main },
-                  }}
-                  onClick={() => navigate("/ecom/report/today")}
-                >
-                  View Reports
-                </Button>
+                <StatCard
+                  title="Total Sellers"
+                  value={metrics?.shops_count ?? 0}
+                  icon={<StorefrontIcon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="d"
+                  footer={
+                    <Stack spacing={1}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#33c24d" }} />
+                        <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                          Approved Sellers
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: ink, fontWeight: 800, ml: "auto" }}>
+                          {metrics?.approved_sellers_count ?? 0}
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5c5c" }} />
+                        <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                          Pending Seller
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: ink, fontWeight: 800, ml: "auto" }}>
+                          {metrics?.pending_sellers_count ?? 0}
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" spacing={0.8}>
+                        {["AR", "BR", "CR", "DR", "ER"].map((initials) => (
+                          <Box
+                            key={initials}
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: "50%",
+                              border: `1px solid ${divider}`,
+                              background: surface2,
+                              display: "grid",
+                              placeItems: "center",
+                              fontSize: 10,
+                              fontWeight: 800,
+                              color: ink,
+                            }}
+                          >
+                            {initials}
+                          </Box>
+                        ))}
+                      </Stack>
+                      <Stack spacing={0.8}>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            borderRadius: 2.5,
+                            textTransform: "none",
+                            fontWeight: 800,
+                            background: "#e7fff1",
+                            color: "#1a9b5f",
+                          }}
+                          onClick={() => navigate("/ecom/seller/all")}
+                        >
+                          All Sellers
+                        </Button>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            borderRadius: 2.5,
+                            textTransform: "none",
+                            fontWeight: 800,
+                            background: "#ffeef1",
+                            color: "#ff4d6d",
+                          }}
+                          onClick={() => navigate("/ecom/seller/pending")}
+                        >
+                          Pending Sellers
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  }
+                />
               </Grid>
             </Grid>
-          </Box>
-        </>
-      )}
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <StatCard
+                  title="Total Category"
+                  value={metrics?.categories_count ?? 0}
+                  icon={<CategoryIcon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="b"
+                  footer={
+                    <Stack spacing={0.7}>
+                      {[
+                        { name: "Fresh Vegetables", total: 849538.52, color: "#ff7aa2" },
+                        { name: "Basmati Rice", total: 293179.53, color: "#f7c04a" },
+                        { name: "Ghee Vog rice", total: 260147.11, color: "#60a5fa" },
+                      ].map((row) => (
+                        <Stack key={row.name} direction="row" alignItems="center" spacing={1}>
+                          <Box sx={{ width: 14, height: 4, borderRadius: 999, background: row.color }} />
+                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                            {row.name}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: ink, fontWeight: 800, ml: "auto" }}>
+                            {moneyBDT(row.total)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <StatCard
+                  title="Total Brands"
+                  value={metrics?.brands_count ?? 0}
+                  icon={<LocalOfferIcon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="a"
+                  footer={
+                    <Stack spacing={0.7}>
+                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                        Top Brands
+                      </Typography>
+                      {topBrands.map((row) => (
+                        <Stack key={row.name} direction="row" alignItems="center" spacing={1}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
+                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                            {row.name}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: ink, fontWeight: 800, ml: "auto" }}>
+                            {moneyBDT(row.total)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <StatCard
+                  title="Total Order"
+                  value={metrics?.orders_count ?? 0}
+                  icon={<ReceiptLongIcon fontSize="small" />}
+                  themeBits={themeBits}
+                  accent="c"
+                  footer={
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      sx={{
+                        borderRadius: 2.5,
+                        textTransform: "none",
+                        fontWeight: 800,
+                        background: "#8b5cf6",
+                      }}
+                      onClick={() => navigate("/ecom/order/all")}
+                    >
+                      All Orders
+                    </Button>
+                  }
+                />
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <Stack spacing={2}>
+                  <Card
+                    sx={{
+                      borderRadius: 4,
+                      border: `1px solid ${divider}`,
+                      background: "#f1f5ff",
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Stack direction="row" alignItems="center" spacing={1.2}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 2,
+                            background: "#e0e7ff",
+                            display: "grid",
+                            placeItems: "center",
+                            color: "#2563eb",
+                          }}
+                        >
+                          <ShoppingCartIcon fontSize="small" />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
+                            Order placed
+                          </Typography>
+                          <Typography sx={{ color: ink, fontWeight: 900 }}>
+                            {metrics?.orders_placed ?? 0}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+
+                  <Card
+                    sx={{
+                      borderRadius: 4,
+                      border: `1px solid ${divider}`,
+                      background: "#ecfdf5",
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Stack direction="row" alignItems="center" spacing={1.2}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 2,
+                            background: "#d1fae5",
+                            display: "grid",
+                            placeItems: "center",
+                            color: "#10b981",
+                          }}
+                        >
+                          <TaskAltIcon fontSize="small" />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
+                            Confirmed Order
+                          </Typography>
+                          <Typography sx={{ color: ink, fontWeight: 900 }}>
+                            {metrics?.orders_confirmed ?? 0}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+
+                  <Card
+                    sx={{
+                      borderRadius: 4,
+                      border: `1px solid ${divider}`,
+                      background: "#fef2f2",
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Stack direction="row" alignItems="center" spacing={1.2}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 2,
+                            background: "#fee2e2",
+                            display: "grid",
+                            placeItems: "center",
+                            color: "#ef4444",
+                          }}
+                        >
+                          <PendingActionsIcon fontSize="small" />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
+                            Processed Order
+                          </Typography>
+                          <Typography sx={{ color: ink, fontWeight: 900 }}>
+                            {metrics?.orders_processed ?? 0}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Stack>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Card
+                  sx={{
+                    borderRadius: 4,
+                    border: `1px solid ${divider}`,
+                    background: surface,
+                    height: "100%",
+                  }}
+                >
+                  <CardContent sx={{ p: 2 }}>
+                    <Typography sx={{ fontWeight: 900, color: ink }}>In-house Top Category</Typography>
+                    <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                      By Sales
+                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 1.2 }}>
+                      {[
+                        { label: "All", active: true },
+                        { label: "Today" },
+                        { label: "Week" },
+                        { label: "Month" },
+                      ].map((tab) => (
+                        <Chip
+                          key={tab.label}
+                          label={tab.label}
+                          size="small"
+                          sx={{
+                            borderRadius: 2,
+                            fontWeight: 800,
+                            background: tab.active ? "#0a8ef2" : surface2,
+                            color: tab.active ? "#fff" : subInk,
+                          }}
+                        />
+                      ))}
+                    </Stack>
+
+                    <Stack spacing={1.2} sx={{ mt: 2 }}>
+                      {topCategories.map((row) => (
+                        <Stack key={row.name} direction="row" alignItems="center" spacing={1}>
+                          <Box
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 2,
+                              border: `1px solid ${divider}`,
+                              background: surface2,
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
+                            {row.name}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#ff4d6d", fontWeight: 800, ml: "auto" }}>
+                            {moneyBDT(row.total)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Card
+                  sx={{
+                    borderRadius: 4,
+                    border: `1px solid ${divider}`,
+                    background: surface,
+                    height: "100%",
+                  }}
+                >
+                  <CardContent sx={{ p: 2 }}>
+                    <Typography sx={{ fontWeight: 900, color: ink }}>In-house Top Brands</Typography>
+                    <Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>
+                      By Sales
+                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 1.2 }}>
+                      {[
+                        { label: "All", active: true },
+                        { label: "Today" },
+                        { label: "Week" },
+                        { label: "Month" },
+                      ].map((tab) => (
+                        <Chip
+                          key={tab.label}
+                          label={tab.label}
+                          size="small"
+                          sx={{
+                            borderRadius: 2,
+                            fontWeight: 800,
+                            background: tab.active ? "#ff4d6d" : surface2,
+                            color: tab.active ? "#fff" : subInk,
+                          }}
+                        />
+                      ))}
+
+                    </Stack>
+                    <Stack spacing={1.2} sx={{ mt: 2 }}>
+                      {topBrands.map((row) => (
+                        <Stack key={row.name} direction="row" alignItems="center" spacing={1}>
+                          <Box
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 2,
+                              border: `1px solid ${divider}`,
+                              background: surface2,
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
+                            {row.name}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: "#ff4d6d", fontWeight: 800, ml: "auto" }}>
+                            {moneyBDT(row.total)}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Stack>
+        )}
+      </Stack>
     </Box>
   );
 }

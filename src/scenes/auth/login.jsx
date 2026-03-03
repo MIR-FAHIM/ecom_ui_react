@@ -107,7 +107,9 @@ const Login = () => {
           }
           if (userType === "seller") {
             navigate("/seller/dashboard");
-          } else {
+          } else if (userType === "admin") {
+            navigate("/admin");
+          }  else  {
             navigate("/");
           }
         }
