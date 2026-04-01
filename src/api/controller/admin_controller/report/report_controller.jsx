@@ -82,6 +82,38 @@ export const getShopMonthReport = async (shopId) => {
     return [];
   }
 }
+export const getAdminMonthReport = async () => {
+  
+  try {
+    const response = await axiosInstance.get(`/api/reports/orders/monthly`,
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching admin month report:", error);
+    return [];
+  }
+}
+export const getTodayReport = async () => {
+  
+  try {
+    const response = await axiosInstance.get(`/api/reports/today`,
+      {
+        headers: {
+          'token': localStorage.getItem("authToken"),// Add the token in Authorization header
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching today report:", error);
+    return [];
+  }
+}
 
 
 

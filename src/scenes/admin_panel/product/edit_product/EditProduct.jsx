@@ -111,7 +111,7 @@ function EditProduct() {
 		}
 	};
 
-				productId={id}
+			
 	const buildImageList = (product) => {
 		const list = [];
 		const primary = product?.primary_image || null;

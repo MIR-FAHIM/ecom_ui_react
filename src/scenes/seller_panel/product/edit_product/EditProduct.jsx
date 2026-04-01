@@ -316,7 +316,7 @@ function EditProduct() {
 			if (primaryMedia) productFormData.append("thumbnail_img", primaryMedia.media_id);
 
 			await updateProduct(id, productFormData);
-
+     
 			const imagesToUpload = images
 				.filter((img) => img.file)
 				.map((img) => ({ file: img.file, is_primary: img.is_primary }));
