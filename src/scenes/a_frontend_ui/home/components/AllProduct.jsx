@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, CircularProgress, Grid, Pagination, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
 import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import FeaturedTitle from "./FeaturedTitle";
 import SmartProductCard from "./ProductCard";

@@ -16,7 +16,7 @@ const AddCustomer = () => {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
+    password: "",   
     role: "customer",
     mobile: "",
     address: "",

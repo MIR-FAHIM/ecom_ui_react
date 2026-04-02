@@ -292,24 +292,22 @@ const Topbar = () => {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            gap: { xs: 0.6, sm: 1 },
-            flexWrap: { xs: "wrap", sm: "nowrap" },
-            justifyContent: { xs: "flex-end", sm: "flex-end" },
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: 0.6,
             width: { xs: "100%", sm: "auto" },
           }}
         >
-          <Tooltip title={t("topbar.becomeSeller")}>
-            <IconButton onClick={() => navigate("/seller/add")} sx={{ ...pillIconSx, display: { xs: "none", md: "inline-flex" } }}>
-              <StorefrontIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title={t("topbar.about")}>
-            <IconButton onClick={() => navigate("/about")} sx={{ ...pillIconSx, display: { xs: "none", md: "inline-flex" } }}>
-              <InfoOutlinedIcon />
-            </IconButton>
-          </Tooltip>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.6, sm: 1 },
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              justifyContent: { xs: "flex-end", sm: "flex-end" },
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
 
           <Tooltip title={t("lang.label")}>
             <Button
@@ -343,94 +341,94 @@ const Topbar = () => {
             <MenuItem onClick={() => handleLangChange("bn")}>{t("lang.bangla")}</MenuItem>
           </Menu>
 
-          <Tooltip title={t("topbar.wishlist")}>
-            <IconButton onClick={() => navigate("/wish")} sx={pillIconSx}>
-              <Badge badgeContent={wishCount} color="secondary">
-                <FavoriteIcon />
-              </Badge>
-            </IconButton>
-          </Tooltip>
+            <Tooltip title={t("topbar.wishlist")}>
+              <IconButton onClick={() => navigate("/wish")} sx={pillIconSx}>
+                <Badge badgeContent={wishCount} color="secondary">
+                  <FavoriteIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
 
           {/* Cart (highlighted, brand gradient) */}
-          <Tooltip title={t("topbar.cart")}>
-            <IconButton
-              onClick={() => navigate("/cart")}
-              sx={{
-                borderRadius: 3,
-                border: `1px solid ${border}`,
-                background: theme.palette.secondary.main,
-                color: colors.gray[900],
-                boxShadow: "none",
-                "&:hover": { opacity: 0.92, transform: "translateY(-1px)" },
-                transition: "transform 120ms ease, opacity 180ms ease",
-              }}
-            >
-              <Badge badgeContent={cartCount} color="error">
-                <ShoppingCartIcon />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-
-          {/* Profile */}
-          {user ? (
-            <>
-              <Tooltip title={t("topbar.menu.account")}>
-                <Button
-                  onClick={handleUserClick}
-                  aria-controls={menuOpen ? "user-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={menuOpen ? "true" : undefined}
-                  sx={{
-                    ml: 0.4,
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 900,
-                    border: `1px solid ${border}`,
-                    background: glass,
-                    px: 1.2,
-                    gap: 1,
-                    "&:hover": { background: glass2 },
-                  }}
-                  startIcon={
-                    <Avatar
-                      sx={{
-                        width: 26,
-                        height: 26,
-                        fontSize: 12,
-                        fontWeight: 900,
-                        background: colors.blueAccent[400],
-                        color: colors.gray[900],
-                        border: `1px solid ${border}`,
-                      }}
-                    >
-                      {initials}
-                    </Avatar>
-                  }
-                >
-                  <Box sx={{color: colors.primary[600], display: { xs: "none", md: "block" } }}>
-                    {user?.name || t("topbar.menu.profile")}
-                  </Box>
-                </Button>
-              </Tooltip>
-
-              <Menu
-                id="user-menu"
-                anchorEl={anchorEl}
-                open={menuOpen}
-                onClose={handleMenuClose}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-                PaperProps={{
-                  sx: {
-                    mt: 1,
-                    borderRadius: 4,
-                    minWidth: 250,
-                    overflow: "hidden",
-                    border: `1px solid ${border}`,
-                    background: colors.primary[500],
-                  },
+            <Tooltip title={t("topbar.cart")}>
+              <IconButton
+                onClick={() => navigate("/cart")}
+                sx={{
+                  borderRadius: 3,
+                  border: `1px solid ${border}`,
+                  background: theme.palette.secondary.main,
+                  color: colors.gray[900],
+                  boxShadow: "none",
+                  "&:hover": { opacity: 0.92, transform: "translateY(-1px)" },
+                  transition: "transform 120ms ease, opacity 180ms ease",
                 }}
               >
+                <Badge badgeContent={cartCount} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+
+          {/* Profile */}
+            {user ? (
+              <>
+                <Tooltip title={t("topbar.menu.account")}>
+                  <Button
+                    onClick={handleUserClick}
+                    aria-controls={menuOpen ? "user-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={menuOpen ? "true" : undefined}
+                    sx={{
+                      ml: 0.4,
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 900,
+                      border: `1px solid ${border}`,
+                      background: glass,
+                      px: 1.2,
+                      gap: 1,
+                      "&:hover": { background: glass2 },
+                    }}
+                    startIcon={
+                      <Avatar
+                        sx={{
+                          width: 26,
+                          height: 26,
+                          fontSize: 12,
+                          fontWeight: 900,
+                          background: colors.blueAccent[400],
+                          color: colors.gray[900],
+                          border: `1px solid ${border}`,
+                        }}
+                      >
+                        {initials}
+                      </Avatar>
+                    }
+                  >
+                    <Box sx={{ color: colors.primary[600], display: { xs: "none", md: "block" } }}>
+                      {user?.name || t("topbar.menu.profile")}
+                    </Box>
+                  </Button>
+                </Tooltip>
+
+                <Menu
+                  id="user-menu"
+                  anchorEl={anchorEl}
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  PaperProps={{
+                    sx: {
+                      mt: 1,
+                      borderRadius: 4,
+                      minWidth: 250,
+                      overflow: "hidden",
+                      border: `1px solid ${border}`,
+                      background: colors.primary[500],
+                    },
+                  }}
+                >
                 <Box sx={{ px: 2, pt: 2, pb: 1 }}>
                   <Typography sx={{  color: "text.secondary", fontWeight: 950 }}>{user?.name || t("topbar.menu.account")}</Typography>
                   <Typography variant="body3" sx={{ color: "text.secondary", fontWeight: 700 }}>
@@ -474,30 +472,66 @@ const Topbar = () => {
                   <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
                   {t("topbar.menu.logout")}
                 </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Button
-              onClick={() => navigate("/login")}
-              startIcon={<AccountCircleIcon />}
-              sx={{
-                ml: 0.4,
-                 color: colors.gray[100],
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 900,
-                border: `1px solid ${border}`,
-                background: glass,
-                sx: {
-                 
-                  px: 1.6,
-                  "&:hover": { background: glass2 },
-                }
-              }}
-            >
-              Login
-            </Button>
-          )}
+                </Menu>
+              </>
+            ) : (
+              <Button
+                onClick={() => navigate("/login")}
+                startIcon={<AccountCircleIcon />}
+                sx={{
+                  ml: 0.4,
+                  color: colors.gray[100],
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 900,
+                  border: `1px solid ${border}`,
+                  background: glass,
+                  sx: {
+                    px: 1.6,
+                    "&:hover": { background: glass2 },
+                  },
+                }}
+              >
+                Login
+              </Button>
+            )}
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Tooltip title={t("topbar.becomeSeller")}>
+              <Button
+                onClick={() => navigate("/seller/add")}
+                startIcon={<StorefrontIcon />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
+                  textTransform: "none",
+                  fontWeight: 800,
+                  color: colors.gray[100],
+                  px: 0.8,
+                  minWidth: 0,
+                }}
+              >
+                {t("topbar.becomeSeller")}
+              </Button>
+            </Tooltip>
+
+            <Tooltip title={t("topbar.about")}>
+              <Button
+                onClick={() => navigate("/about")}
+                startIcon={<InfoOutlinedIcon />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
+                  textTransform: "none",
+                  fontWeight: 800,
+                  color: colors.gray[100],
+                  px: 0.8,
+                  minWidth: 0,
+                }}
+              >
+                {t("topbar.about")}
+              </Button>
+            </Tooltip>
+          </Box>
         </Box>
       </Toolbar>
 
