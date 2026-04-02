@@ -2,6 +2,8 @@ import Navbar from "./layout/navbar";
 import SideBar from "./layout/sidebar";
 import Dashboard from "./admin_panel/dashboard";
 import Login from "./auth/login";
+import AdminLogin from "./auth/admin_login";
+import SellerLogin from "./auth/seller_login";
 import LoginOtp from "./auth/LoginOtp";
 
 // Ecommerce imports
@@ -49,6 +51,7 @@ import UserOrderDetails from "./a_frontend_ui/order/UserOrderDetails";
 import ProductDetail from "./a_frontend_ui/product/ProductDetail";
 import Cart from "./a_frontend_ui/order/cart";
 import ProceedOrder from "./a_frontend_ui/order/ProceedOrder";
+import OrderSuccessPage from "./a_frontend_ui/order/order_success_page";
 import CategoryWiseProduct from "./a_frontend_ui/product/category_wise/CategoryWiseProduct";
 import RelatedProduct from "./a_frontend_ui/product/related_product/RelatedProduct";
 import ProductReview from "./a_frontend_ui/product/review_product/ProductReview";
@@ -80,6 +83,8 @@ export {
   SideBar,
   Dashboard,
   Login,
+  AdminLogin,
+  SellerLogin,
   LoginOtp,
   AddProductTab,
   AllProducts,
@@ -122,6 +127,7 @@ RelatedProductAdd,
   ProductDetail,
   Cart,
   ProceedOrder,
+  OrderSuccessPage,
   Wish,
   CategoryWiseProduct,
   RelatedProduct,

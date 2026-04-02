@@ -379,7 +379,7 @@ const ProceedOrder = () => {
         setMsg(res?.data?.message || "Order placed");
         localStorage.setItem("cart", JSON.stringify(0));
         window.dispatchEvent(new Event("cart-updated"));
-        setTimeout(() => navigate("/"), 900);
+        setTimeout(() => navigate("/order-success"), 900);
       } else {
         setMsg(res?.data?.message || "Failed to place order");
       }

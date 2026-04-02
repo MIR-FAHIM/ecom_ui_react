@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Dashboard from "./scenes/admin_panel/dashboard";
 import Login from "./scenes/auth/login";
+import AdminLogin from "./scenes/auth/admin_login";
+import SellerLogin from "./scenes/auth/seller_login";
 import LoginOtp from "./scenes/auth/LoginOtp";
 import Register from "./scenes/auth/Register";
 import AddProductTab from "./scenes/admin_panel/product/add_product/AddProductTab";
@@ -51,6 +53,7 @@ import Terms from "./scenes/a_frontend_ui/pages/Terms";
 import About from "./scenes/a_frontend_ui/pages/About";
 import Contact from "./scenes/a_frontend_ui/pages/Contact";
 import ProceedOrder from "./scenes/a_frontend_ui/order/ProceedOrder";
+import OrderSuccessPage from "./scenes/a_frontend_ui/order/order_success_page";
 import Profile from "./scenes/a_frontend_ui/profile/Profile";
 import UserOrder from "./scenes/a_frontend_ui/order/UserOrder";
 import UserOrderDetails from "./scenes/a_frontend_ui/order/UserOrderDetails";
@@ -84,6 +87,8 @@ const AppRouter = () => {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/admin-login" element={<AdminLogin />}></Route>
+        <Route path="/seller-login" element={<SellerLogin />}></Route>
         <Route path="/login-otp" element={<LoginOtp />}></Route>
         <Route path="/register" element={<Register />}></Route>
         {/* Public / storefront routes */}
@@ -101,6 +106,7 @@ const AppRouter = () => {
           <Route path="orders" element={<UserOrder />} />
           <Route path="order/:id" element={<UserOrderDetails />} />
           <Route path="checkout" element={<ProceedOrder />} />
+          <Route path="order-success" element={<OrderSuccessPage />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="terms" element={<Terms />} />
           <Route path="about" element={<About />} />

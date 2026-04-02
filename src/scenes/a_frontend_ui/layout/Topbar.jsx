@@ -500,7 +500,7 @@ const Topbar = () => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", justifyContent: "flex-end" }}>
             <Tooltip title={t("topbar.becomeSeller")}>
               <Button
-                onClick={() => navigate("/seller/add")}
+                onClick={() => navigate("/seller-login")}
                 startIcon={<StorefrontIcon />}
                 sx={{
                   display: { xs: "none", md: "inline-flex" },
