@@ -12,7 +12,6 @@ const UserOrder = () => {
   const surface2 = colors.primary[300];
   const ink = colors.gray[100];
   const subInk = colors.gray[300];
-
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
