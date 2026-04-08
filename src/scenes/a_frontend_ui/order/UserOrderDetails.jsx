@@ -246,7 +246,7 @@ const UserOrderDetails = () => {
                 sx={{
                   borderRadius: 999,
                   textTransform: "none",
-                  fontWeight: 800,
+                  fontWeight: 600,
                   px: 2,
                   borderColor: "transparent",
                   background: blueGrey[500],
@@ -261,7 +261,7 @@ const UserOrderDetails = () => {
                   fontWeight={900}
                   sx={{
                     lineHeight: 1.05,
-                    letterSpacing: -0.6,
+                    letterSpacing: "-0.02em",
                     color: theme.palette.secondary.main,
                   }}
                 >
@@ -278,7 +278,7 @@ const UserOrderDetails = () => {
                     label={statusMeta.label}
                     color={statusMeta.tone}
                     size="small"
-                    sx={{ borderRadius: 999, fontWeight: 800, textTransform: "capitalize" }}
+                    sx={{ borderRadius: 999, fontWeight: 600, textTransform: "capitalize" }}
                   />
 
                   <Chip
@@ -289,7 +289,7 @@ const UserOrderDetails = () => {
                     size="small"
                     sx={{
                       borderRadius: 999,
-                      fontWeight: 800,
+                      fontWeight: 600,
                       borderColor: "transparent",
                       background: surface2,
                     }}
@@ -344,7 +344,7 @@ const UserOrderDetails = () => {
                   <CalendarMonth fontSize="small" />
                 </Box>
                 <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                     ORDER DATE
                   </Typography>
                   <Typography fontWeight={800} sx={{ mt: 0.4 }}>
@@ -382,7 +382,7 @@ const UserOrderDetails = () => {
                   <ReceiptLong fontSize="small" />
                 </Box>
                 <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                     ITEMS
                   </Typography>
                   <Typography fontWeight={900} sx={{ mt: 0.4, fontSize: 22 }}>
@@ -420,7 +420,7 @@ const UserOrderDetails = () => {
                   <Payments fontSize="small" />
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                     TOTAL
                   </Typography>
                   <Typography
@@ -480,7 +480,7 @@ const UserOrderDetails = () => {
                     sx={{
                       width: 40,
                       height: 40,
-                      fontWeight: 900,
+                      fontWeight: 600,
                       borderRadius: 3,
                       background: theme.palette.secondary.main,
                       color: colors.gray[900],
@@ -490,7 +490,7 @@ const UserOrderDetails = () => {
                     {getInitials(order.customer_name)}
                   </Avatar>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                       NAME
                     </Typography>
                     <Typography fontWeight={850} noWrap>
@@ -502,7 +502,7 @@ const UserOrderDetails = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                         PHONE
                       </Typography>
                       <Typography fontWeight={800}>{order.customer_phone || "N/A"}</Typography>
@@ -511,7 +511,7 @@ const UserOrderDetails = () => {
 
                   <Grid item xs={12} sm={6}>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                         USER ID
                       </Typography>
                       <Typography fontWeight={800}>{order.user_id ?? "N/A"}</Typography>
@@ -558,7 +558,7 @@ const UserOrderDetails = () => {
 
               <Stack spacing={1.7}>
                 <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                     ADDRESS
                   </Typography>
                   <Typography fontWeight={800} sx={{ mt: 0.3 }}>
@@ -569,7 +569,7 @@ const UserOrderDetails = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                         ZONE
                       </Typography>
                       <Typography fontWeight={800}>{order.zone || "N/A"}</Typography>
@@ -577,7 +577,7 @@ const UserOrderDetails = () => {
                   </Grid>
                   <Grid item xs={12} sm={4}>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                         DISTRICT
                       </Typography>
                       <Typography fontWeight={800}>{order.district || "N/A"}</Typography>
@@ -585,7 +585,7 @@ const UserOrderDetails = () => {
                   </Grid>
                   <Grid item xs={12} sm={4}>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                         AREA
                       </Typography>
                       <Typography fontWeight={800}>{order.area || "N/A"}</Typography>
@@ -603,7 +603,7 @@ const UserOrderDetails = () => {
                       boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.1)",
                     }}
                   >
-                    <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.8, color: "text.secondary" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
                       NOTE
                     </Typography>
                     <Typography sx={{ mt: 0.5, fontWeight: 700 }}>{order.note}</Typography>
@@ -668,7 +668,7 @@ const UserOrderDetails = () => {
               <TableHead
                 sx={{
                   "& th": {
-                    fontWeight: 900,
+                    fontWeight: 600,
                     background: surface2,
                   },
                 }}
@@ -715,11 +715,11 @@ const UserOrderDetails = () => {
                       </TableCell>
 
                       <TableCell>
-                        <Typography sx={{ fontWeight: 800 }}>{item.sku || "N/A"}</Typography>
+                        <Typography sx={{ fontWeight: 600 }}>{item.sku || "N/A"}</Typography>
                       </TableCell>
 
                       <TableCell align="center">
-                        <Typography sx={{ fontWeight: 800 }}>{formatCurrency(item.unit_price)}</Typography>
+                        <Typography sx={{ fontWeight: 600 }}>{formatCurrency(item.unit_price)}</Typography>
                       </TableCell>
 
                       <TableCell align="center">
@@ -728,7 +728,7 @@ const UserOrderDetails = () => {
                           size="small"
                           sx={{
                             borderRadius: 999,
-                            fontWeight: 900,
+                            fontWeight: 600,
                             background: surface,
                             border: "none",
                           }}
@@ -736,7 +736,7 @@ const UserOrderDetails = () => {
                       </TableCell>
 
                       <TableCell align="right">
-                        <Typography sx={{ fontWeight: 950 }}>
+                        <Typography sx={{ fontWeight: 700 }}>
                           {formatCurrency(item.line_total ?? Number(item.unit_price || 0) * Number(item.qty || 0))}
                         </Typography>
                       </TableCell>
@@ -746,7 +746,7 @@ const UserOrderDetails = () => {
                           label={(item.status || "pending").toString()}
                           size="small"
                           color={normalizeStatus(item.status) === "pending" ? "warning" : "success"}
-                          sx={{ borderRadius: 999, fontWeight: 900, textTransform: "capitalize" }}
+                          sx={{ borderRadius: 999, fontWeight: 600, textTransform: "capitalize" }}
                         />
                       </TableCell>
 
@@ -756,7 +756,7 @@ const UserOrderDetails = () => {
                             variant="outlined"
                             size="small"
                             onClick={() => openReview(item)}
-                            sx={{ textTransform: "none", fontWeight: 800, color : 'success.main' }}
+                            sx={{ textTransform: "none", fontWeight: 600, color : 'success.main' }}
                           >
                             Add Review
                           </Button>
@@ -770,7 +770,7 @@ const UserOrderDetails = () => {
           </TableContainer>
         ) : (
           <Box sx={{ p: 3, textAlign: "center" }}>
-            <Typography color="text.secondary" sx={{ fontWeight: 800 }}>
+            <Typography color="text.secondary" sx={{ fontWeight: 600 }}>
               No items in this order
             </Typography>
           </Box>
@@ -831,10 +831,10 @@ const UserOrderDetails = () => {
                   <Row
                     label="Total"
                     value={formatCurrency(order.total)}
-                    labelSx={{ fontSize: 16, fontWeight: 950 }}
+                    labelSx={{ fontSize: 16, fontWeight: 700 }}
                     valueSx={{
                       fontSize: 18,
-                      fontWeight: 950,
+                      fontWeight: 700,
                       color: theme.palette.secondary.main,
                     }}
                   />
@@ -851,7 +851,7 @@ const UserOrderDetails = () => {
                   boxShadow: theme.palette.mode === "dark" ? "none" : "0 10px 20px rgba(65, 40, 120, 0.08)",
                 }}
               >
-                <Typography sx={{ fontWeight: 950, mb: 1.2 }}>Timeline</Typography>
+                <Typography sx={{ fontWeight: 700, mb: 1.2 }}>Timeline</Typography>
 
                 <Stack spacing={1}>
                   <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Created" value={formatDate(order.created_at)} border={border} surface2={surface2} />
@@ -876,7 +876,7 @@ const UserOrderDetails = () => {
       </Card>
 
       <Dialog open={reviewOpen} onClose={closeReview} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 900 }}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
           Write a review
           {reviewProductName ? `: ${reviewProductName}` : ""}
         </DialogTitle>
@@ -890,7 +890,7 @@ const UserOrderDetails = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeReview} sx={{ textTransform: "none", fontWeight: 800 }}>
+          <Button onClick={closeReview} sx={{ textTransform: "none", fontWeight: 600 }}>
             Close
           </Button>
         </DialogActions>
@@ -903,7 +903,7 @@ function Row({ label, value, labelSx, valueSx }) {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
       <Typography sx={{ fontWeight: 850, color: "text.secondary", ...labelSx }}>{label}</Typography>
-      <Typography sx={{ fontWeight: 900, ...valueSx }}>{value}</Typography>
+      <Typography sx={{ fontWeight: 600, ...valueSx }}>{value}</Typography>
     </Box>
   );
 }
@@ -926,7 +926,7 @@ function MiniMeta({ icon, label, value, valueChip, border, surface2 }) {
       </Box>
 
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography variant="body2" sx={{ fontWeight: 900, letterSpacing: 0.6, color: "text.secondary" }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.6, color: "text.secondary" }}>
           {label}
         </Typography>
 
@@ -936,7 +936,7 @@ function MiniMeta({ icon, label, value, valueChip, border, surface2 }) {
             label={valueChip.label}
             color={valueChip.color}
             size="small"
-            sx={{ borderRadius: 999, fontWeight: 900, mt: 0.4 }}
+            sx={{ borderRadius: 999, fontWeight: 600, mt: 0.4 }}
           />
         ) : (
           <Typography noWrap sx={{ fontWeight: 850 }}>

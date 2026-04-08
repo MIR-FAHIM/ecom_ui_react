@@ -53,10 +53,10 @@ export default function FeaturedCategory({ categories = [] }) {
       }}
     >
       <Box>
-        <Typography variant="h6" sx={{ fontWeight: 800 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Featured Categories
         </Typography>
-        <Typography variant="body3" color="text.secondary" sx={{
+        <Typography variant="caption" color="text.secondary" sx={{
     display: '-webkit-box',
     WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical',

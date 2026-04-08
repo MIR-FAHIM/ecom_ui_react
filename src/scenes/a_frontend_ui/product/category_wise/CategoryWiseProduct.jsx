@@ -132,7 +132,7 @@ const CategoryWiseProduct = () => {
 		>
 			<Container maxWidth="xl">
 				<Box sx={{ mb: 3 }}>
-					<Typography variant="h4" sx={{ fontWeight: 900 }}>
+					<Typography variant="h4" sx={{ fontWeight: 600 }}>
 						{title}
 					</Typography>
 					<Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
@@ -150,7 +150,7 @@ const CategoryWiseProduct = () => {
 								background: colors.primary[400],
 							}}
 						>
-							<Typography variant="h6" sx={{ fontWeight: 900, mb: 1 }}>
+							<Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
 								{category?.name || "Category"}
 							</Typography>
 							<Typography variant="body2" sx={{ color: "text.secondary", mb: 1.5 }}>
@@ -193,7 +193,7 @@ const CategoryWiseProduct = () => {
 								<Button
 									variant="contained"
 									onClick={() => navigate("/")}
-									sx={{ textTransform: "none", fontWeight: 800 }}
+									sx={{ textTransform: "none", fontWeight: 600 }}
 								>
 									Back to home
 								</Button>

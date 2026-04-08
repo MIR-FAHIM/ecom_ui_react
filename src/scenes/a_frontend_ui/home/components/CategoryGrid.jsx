@@ -16,7 +16,7 @@ function CategoryCard({ cat }) {
     <Card
       sx={{
         borderRadius: 3,
-        boxShadow: "0 10px 20px rgba(0,0,0,0.06)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
         border: `1px solid ${theme.palette.divider}`,
         height: "100%",
       }}
@@ -38,7 +38,7 @@ function CategoryCard({ cat }) {
           }}
         />
         <CardContent sx={{ p: 0, width: "100%" }}>
-          <Typography variant="subtitle2" noWrap sx={{ fontWeight: 700 }}>
+          <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600, fontSize: 12 }}>
             {cat.name}
           </Typography>
           {cat.children?.length ? (
@@ -56,10 +56,10 @@ export default function CategoryGrid({ categories = [] }) {
   return (
     <Box
       sx={{
-        borderRadius: 3,
-        p: { xs: 1.25, sm: 2 },
+        borderRadius: 3.5,
+        p: { xs: 1.5, sm: 2 },
         bgcolor: "background.paper",
-        boxShadow: { xs: "0 10px 24px rgba(0,0,0,0.06)", md: "0 16px 32px rgba(0,0,0,0.06)" },
+        boxShadow: { xs: "0 4px 16px rgba(0,0,0,0.04)", md: "0 6px 20px rgba(0,0,0,0.05)" },
         width: "100%",
         minWidth: 0,
         height: "100%",
@@ -78,10 +78,10 @@ export default function CategoryGrid({ categories = [] }) {
           mb: { xs: 1, sm: 1.5 },
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 800, fontSize: { xs: 18, sm: 20 } }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: 16, sm: 17 } }}>
           Hot Categories
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, fontSize: 11 }}>
           Scroll
         </Typography>
       </Box>

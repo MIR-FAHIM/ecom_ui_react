@@ -432,8 +432,8 @@ const ProceedOrder = () => {
             <Typography
               variant="h4"
               sx={{
-                fontWeight: 950,
-                letterSpacing: -0.7,
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
                 color: theme.palette.secondary.main,
                 lineHeight: 1.05,
               }}
@@ -458,7 +458,7 @@ const ProceedOrder = () => {
             }
             sx={{
               borderRadius: 999,
-              fontWeight: 900,
+              fontWeight: 600,
               background: surface2,
               border: `1px solid ${divider}`,
               color: ink,
@@ -472,7 +472,7 @@ const ProceedOrder = () => {
             sx={{
               borderRadius: 999,
               textTransform: "none",
-              fontWeight: 950,
+              fontWeight: 700,
               px: 2,
               background: theme.palette.secondary.main,
               color: colors.gray[900],
@@ -533,7 +533,7 @@ const ProceedOrder = () => {
                 <LockCheckoutIcon fontSize="small" />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 950, color: ink }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: ink }}>
                   Order Summary
                 </Typography>
                 <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
@@ -545,15 +545,15 @@ const ProceedOrder = () => {
             <Divider sx={{ my: 1.5, opacity: 0.12 }} />
 
             {!userId ? (
-              <Typography sx={{ mt: 1, fontWeight: 800, color: subInk }}>
+              <Typography sx={{ mt: 1, fontWeight: 600, color: subInk }}>
                 Please login to checkout.
               </Typography>
             ) : !cart ? (
-              <Typography sx={{ mt: 1, fontWeight: 800, color: subInk }}>
+              <Typography sx={{ mt: 1, fontWeight: 600, color: subInk }}>
                 Loading cart...
               </Typography>
             ) : cart.items && cart.items.length === 0 ? (
-              <Typography sx={{ mt: 1, fontWeight: 800, color: subInk }}>
+              <Typography sx={{ mt: 1, fontWeight: 600, color: subInk }}>
                 Your cart is empty.
               </Typography>
             ) : (
@@ -571,10 +571,10 @@ const ProceedOrder = () => {
                     >
                       <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
                         <Box sx={{ minWidth: 0 }}>
-                          <Typography sx={{ fontWeight: 950, color: ink, lineHeight: 1.2 }}>
+                          <Typography sx={{ fontWeight: 700, color: ink, lineHeight: 1.2 }}>
                             {it.product?.name || "Item"}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 800 }}>
+                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 600 }}>
                             Line: {money(it.line_total)}
                           </Typography>
                         </Box>
@@ -602,7 +602,7 @@ const ProceedOrder = () => {
                             label={it.qty}
                             sx={{
                               borderRadius: 999,
-                              fontWeight: 950,
+                              fontWeight: 700,
                               background: surface,
                               border: `1px solid ${divider}`,
                               color: ink,
@@ -658,13 +658,13 @@ const ProceedOrder = () => {
                 <Divider sx={{ my: 1.5, opacity: 0.12 }} />
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: subInk }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: subInk }}>
                     Subtotal
                   </Typography>
                   <Typography
                     variant="subtitle1"
                     sx={{
-                      fontWeight: 950,
+                      fontWeight: 700,
                       color: theme.palette.secondary.main,
                     }}
                   >
@@ -673,21 +673,21 @@ const ProceedOrder = () => {
                 </Stack>
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 0.8 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: subInk }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: subInk }}>
                     Shipping Cost
                   </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 950, color: ink }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: ink }}>
                     {money(shippingCost)}
                   </Typography>
                 </Stack>
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 0.8 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 900, color: subInk }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: subInk }}>
                     Total
                   </Typography>
                   <Typography
                     variant="subtitle1"
-                    sx={{ fontWeight: 950, color: theme.palette.secondary.main }}
+                    sx={{ fontWeight: 700, color: theme.palette.secondary.main }}
                   >
                     {money(Number(cart.subtotal || 0) + Number(shippingCost || 0))}
                   </Typography>
@@ -725,7 +725,7 @@ const ProceedOrder = () => {
                     sx={{
                       borderRadius: 999,
                       textTransform: "none",
-                      fontWeight: 900,
+                      fontWeight: 600,
                        color: colors.primary[900],
                       borderColor: divider,
                       background: surface,
@@ -744,7 +744,7 @@ const ProceedOrder = () => {
                       ml: "auto",
                       borderRadius: 999,
                       textTransform: "none",
-                      fontWeight: 950,
+                      fontWeight: 700,
                       px: 2.6,
                       background: theme.palette.secondary.main,
                       color: colors.bg[100],
@@ -785,7 +785,7 @@ const ProceedOrder = () => {
       >
         <DialogTitle
           sx={{
-            fontWeight: 950,
+            fontWeight: 700,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -940,7 +940,7 @@ const ProceedOrder = () => {
             sx={{
               borderRadius: 999,
               textTransform: "none",
-              fontWeight: 900,
+              fontWeight: 600,
                color: colors.gray[100],
               borderColor: divider,
               background: surface,
@@ -959,7 +959,7 @@ const ProceedOrder = () => {
               ml: "auto",
               borderRadius: 999,
               textTransform: "none",
-              fontWeight: 950,
+              fontWeight: 700,
               px: 2.4,
               background: theme.palette.secondary.main,
               color: colors.gray[900],

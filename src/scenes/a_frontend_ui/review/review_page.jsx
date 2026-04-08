@@ -88,7 +88,7 @@ const ProductReviewForm = ({ productId, userId: userIdProp, status: statusProp =
 			}}
 		>
 			<CardContent>
-				<Typography variant="h5" sx={{ fontWeight: 900 }}>
+				<Typography variant="h5" sx={{ fontWeight: 600 }}>
 					Write a review
 				</Typography>
 				<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.5 }}>
@@ -139,7 +139,7 @@ const ProductReviewForm = ({ productId, userId: userIdProp, status: statusProp =
 								type="submit"
 								variant="contained"
 								disabled={loading}
-								sx={{ textTransform: "none", fontWeight: 800 }}
+								sx={{ textTransform: "none", fontWeight: 600 }}
 							>
 								{loading ? <CircularProgress size={18} /> : "Submit Review"}
 							</Button>

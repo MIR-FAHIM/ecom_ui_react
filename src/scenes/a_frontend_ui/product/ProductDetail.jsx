@@ -311,7 +311,7 @@ const ProductDetail = () => {
       <Container sx={{ py: 8 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
           <CircularProgress size={18} />
-          <Typography sx={{ color: subInk, fontWeight: 800 }}>Loading product...</Typography>
+          <Typography sx={{ color: subInk, fontWeight: 600 }}>Loading product...</Typography>
         </Box>
       </Container>
     );
@@ -320,8 +320,8 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <Container sx={{ py: 8 }}>
-        <Typography sx={{ fontWeight: 900, color: ink }}>Product not found</Typography>
-        <Button onClick={() => navigate("/")} sx={{ mt: 2, borderRadius: 999, textTransform: "none", fontWeight: 900 }}>
+        <Typography sx={{ fontWeight: 600, color: ink }}>Product not found</Typography>
+        <Button onClick={() => navigate("/")} sx={{ mt: 2, borderRadius: 999, textTransform: "none", fontWeight: 600 }}>
           Back to home
         </Button>
       </Container>
@@ -369,8 +369,8 @@ const ProductDetail = () => {
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 sx={{
-                  fontWeight: 950,
-                  letterSpacing: -0.6,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
                   color: theme.palette.secondary.main,
                   lineHeight: 1.1,
                 }}
@@ -389,7 +389,7 @@ const ProductDetail = () => {
               label={inStock ? "In stock" : "Out of stock"}
               sx={{
                 borderRadius: 999,
-                fontWeight: 900,
+                fontWeight: 600,
                 background: surface2,
                 border: `1px solid ${divider}`,
                 color: ink,
@@ -400,7 +400,7 @@ const ProductDetail = () => {
                 label={`${discountPct}% OFF`}
                 sx={{
                   borderRadius: 999,
-                  fontWeight: 950,
+                  fontWeight: 700,
                   background: theme.palette.secondary.main,
                   color: colors.gray[900],
                   boxShadow: "none",
@@ -443,13 +443,13 @@ const ProductDetail = () => {
               }}
             >
               <Stack spacing={2}>
-                <Typography variant="h5" sx={{ fontWeight: 950, color: ink, lineHeight: 1.15 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: ink, lineHeight: 1.15 }}>
                   {product?.name}
                 </Typography>
 
                 <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" sx={{ rowGap: 1 }}>
                   <Rating value={Number(product?.average_review?.average_rating || 0)} precision={0.1} readOnly />
-                  <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
+                  <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
                     Reviews {product?.average_review?.review_count ?? 0}
                   </Typography>
 
@@ -458,7 +458,7 @@ const ProductDetail = () => {
                     label={product?.brand?.name ? `Brand: ${product.brand.name}` : "No brand"}
                     sx={{
                       borderRadius: 999,
-                      fontWeight: 900,
+                      fontWeight: 600,
                       background: surface2,
                       border: `1px solid ${divider}`,
                       color: ink,
@@ -470,7 +470,7 @@ const ProductDetail = () => {
                 {/* Color chips (your API: colors JSON string) */}
                 {Array.isArray(colors) && colors.length > 0 ? (
                   <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" sx={{ rowGap: 1 }}>
-                    <Typography variant="body2" sx={{ color: subInk, fontWeight: 900 }}>
+                    <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
                       Colors:
                     </Typography>
                     {colors.map((c) => (
@@ -501,17 +501,17 @@ const ProductDetail = () => {
                 >
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-end" spacing={1}>
                     <Box>
-                      <Typography sx={{ fontWeight: 950, color: ink, fontSize: 22, lineHeight: 1.1 }}>
+                      <Typography sx={{ fontWeight: 700, color: ink, fontSize: 22, lineHeight: 1.1 }}>
                         {money(displayPrice)}
                       </Typography>
 
                       {hasSale ? (
-                        <Typography variant="body2" sx={{ color: subInk, textDecoration: "line-through", fontWeight: 800 }}>
+                        <Typography variant="body2" sx={{ color: subInk, textDecoration: "line-through", fontWeight: 600 }}>
                           {money(price)}
                         </Typography>
                       ) : null}
 
-                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 800, display: "block", mt: 0.4 }}>
+                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block", mt: 0.4 }}>
                         Unit: {product?.unit || "pc"}
                       </Typography>
                     </Box>
@@ -521,7 +521,7 @@ const ProductDetail = () => {
                         label={`${discountPct}% OFF`}
                         sx={{
                           borderRadius: 999,
-                          fontWeight: 950,
+                          fontWeight: 700,
                           background: theme.palette.secondary.main,
                           color: colors.gray[900],
                           boxShadow: "none",
@@ -540,7 +540,7 @@ const ProductDetail = () => {
                       background: surface,
                     }}
                   >
-                    <Typography sx={{ fontWeight: 900, color: ink, mb: 1 }}>
+                    <Typography sx={{ fontWeight: 600, color: ink, mb: 1 }}>
                       Attributes
                     </Typography>
                     <Stack spacing={1.2}>
@@ -554,7 +554,7 @@ const ProductDetail = () => {
                           useFlexGap
                           sx={{ rowGap: 1 }}
                         >
-                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 800 }}>
+                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
                             {attr.name}:
                           </Typography>
                           <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap sx={{ rowGap: 0.8 }}>
@@ -568,7 +568,7 @@ const ProductDetail = () => {
                                 onClick={() => setSelectedAttributeId(opt.id)}
                                 sx={{
                                   borderRadius: 999,
-                                  fontWeight: 900,
+                                  fontWeight: 600,
                                   background: selected ? theme.palette.secondary.main : surface2,
                                   border: `1px solid ${divider}`,
                                   color: selected ? colors.gray[900] : ink,
@@ -622,7 +622,7 @@ const ProductDetail = () => {
                           background: surface,
                           "& fieldset": { borderColor: "transparent" },
                         },
-                        input: { textAlign: "center", fontWeight: 900, color: ink },
+                        input: { textAlign: "center", fontWeight: 600, color: ink },
                       }}
                     />
 
@@ -676,7 +676,7 @@ const ProductDetail = () => {
                       sx={{
                         borderRadius: 999,
                         textTransform: "none",
-                        fontWeight: 950,
+                        fontWeight: 700,
                         px: 2.2,
                         background: surface,
                         border: `1px solid ${divider}`,
@@ -697,20 +697,20 @@ const ProductDetail = () => {
                   <Chip
                     icon={<VerifiedIcon />}
                     label={`Stock: ${typeof product?.current_stock === "number" ? product.current_stock : "-"}`}
-                    sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                    sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
                   />
                   <Chip
                     label={`COD: ${product?.cash_on_delivery ? "Yes" : "No"}`}
-                    sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                    sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
                   />
                   <Chip
                     label={`Shipping: ${product?.shipping_type || "flat_rate"}`}
-                    sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                    sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
                   />
                   {product?.est_shipping_days != null ? (
                     <Chip
                       label={`Est: ${product.est_shipping_days} day(s)`}
-                      sx={{ borderRadius: 999, fontWeight: 900, background: surface2, border: `1px solid ${divider}`, color: ink }}
+                      sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
                     />
                   ) : null}
                 </Stack>

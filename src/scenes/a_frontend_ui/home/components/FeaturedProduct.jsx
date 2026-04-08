@@ -98,18 +98,18 @@ export default function FeaturedProduct({ onView }) {
 		<Box
 			sx={{
 				mt: 3,
-				p: { xs: 2, sm: 2.5 },
-				borderRadius: 3,
+				p: { xs: 2, sm: 3 },
+				borderRadius: 4,
 				bgcolor: "#cfe1b8",
-				boxShadow: "0 16px 32px rgba(0,0,0,0.08)",
+				boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
 			}}
 		>
-			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1 }}>
+			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1.5 }}>
 				<FeaturedTitle>Featured Products</FeaturedTitle>
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 					<Typography
 						variant="body2"
-						sx={{ fontWeight: 700, cursor: "pointer" }}
+						sx={{ fontWeight: 600, cursor: "pointer", fontSize: 13, opacity: 0.7, "&:hover": { opacity: 1 } }}
 						onClick={handleSeeAll}
 					>
 						See all

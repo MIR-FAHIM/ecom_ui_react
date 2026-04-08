@@ -135,7 +135,8 @@ const SearchProduct = ({
 									sx={{
 										borderRadius: 999,
 										textTransform: "none",
-										fontWeight: 900,
+										fontWeight: 600,
+										fontSize: 13,
 										px: 2,
 										boxShadow: "none",
 										background: theme.palette.primary.main,
@@ -224,8 +225,9 @@ const SearchProduct = ({
 									<Box sx={{ minWidth: 0 }}>
 										<Typography
 											sx={{
-												fontWeight: 900,
-												lineHeight: 1.2,
+											fontWeight: 700,
+											lineHeight: 1.3,
+											fontSize: 13,
 												display: "-webkit-box",
 												WebkitLineClamp: 1,
 												WebkitBoxOrient: "vertical",
@@ -234,7 +236,7 @@ const SearchProduct = ({
 										>
 											{product?.name || "Unnamed product"}
 										</Typography>
-										<Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
+										<Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: 12 }}>
 											{money(product?.unit_price ?? product?.price ?? 0)}
 										</Typography>
 									</Box>

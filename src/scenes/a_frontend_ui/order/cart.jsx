@@ -153,7 +153,7 @@ const Cart = () => {
         background: theme.palette.background?.default || colors.primary[500],
       }}
     >
-      <Container sx={{ py: 3 }}>
+      <Container sx={{ py: { xs: 2, md: 4 } }}>
         {/* Header */}
         <Box
           sx={{
@@ -187,16 +187,16 @@ const Cart = () => {
               <Typography
                 variant="h4"
                 sx={{
-                  fontWeight: 950,
-                  letterSpacing: -0.7,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
                   color: theme.palette.secondary.main,
-                  lineHeight: 1.05,
+                  lineHeight: 1.1,
                 }}
               >
                 Your Cart
               </Typography>
 
-              <Typography variant="body2" sx={{ fontWeight: 700, color: subInk, mt: 0.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: subInk, mt: 0.5, fontSize: 13 }}>
                 Review items, adjust quantities, then checkout.
               </Typography>
             </Box>
@@ -208,7 +208,8 @@ const Cart = () => {
               label={cart?.total_items ? `${cart.total_items} items` : "0 items"}
               sx={{
                 borderRadius: 999,
-                fontWeight: 900,
+                fontWeight: 600,
+                fontSize: 12,
                 background: surface2,
                 border: `1px solid ${divider}`,
                 color: ink,
@@ -246,10 +247,10 @@ const Cart = () => {
               backdropFilter: "blur(12px)",
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 950, color: ink }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: ink }}>
               Your cart is empty.
             </Typography>
-            <Typography variant="body2" sx={{ color: subInk, mt: 0.5, fontWeight: 700 }}>
+            <Typography variant="body2" sx={{ color: subInk, mt: 0.5, fontWeight: 500, fontSize: 13 }}>
               Add something fun. Your future self will thank you.
             </Typography>
 
@@ -258,7 +259,7 @@ const Cart = () => {
                 mt: 2,
                 borderRadius: 999,
                 textTransform: "none",
-                fontWeight: 900,
+                fontWeight: 600,
                 px: 2.5,
                 background: theme.palette.secondary.main,
                 color: colors.gray[900],
@@ -319,13 +320,13 @@ const Cart = () => {
 
                       <ListItemText
                         primary={
-                          <Typography sx={{ fontWeight: 950, color: ink, lineHeight: 1.2 }}>
+                          <Typography sx={{ fontWeight: 700, color: ink, lineHeight: 1.3, fontSize: 14 }}>
                             {it.product?.name || "Unnamed product"}
                           </Typography>
                         }
                         secondary={
                           <Box sx={{ mt: 0.5 }}>
-                            <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
+                            <Typography variant="body2" sx={{ color: subInk, fontWeight: 500, fontSize: 12 }}>
                               Shop: {it.shop?.name || "N/A"}
                             </Typography>
 
@@ -336,7 +337,7 @@ const Cart = () => {
                                   label={`${it.product_attribute?.attribute?.name || "N/A"}`}
                                   sx={{
                                     borderRadius: 999,
-                                    fontWeight: 900,
+                                    fontWeight: 600,
                                     background: "transparent",
                                     border: `1px solid ${divider}`,
                                     color: subInk,
@@ -347,7 +348,7 @@ const Cart = () => {
                                   label={`Value: ${it.product_attribute?.value?.value || "N/A"}`}
                                   sx={{
                                     borderRadius: 999,
-                                    fontWeight: 900,
+                                    fontWeight: 600,
                                     background: surface2,
                                     border: `1px solid ${divider}`,
                                     color: ink,
@@ -385,7 +386,7 @@ const Cart = () => {
                                   label={`Qty: ${it.qty}`}
                                   sx={{
                                     borderRadius: 999,
-                                    fontWeight: 900,
+                                    fontWeight: 600,
                                     background: surface2,
                                     border: `1px solid ${divider}`,
                                     color: ink,
@@ -417,7 +418,7 @@ const Cart = () => {
                                   label={`Unit: ${money(it.unit_price)}`}
                                   sx={{
                                     borderRadius: 999,
-                                    fontWeight: 900,
+                                    fontWeight: 600,
                                     background: "transparent",
                                     border: `1px solid ${divider}`,
                                     color: subInk,
@@ -427,7 +428,7 @@ const Cart = () => {
                                   label={`Line: ${money(it.line_total)}`}
                                   sx={{
                                     borderRadius: 999,
-                                    fontWeight: 900,
+                                    fontWeight: 600,
                                     background: "transparent",
                                     border: `1px solid ${divider}`,
                                     color: ink,
@@ -484,10 +485,10 @@ const Cart = () => {
               }}
             >
               <Stack spacing={0.6}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 900, color: ink }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: ink, fontSize: 13 }}>
                   Total items: {cart.total_items}
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 950, color: ink }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: ink }}>
                   Subtotal:{" "}
                   <Box
                     component="span"
@@ -509,7 +510,7 @@ const Cart = () => {
                   sx={{
                     borderRadius: 999,
                     textTransform: "none",
-                    fontWeight: 900,
+                    fontWeight: 600,
                      color: colors.gray[100],
                     borderColor: divider,
                     background: surface,
@@ -526,7 +527,7 @@ const Cart = () => {
                   sx={{
                     borderRadius: 999,
                     textTransform: "none",
-                    fontWeight: 950,
+                    fontWeight: 700,
                     px: 2.6,
                     background: theme.palette.secondary.main,
                     color: colors.gray[900],

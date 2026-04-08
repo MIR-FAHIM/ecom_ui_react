@@ -51,20 +51,23 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
         sx={{
           width: size,
           height: size,
-          borderRadius: 2,
+          borderRadius: 3,
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundColor: "#fff",
           border: `1px solid ${theme.palette.divider}`,
-          boxShadow: "0 10px 20px rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+          transition: "transform 0.2s ease, box-shadow 0.2s ease",
+          "&:hover": { transform: "scale(1.03)", boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
         }}
       />
       <Box sx={{ width: size, textAlign: "center" }}>
         <Typography
           variant="body2"
           sx={{
-            fontWeight: 700,
+            fontWeight: 600,
+            fontSize: 12,
             display: "-webkit-box",
             WebkitLineClamp: 3,
             WebkitBoxOrient: "vertical",
@@ -74,7 +77,7 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
         >
           {product?.name || "Untitled product"}
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 800, mt: 0.25 }}>
+        <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.25, fontSize: 13 }}>
           {formatMoney(displayPrice)}
         </Typography>
         {hasSale ? (

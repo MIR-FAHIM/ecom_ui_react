@@ -66,9 +66,9 @@ const UserAddress = ({
           </Box>
 
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontWeight: 950, lineHeight: 1.1 }}>
+            <Typography sx={{ fontWeight: 700, lineHeight: 1.1 }}>
               {a.name}{" "}
-              <Box component="span" sx={{ fontWeight: 800, opacity: 0.85 }}>
+              <Box component="span" sx={{ fontWeight: 600, opacity: 0.85 }}>
                 {a.mobile}
               </Box>
             </Typography>
@@ -112,7 +112,7 @@ const UserAddress = ({
               label={selected ? "Selected" : "Use"}
               sx={{
                 borderRadius: 999,
-                fontWeight: 950,
+                fontWeight: 700,
                 background: selected ? colors.primary[200] : surface2,
                 border: `1px solid ${selected ? colors.primary[300] : divider}`,
                 color: selected ? colors.gray[10] : ink,
@@ -149,7 +149,7 @@ const UserAddress = ({
           <PlaceIcon fontSize="small" />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 950, color: ink }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: ink }}>
             Shipping Address
           </Typography>
           <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
@@ -163,7 +163,7 @@ const UserAddress = ({
       {addrLoading ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, py: 3 }}>
           <CircularProgress size={18} />
-          <Typography sx={{ color: subInk, fontWeight: 800 }}>Loading addresses...</Typography>
+          <Typography sx={{ color: subInk, fontWeight: 600 }}>Loading addresses...</Typography>
         </Box>
       ) : addresses.length === 0 ? (
         <Paper
@@ -174,7 +174,7 @@ const UserAddress = ({
             background: surface2,
           }}
         >
-          <Typography sx={{ fontWeight: 950, color: ink }}>No saved addresses</Typography>
+          <Typography sx={{ fontWeight: 700, color: ink }}>No saved addresses</Typography>
           <Typography variant="body2" sx={{ color: subInk, fontWeight: 700, mt: 0.4 }}>
             Add one to continue checkout.
           </Typography>

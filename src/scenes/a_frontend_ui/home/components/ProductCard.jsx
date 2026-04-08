@@ -340,17 +340,17 @@ export default function SmartProductCard({
   return (
     <Card
       sx={{
-        borderRadius: 4,
+        borderRadius: 3.5,
         overflow: "hidden",
         border: `1px solid ${divider}`,
         background: surface,
         backdropFilter: "blur(12px)",
-        transition: "transform 140ms ease, box-shadow 220ms ease, border-color 220ms ease",
+        transition: "transform 200ms ease, box-shadow 250ms ease, border-color 250ms ease",
         position: "relative",
         "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: `0 18px 40px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.12)"}`,
-          borderColor: theme.palette.primary.main,
+          transform: "translateY(-3px)",
+          boxShadow: `0 12px 32px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.08)"}`,
+          borderColor: theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100],
         },
       }}
     >
@@ -405,7 +405,8 @@ export default function SmartProductCard({
                   size="small"
                   sx={{
                     borderRadius: 999,
-                    fontWeight: 900,
+                    fontWeight: 700,
+                    fontSize: 11,
                     background: accent,
                     color: "#fff",
                     border: `1px solid ${divider}`,
@@ -414,7 +415,7 @@ export default function SmartProductCard({
             ) : null}
 
             {outOfStock ? (
-              <Chip label="Out of stock" size="small" color="error" sx={{ borderRadius: 999, fontWeight: 900 }} />
+              <Chip label="Out of stock" size="small" color="error" sx={{ borderRadius: 999, fontWeight: 600 }} />
             ) : (
               <Chip
                 label="In stock"
@@ -422,7 +423,7 @@ export default function SmartProductCard({
                 variant="outlined"
                 sx={{
                   borderRadius: 999,
-                  fontWeight: 900,
+                  fontWeight: 600,
                   color: subInk,
                   borderColor: divider,
                   background: surface,
@@ -549,11 +550,12 @@ export default function SmartProductCard({
         <Stack spacing={1}>
           {/* Row 1: Name */}
           <Typography
-            fontWeight={950}
+            fontWeight={700}
             sx={{
               color: ink,
-              letterSpacing: -0.2,
-              lineHeight: 1.15,
+              letterSpacing: "-0.01em",
+              lineHeight: 1.25,
+              fontSize: 14,
               display: "-webkit-box",
               WebkitLineClamp: 1,
               WebkitBoxOrient: "vertical",
@@ -566,10 +568,11 @@ export default function SmartProductCard({
           {/* Row 2: Price */}
           <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
             <Typography
-              fontWeight={950}
+              fontWeight={700}
               sx={{
-                fontSize: 18,
+                fontSize: 17,
                 color: accent,
+                letterSpacing: "-0.01em",
               }}
             >
               {displayPrice}
@@ -579,9 +582,10 @@ export default function SmartProductCard({
               <Typography
                 variant="caption"
                 sx={{
-                  fontWeight: 800,
+                  fontWeight: 500,
                   color: subInk,
                   textDecoration: "line-through",
+                  fontSize: 12,
                 }}
               >
                 {money(price)}
@@ -594,7 +598,7 @@ export default function SmartProductCard({
           
 
             <Rating value={ratingValue} precision={0.5} size="small" readOnly />
-            <Typography variant="caption" sx={{ fontWeight: 800, color: subInk }}>
+            <Typography variant="caption" sx={{ fontWeight: 500, color: subInk, fontSize: 11 }}>
               ({reviewsCount})
             </Typography>
 
@@ -604,7 +608,8 @@ export default function SmartProductCard({
               sx={{
                 ml: "auto",
                 borderRadius: 999,
-                fontWeight: 900,
+                fontWeight: 600,
+                fontSize: 11,
                 background: surface,
                 border: `1px solid ${divider}`,
                 color: subInk,

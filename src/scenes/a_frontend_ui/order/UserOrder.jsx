@@ -66,17 +66,20 @@ const UserOrder = () => {
   };
 
   return (
-    <Container sx={{ py: 3 }}>
-      <Typography variant="h5" sx={{ mb: 2, fontWeight: 900, color: ink }}>My Orders</Typography>
+    <Container sx={{ py: { xs: 2, md: 4 } }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: ink, letterSpacing: "-0.02em" }}>My Orders</Typography>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
       ) : orders.length === 0 ? (
-        <Typography>No orders yet.</Typography>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: subInk, mb: 1 }}>No orders yet</Typography>
+          <Typography variant="body2" sx={{ color: subInk, opacity: 0.7 }}>Your order history will appear here.</Typography>
+        </Box>
       ) : (
-        <Paper sx={{ border: `1px solid ${border}`, background: surface }}>
+        <Paper sx={{ border: `1px solid ${border}`, background: surface, borderRadius: 3, overflow: 'hidden' }}>
           <TableContainer>
-            <Table sx={{ "& th": { fontWeight: 900, color: ink, background: surface2 } }}>
+            <Table sx={{ "& th": { fontWeight: 700, fontSize: 12, color: ink, background: surface2, textTransform: 'uppercase', letterSpacing: '0.04em', py: 1.5 }, "& td": { py: 1.8, fontSize: 13 } }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Order #</TableCell>
@@ -89,16 +92,17 @@ const UserOrder = () => {
               </TableHead>
               <TableBody>
                 {orders.map((o) => (
-                  <TableRow key={o.id} hover sx={{ "& td": { color: subInk } }}>
-                    <TableCell sx={{ color: ink, fontWeight: 800 }}>{o.order_number}</TableCell>
-                    <TableCell>{new Date(o.created_at).toLocaleString()}</TableCell>
-                    <TableCell><Chip label={o.status} color={getStatusColor(o.status)} size="small" /></TableCell>
-                    <TableCell>{o.payment_status}</TableCell>
-                    <TableCell align="right">৳ {o.total ?? 0}</TableCell>
+                  <TableRow key={o.id} hover sx={{ "& td": { color: subInk }, transition: "background 0.15s ease" }}>
+                    <TableCell sx={{ color: ink, fontWeight: 700, fontSize: 13 }}>{o.order_number}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{new Date(o.created_at).toLocaleString()}</TableCell>
+                    <TableCell><Chip label={o.status} color={getStatusColor(o.status)} size="small" sx={{ fontWeight: 600, fontSize: 11, borderRadius: 2 }} /></TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{o.payment_status}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: 13 }}>৳ {o.total ?? 0}</TableCell>
                     <TableCell align="right">
                       <Button
                         size="small"
-                        sx={{ minWidth: 64, color: theme.palette.secondary.main, fontWeight: 800 }}
+                        variant="outlined"
+                        sx={{ minWidth: 64, fontSize: 12, fontWeight: 600, borderRadius: 2, textTransform: 'none' }}
                         onClick={() => navigate(`/order/${o.id}`)}
                       >
                         View
@@ -118,7 +122,7 @@ const UserOrder = () => {
             rowsPerPage={perPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[10, 20, 50]}
-            sx={{ color: subInk }}
+            sx={{ color: subInk, fontSize: 12, borderTop: `1px solid ${border}` }}
           />
         </Paper>
       )}

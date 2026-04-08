@@ -83,11 +83,11 @@ const Brand = () => {
 			}}
 		>
 			<Container maxWidth="xl">
-				<Box sx={{ mb: 3 }}>
-					<Typography variant="h4" sx={{ fontWeight: 900, color: colors.gray[100] }}>
+				<Box sx={{ mb: 4 }}>
+					<Typography variant="h4" sx={{ fontWeight: 700, color: colors.gray[100], letterSpacing: "-0.02em" }}>
 						All Brands
 					</Typography>
-					<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.5 }}>
+					<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.5, fontWeight: 400 }}>
 						Explore trusted brands and shop by your favorites.
 					</Typography>
 				</Box>
@@ -139,7 +139,8 @@ const Brand = () => {
 														variant="subtitle2"
 														sx={{
 															color: colors.gray[100],
-															fontWeight: 800,
+															fontWeight: 600,
+															fontSize: 13,
 															textTransform: "capitalize",
 															display: "-webkit-box",
 															WebkitLineClamp: 2,

@@ -96,15 +96,25 @@ const Profile = () => {
   };
 
   return (
-    <Container sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>My Profile</Typography>
+    <Container sx={{ py: { xs: 2, md: 4 } }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, letterSpacing: "-0.02em" }}>My Profile</Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 1 }}>
-            <List>
+          <Paper sx={{ p: 1.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+            <List disablePadding>
               {MENU.map((m) => (
-                <ListItemButton key={m.key} selected={selected === m.key} onClick={() => setSelected(m.key)}>
-                  <ListItemText primary={m.label} />
+                <ListItemButton
+                  key={m.key}
+                  selected={selected === m.key}
+                  onClick={() => setSelected(m.key)}
+                  sx={{
+                    borderRadius: 2,
+                    mb: 0.5,
+                    py: 1,
+                    '&.Mui-selected': { fontWeight: 700 },
+                  }}
+                >
+                  <ListItemText primary={m.label} primaryTypographyProps={{ fontSize: 13, fontWeight: selected === m.key ? 700 : 500 }} />
                 </ListItemButton>
               ))}
             </List>
@@ -112,8 +122,8 @@ const Profile = () => {
         </Grid>
 
         <Grid item xs={12} md={9}>
-          <Paper sx={{ p: 3, minHeight: 320 }}>
-            {loading ? <Typography>Loading…</Typography> : renderContent()}
+          <Paper sx={{ p: { xs: 2.5, md: 4 }, minHeight: 320, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+            {loading ? <Typography sx={{ color: 'text.secondary' }}>Loading…</Typography> : renderContent()}
           </Paper>
         </Grid>
       </Grid>

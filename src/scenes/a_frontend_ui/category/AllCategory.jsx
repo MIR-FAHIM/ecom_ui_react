@@ -77,11 +77,11 @@ const AllCategory = () => {
 			}}
 		>
 			<Container maxWidth="xl">
-				<Box sx={{ mb: 3 }}>
-					<Typography variant="h4" sx={{ fontWeight: 900, color: colors.gray[100] }}>
+				<Box sx={{ mb: 4 }}>
+					<Typography variant="h4" sx={{ fontWeight: 700, color: colors.gray[100], letterSpacing: "-0.02em" }}>
 						All Categories
 					</Typography>
-					<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.5 }}>
+					<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.5, fontWeight: 400 }}>
 						Browse every category and its children.
 					</Typography>
 				</Box>
@@ -142,8 +142,8 @@ const AllCategory = () => {
 															variant="h6"
 															sx={{
 																color: colors.gray[100],
-																fontWeight: 900,
-																letterSpacing: -0.2,
+																fontWeight: 700,
+																letterSpacing: "-0.01em",
 																cursor: "pointer",
 															}}
 															onClick={() => category?.id && navigate(`/category/${category.id}`)}

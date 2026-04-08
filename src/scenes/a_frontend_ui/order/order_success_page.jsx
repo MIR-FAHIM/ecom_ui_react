@@ -58,9 +58,8 @@ const OrderSuccessPage = () => {
 						<Typography
 							variant="h4"
 							sx={{
-								fontWeight: 800,
-								letterSpacing: 0.3,
-								fontFamily: '"DM Serif Display", "Georgia", serif',
+								fontWeight: 700,
+								letterSpacing: "-0.02em",
 								color: "#1f2a44",
 							}}
 						>

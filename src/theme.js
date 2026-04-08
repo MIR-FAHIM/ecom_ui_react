@@ -86,11 +86,11 @@ export const tokens = (mode) => ({
         },
         primary: {
           
-          100: "#f5f5f6ff",
-          200: "#e1e3e6ff",
-          300: "#eeeff4ff",
-          400: "#fcfcfc",
-          500: "#f2f0f0",
+          100: "#f7f8fa",
+          200: "#eceef2",
+          300: "#e8eaef",
+          400: "#fcfcfd",
+          500: "#f5f6f8",
           600: "#434957",
           700: "#727681",
           800: "#a1a4ab",
@@ -180,32 +180,70 @@ export const themeSettings = (mode) => {
           }),
     },
     typography: {
-      fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-      fontSize: 12,
+      fontFamily: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"].join(","),
+      fontSize: 13,
       h1: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 40,
+        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontSize: 36,
+        fontWeight: 800,
+        letterSpacing: "-0.025em",
+        lineHeight: 1.2,
       },
       h2: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 32,
+        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontSize: 28,
+        fontWeight: 700,
+        letterSpacing: "-0.02em",
+        lineHeight: 1.25,
       },
       h3: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 24,
+        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontSize: 22,
+        fontWeight: 700,
+        letterSpacing: "-0.015em",
+        lineHeight: 1.3,
       },
       h4: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 20,
+        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontSize: 18,
+        fontWeight: 600,
+        letterSpacing: "-0.01em",
+        lineHeight: 1.35,
       },
       h5: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 16,
+        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontSize: 15,
+        fontWeight: 600,
+        letterSpacing: "-0.005em",
+        lineHeight: 1.4,
       },
       h6: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 14,
+        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontSize: 13,
+        fontWeight: 600,
+        lineHeight: 1.45,
       },
+      body1: {
+        fontSize: 14,
+        lineHeight: 1.6,
+        letterSpacing: "-0.005em",
+      },
+      body2: {
+        fontSize: 13,
+        lineHeight: 1.55,
+      },
+      caption: {
+        fontSize: 12,
+        lineHeight: 1.5,
+        letterSpacing: "0.01em",
+      },
+      button: {
+        fontWeight: 600,
+        letterSpacing: "0.01em",
+      },
+    },
+    shape: {
+      borderRadius: 12,
     },
     components: {
       MuiContainer: {
@@ -215,6 +253,99 @@ export const themeSettings = (mode) => {
         styleOverrides: {
           maxWidthXl: {
             maxWidth: "1480px",
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 10,
+            textTransform: "none",
+            fontWeight: 600,
+            padding: "8px 18px",
+            boxShadow: "none",
+            "&:hover": { boxShadow: "none" },
+          },
+          sizeSmall: {
+            padding: "5px 12px",
+            fontSize: 12,
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            fontWeight: 600,
+            fontSize: 12,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 14,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)",
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: "none",
+          },
+          rounded: {
+            borderRadius: 14,
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 10,
+            },
+          },
+        },
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            transition: "all 0.15s ease",
+          },
+        },
+      },
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 500,
+            padding: "6px 12px",
+          },
+        },
+      },
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            borderRadius: 12,
+            boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            margin: "2px 6px",
+            fontSize: 13,
+            fontWeight: 500,
+          },
+        },
+      },
+      MuiDivider: {
+        styleOverrides: {
+          root: {
+            opacity: 0.08,
           },
         },
       },

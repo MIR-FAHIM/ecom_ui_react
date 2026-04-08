@@ -106,7 +106,7 @@ const AddShop = () => {
 				<Card sx={{ background: colors.primary[400], borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
 					<CardContent>
 						<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
-							<Typography variant="h5" sx={{ fontWeight: 900 }}>
+							<Typography variant="h5" sx={{ fontWeight: 600 }}>
 								Create Shop
 							</Typography>
 							<Button variant="outlined" onClick={() => navigate(-1)} disabled={loading}>
@@ -199,7 +199,7 @@ const AddShop = () => {
 									disabled={loading}
 									startIcon={loading ? <CircularProgress size={18} /> : null}
 									sx={{
-										fontWeight: 900,
+										fontWeight: 600,
 										textTransform: "none",
 										background: theme.palette.secondary.main,
 										color: colors.gray[900],

@@ -74,7 +74,7 @@ const AllProduct = ({ categoryId = "" }) => {
 					<Grid container spacing={2}>
 						{list.length === 0 ? (
 							<Grid item xs={12}>
-								<Typography variant="h6" align="center" sx={{ py: 6, fontWeight: 900, color: "text.secondary" }}>
+								<Typography variant="h6" align="center" sx={{ py: 6, fontWeight: 600, color: "text.secondary" }}>
 									No products found.
 								</Typography>
 							</Grid>

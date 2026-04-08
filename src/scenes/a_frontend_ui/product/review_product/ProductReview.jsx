@@ -80,7 +80,7 @@ const ProductReview = ({ productId }) => {
 			}}
 		>
 			<CardContent sx={{ p: 2 }}>
-				<Typography sx={{ fontWeight: 950, color: ink, mb: 1 }}>Reviews</Typography>
+				<Typography sx={{ fontWeight: 700, color: ink, mb: 1 }}>Reviews</Typography>
 
 				{loading ? (
 					<Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
@@ -102,14 +102,14 @@ const ProductReview = ({ productId }) => {
 											borderRadius: 2,
 											background: theme.palette.secondary.main,
 											color: colors.gray[900],
-											fontWeight: 900,
+											fontWeight: 600,
 											border: `1px solid ${border}`,
 										}}
 									>
 										{initials(r?.user?.name)}
 									</Avatar>
 									<Box sx={{ minWidth: 0 }}>
-										<Typography sx={{ fontWeight: 900, color: ink, lineHeight: 1.1 }}>
+										<Typography sx={{ fontWeight: 600, color: ink, lineHeight: 1.1 }}>
 											{r?.user?.name || "Anonymous"}
 										</Typography>
 										<Typography variant="caption" sx={{ color: subInk, fontWeight: 700 }}>

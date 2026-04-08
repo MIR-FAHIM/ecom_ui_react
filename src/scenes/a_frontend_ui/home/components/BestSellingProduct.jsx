@@ -105,12 +105,12 @@ export default function BestSellingProduct({ onView }) {
   return (
     <Box
       sx={{
-        borderRadius: 3,
-        p: { xs: 2, md: 2.5 },
+        borderRadius: 4,
+        p: { xs: 2.5, md: 3 },
         bgcolor: "#f1eadc",
-        boxShadow: "0 16px 32px rgba(0,0,0,0.08)",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
         display: "grid",
-        gap: 2.5,
+        gap: 3,
         gridTemplateColumns: { xs: "1fr", md: "1.1fr 2fr" },
         alignItems: "stretch",
       }}
@@ -128,10 +128,10 @@ export default function BestSellingProduct({ onView }) {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 15 }}>
               Best Selling
             </Typography>
-            <Typography variant="body3" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
               Products ({Math.min(items.length, 10)})
             </Typography>
           </Box>

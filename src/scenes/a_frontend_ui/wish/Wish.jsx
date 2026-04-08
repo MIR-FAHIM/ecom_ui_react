@@ -88,8 +88,8 @@ const Wish = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", background: theme.palette.background?.default || "#fff" }}>
-      <Container sx={{ py: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 900, mb: 2 }}>
+      <Container sx={{ py: { xs: 2, md: 4 } }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, letterSpacing: "-0.02em" }}>
           Your Wishlist
         </Typography>
 
@@ -98,9 +98,14 @@ const Wish = () => {
             <CircularProgress />
           </Box>
         ) : products.length === 0 ? (
-          <Typography variant="h6" align="center" sx={{ py: 6, fontWeight: 900, color: "text.secondary" }}>
-            No items in your wishlist.
-          </Typography>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: "text.secondary", mb: 1 }}>
+              No items in your wishlist
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary", opacity: 0.7 }}>
+              Products you save will appear here.
+            </Typography>
+          </Box>
         ) : (
           <Grid container spacing={2}>
             {products.map((product) => (

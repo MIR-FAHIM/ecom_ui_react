@@ -67,8 +67,8 @@ const ShopCard = ({ shop, onView }) => {
 					borderColor: theme.palette.primary.main,
 					boxShadow:
 						theme.palette.mode === "dark"
-							? "0 16px 34px rgba(0,0,0,0.35)"
-							: "0 16px 34px rgba(0,0,0,0.12)",
+							? "0 8px 24px rgba(0,0,0,0.25)"
+							: "0 8px 24px rgba(0,0,0,0.08)",
 				},
 			}}
 		>
@@ -90,13 +90,13 @@ const ShopCard = ({ shop, onView }) => {
 							height: 56,
 							border: `2px solid ${colors.primary[400]}`,
 							background: colors.primary[300],
-							fontWeight: 800,
+							fontWeight: 600,
 						}}
 					>
 						{initialsFromName(shop?.name)}
 					</Avatar>
 					<Box sx={{ minWidth: 0 }}>
-						<Typography variant="subtitle1" sx={{ fontWeight: 800 }} noWrap>
+						<Typography variant="subtitle1" sx={{ fontWeight: 600 }} noWrap>
 							{shop?.name || "Shop"}
 						</Typography>
 						<Typography variant="body2" sx={{ color: colors.gray[300] }} noWrap>
@@ -170,7 +170,7 @@ const HomeShopList = () => {
 	return (
 		<Box sx={{ mt: 3 }}>
 			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mb: 1 }}>
-				<Typography variant="h5" sx={{ fontWeight: 900 }}>
+				<Typography variant="h5" sx={{ fontWeight: 600 }}>
 					Shops
 				</Typography>
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

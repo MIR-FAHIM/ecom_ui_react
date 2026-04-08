@@ -125,7 +125,7 @@ const ShopProducts = () => {
 		>
 			<Container maxWidth="xl">
 				<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-					<Typography variant="h4" sx={{ fontWeight: 900 }}>
+					<Typography variant="h4" sx={{ fontWeight: 600 }}>
 						Shop Products
 					</Typography>
 					<Button variant="outlined" onClick={() => navigate(-1)}>
@@ -149,7 +149,7 @@ const ShopProducts = () => {
 							<CardContent>
 								<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
 									<Box>
-										<Typography variant="h5" sx={{ fontWeight: 900 }}>
+										<Typography variant="h5" sx={{ fontWeight: 600 }}>
 											Products
 										</Typography>
 										<Typography variant="body2" sx={{ color: colors.gray[300] }}>

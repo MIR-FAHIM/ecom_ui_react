@@ -73,14 +73,14 @@ const GeneralInfoBar = ({ shop, loading, error }) => {
 							height: 80,
 							border: `3px solid ${colors.primary[400]}`,
 							background: colors.primary[300],
-							fontWeight: 800,
+							fontWeight: 600,
 							fontSize: 28,
 						}}
 					>
 						{initialsFromName(shop?.name)}
 					</Avatar>
 					<Box>
-						<Typography variant="h6" sx={{ fontWeight: 900 }}>
+						<Typography variant="h6" sx={{ fontWeight: 600 }}>
 							{shop?.name || "Shop"}
 						</Typography>
 						<Typography variant="body2" sx={{ color: colors.gray[300], fontWeight: 600 }}>

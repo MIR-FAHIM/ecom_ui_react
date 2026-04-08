@@ -19,7 +19,7 @@ const ProductDescription = ({ description, ink, subInk }) => {
 
 	return (
 		<Box sx={{ mt: 3 }}>
-			<Typography sx={{ fontWeight: 950, color: titleColor }}>Description</Typography>
+			<Typography sx={{ fontWeight: 700, color: titleColor }}>Description</Typography>
 			<Typography variant="body2" sx={{ color: bodyColor, fontWeight: 700, whiteSpace: "pre-line", mt: 0.5 }}>
 				{descriptionText || "No detailed description available."}
 			</Typography>

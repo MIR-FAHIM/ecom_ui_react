@@ -223,18 +223,20 @@ const Topbar = () => {
       position="sticky"
       elevation={0}
       sx={{
-        mb: { xs: 1, md: 2 },
+        mb: 0,
         borderBottom: `1px solid ${border}`,
         background: colors.primary[500],
+        backdropFilter: "blur(20px)",
       }}
     >
       <Toolbar
         sx={{
           display: "flex",
           flexWrap: { xs: "wrap", md: "nowrap" },
-          gap: { xs: 1.2, sm: 2 },
+          gap: { xs: 1, sm: 1.5 },
           justifyContent: "space-between",
-          py: { xs: 0.8, sm: 1.1 },
+          py: { xs: 0.6, sm: 0.8 },
+          minHeight: { xs: 56, sm: 64 },
         }}
       >
         {/* Left: Brand */}
@@ -266,17 +268,18 @@ const Topbar = () => {
           <Box onClick={() => navigate("/")} sx={{ cursor: "pointer", userSelect: "none", lineHeight: 1.05 }}>
             <Typography
               sx={{
-                fontWeight: 950,
-                letterSpacing: -0.7,
+                fontWeight: 600,
+                letterSpacing: "-0.03em",
                 color: colors.greenAccent[500],
-                fontSize: { xs: 16, sm: 18 },
+                fontSize: { xs: 15, sm: 17 },
+                lineHeight: 1.2,
               }}
             >
               {brand.name}
             </Typography>
             <Typography
-              variant="body3"
-              sx={{ color: "text.secondary", fontWeight: 800, display: { xs: "none", sm: "block" } }}
+              variant="caption"
+              sx={{ color: "text.secondary", fontWeight: 500, display: { xs: "none", sm: "block" }, opacity: 0.7 }}
             >
               {brand.slogan}
             </Typography>
@@ -312,15 +315,17 @@ const Topbar = () => {
           <Tooltip title={t("lang.label")}>
             <Button
               onClick={handleLangOpen}
-              startIcon={<LanguageIcon />}
+              startIcon={<LanguageIcon sx={{ fontSize: 18 }} />}
               sx={{
                 borderRadius: 999,
                 textTransform: "none",
-                fontWeight: 900,
+                fontWeight: 600,
+                fontSize: 12,
                 border: `1px solid ${border}`,
-                background: colors.blueAccent[400],
-                px: 1.1,
-                minWidth: 70,
+                background: glass,
+                px: 1.2,
+                py: 0.5,
+                minWidth: 64,
                 "&:hover": { background: glass2 },
               }}
             >
@@ -382,11 +387,13 @@ const Topbar = () => {
                       ml: 0.4,
                       borderRadius: 999,
                       textTransform: "none",
-                      fontWeight: 900,
+                      fontWeight: 600,
+                      fontSize: 13,
                       border: `1px solid ${border}`,
                       background: glass,
-                      px: 1.2,
-                      gap: 1,
+                      px: 1.4,
+                      py: 0.5,
+                      gap: 0.8,
                       "&:hover": { background: glass2 },
                     }}
                     startIcon={
@@ -395,7 +402,7 @@ const Topbar = () => {
                           width: 26,
                           height: 26,
                           fontSize: 12,
-                          fontWeight: 900,
+                          fontWeight: 600,
                           background: colors.blueAccent[400],
                           color: colors.gray[900],
                           border: `1px solid ${border}`,
@@ -429,9 +436,9 @@ const Topbar = () => {
                     },
                   }}
                 >
-                <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-                  <Typography sx={{  color: "text.secondary", fontWeight: 950 }}>{user?.name || t("topbar.menu.account")}</Typography>
-                  <Typography variant="body3" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                <Box sx={{ px: 2.5, pt: 2.5, pb: 1.5 }}>
+                  <Typography sx={{ color: "text.primary", fontWeight: 700, fontSize: 14 }}>{user?.name || t("topbar.menu.account")}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500, mt: 0.3, display: "block" }}>
                     {user?.email || " "}
                   </Typography>
 
@@ -441,7 +448,7 @@ const Topbar = () => {
                       label={t("topbar.menu.verified")}
                       sx={{
                         borderRadius: 999,
-                        fontWeight: 900,
+                        fontWeight: 600,
                         background: glass,
                         border: `1px solid ${border}`,
                       }}
@@ -483,7 +490,7 @@ const Topbar = () => {
                   color: colors.gray[100],
                   borderRadius: 999,
                   textTransform: "none",
-                  fontWeight: 900,
+                  fontWeight: 600,
                   border: `1px solid ${border}`,
                   background: glass,
                   sx: {
@@ -501,14 +508,17 @@ const Topbar = () => {
             <Tooltip title={t("topbar.becomeSeller")}>
               <Button
                 onClick={() => navigate("/seller-login")}
-                startIcon={<StorefrontIcon />}
+                startIcon={<StorefrontIcon sx={{ fontSize: 16 }} />}
                 sx={{
                   display: { xs: "none", md: "inline-flex" },
                   textTransform: "none",
-                  fontWeight: 800,
+                  fontWeight: 500,
+                  fontSize: 12,
                   color: colors.gray[100],
-                  px: 0.8,
+                  px: 1,
                   minWidth: 0,
+                  opacity: 0.8,
+                  "&:hover": { opacity: 1 },
                 }}
               >
                 {t("topbar.becomeSeller")}
@@ -518,14 +528,17 @@ const Topbar = () => {
             <Tooltip title={t("topbar.about")}>
               <Button
                 onClick={() => navigate("/about")}
-                startIcon={<InfoOutlinedIcon />}
+                startIcon={<InfoOutlinedIcon sx={{ fontSize: 16 }} />}
                 sx={{
                   display: { xs: "none", md: "inline-flex" },
                   textTransform: "none",
-                  fontWeight: 800,
+                  fontWeight: 500,
+                  fontSize: 12,
                   color: colors.gray[100],
-                  px: 0.8,
+                  px: 1,
                   minWidth: 0,
+                  opacity: 0.8,
+                  "&:hover": { opacity: 1 },
                 }}
               >
                 {t("topbar.about")}
@@ -557,11 +570,13 @@ const Topbar = () => {
           onClick={handleCategoryOpen}
           endIcon={<KeyboardArrowDownIcon />}
           sx={{
-            borderRadius: 2,
+            borderRadius: 2.5,
             textTransform: "none",
-            fontWeight: 900,
+            fontWeight: 700,
+            fontSize: 13,
             px: 2,
-            width: { xs: "auto", sm: 200 },
+            py: 0.75,
+            width: { xs: "auto", sm: 180 },
             background: colors.yellowAccent ? colors.yellowAccent[500] : "#f5d000",
             color: colors.gray[100],
             border: `1px solid ${border}`,
@@ -629,11 +644,12 @@ const Topbar = () => {
               onClick={() => navigate(item.path)}
               sx={{
                 textTransform: "none",
-                fontWeight: 800,
+                fontWeight: 500,
+                fontSize: 13,
                 color: colors.gray[100],
                 borderRadius: 2,
-               // variant:"body3",
-                px: 1.2,
+                px: 1.5,
+                py: 0.4,
                 "&:hover": { background: colors.primary[400] },
               }}
             >

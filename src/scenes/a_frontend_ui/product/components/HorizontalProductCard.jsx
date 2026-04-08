@@ -43,17 +43,17 @@ export default function HorizontalProductCard({ product, onView }) {
         display: "flex",
         alignItems: "center",
         gap: 1.25,
-        p: 1,
-        borderRadius: 2,
+        p: 1.25,
+        borderRadius: 3,
         border: `1px solid ${theme.palette.divider}`,
         backgroundColor: "background.paper",
         width: 300,
         height: 88,
         cursor: "pointer",
-        transition: "transform 140ms ease, box-shadow 200ms ease, border-color 200ms ease",
+        transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
         "&:hover": {
           transform: "translateY(-2px)",
-          boxShadow: "0 10px 22px rgba(0,0,0,0.08)",
+          boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
           borderColor: theme.palette.primary.main,
         },
       }}
@@ -81,7 +81,8 @@ export default function HorizontalProductCard({ product, onView }) {
         <Typography
           variant="body2"
           sx={{
-            fontWeight: 700,
+            fontWeight: 600,
+            fontSize: 12,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -93,7 +94,7 @@ export default function HorizontalProductCard({ product, onView }) {
           {product?.name || "Untitled product"}
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.8 }}>
-          <Typography variant="body2" sx={{ fontWeight: 800 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 13 }}>
             {formatMoney(displayPrice)}
           </Typography>
           {hasSale ? (

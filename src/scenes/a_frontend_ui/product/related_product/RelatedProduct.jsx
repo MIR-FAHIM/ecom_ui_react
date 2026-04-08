@@ -78,7 +78,7 @@ const RelatedProduct = ({ productId }) => {
 			}}
 		>
 			<CardContent sx={{ p: 2 }}>
-				<Typography sx={{ fontWeight: 950, color: ink, mb: 1 }}>Related Products</Typography>
+				<Typography sx={{ fontWeight: 700, color: ink, mb: 1 }}>Related Products</Typography>
 
 				{loading ? (
 					<Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
@@ -132,7 +132,7 @@ const RelatedProduct = ({ productId }) => {
 										>
 											{p?.name || "Unnamed product"}
 										</Typography>
-										<Typography variant="caption" sx={{ color: subInk, fontWeight: 800 }}>
+										<Typography variant="caption" sx={{ color: subInk, fontWeight: 600 }}>
 											{money(p?.unit_price ?? p?.price ?? 0)}
 										</Typography>
 									</Box>

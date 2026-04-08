@@ -64,8 +64,8 @@ const ShopCard = ({ shop, onView }) => {
 					borderColor: theme.palette.primary.main,
 					boxShadow:
 						theme.palette.mode === "dark"
-							? "0 16px 34px rgba(0,0,0,0.35)"
-							: "0 16px 34px rgba(0,0,0,0.12)",
+							? "0 8px 24px rgba(0,0,0,0.25)"
+							: "0 8px 24px rgba(0,0,0,0.08)",
 				},
 			}}
 		>
@@ -77,13 +77,13 @@ const ShopCard = ({ shop, onView }) => {
 							width: 56,
 							height: 56,
 							background: colors.primary[300],
-							fontWeight: 800,
+							fontWeight: 600,
 						}}
 					>
 						{initialsFromName(shop?.name)}
 					</Avatar>
 					<Box sx={{ minWidth: 0 }}>
-						<Typography variant="subtitle1" sx={{ fontWeight: 800 }} noWrap>
+							<Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 14 }} noWrap>
 							{shop?.name || "Shop"}
 						</Typography>
 						<Typography variant="body2" sx={{ color: colors.gray[300] }} noWrap>
@@ -172,11 +172,11 @@ const ShopList = () => {
 			}}
 		>
 			<Container maxWidth="xl">
-				<Stack spacing={2} sx={{ mb: 2 }}>
-					<Typography variant="h4" sx={{ fontWeight: 900 }}>
+				<Stack spacing={1.5} sx={{ mb: 3 }}>
+					<Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
 						All Shops
 					</Typography>
-					<Typography variant="body2" sx={{ color: colors.gray[300] }}>
+					<Typography variant="body2" sx={{ color: colors.gray[300], fontWeight: 400 }}>
 						{pagination.total ? `${pagination.total} shops` : "Browse all shops"}
 					</Typography>
 				</Stack>
