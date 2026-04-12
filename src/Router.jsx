@@ -65,6 +65,7 @@ import ShopProducts from "./scenes/a_frontend_ui/seller/ShopProducts";
 import EditSellerTab from "./scenes/admin_panel/seller/EditSellerTab";
 import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
 import PosManagement from "./scenes/admin_panel/pos_management/PosManagement";
+import RequireAdmin from "./components/RequireAdmin";
 
 // Seller panel
 import SellerLayout from "./scenes/seller_panel/layout/SellerLayout";
@@ -124,7 +125,7 @@ const AppRouter = () => {
 
 
 
-        <Route path="/" element={<App />}>
+        <Route path="/" element={<RequireAdmin><App /></RequireAdmin>}>
 
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/pos" element={<PosManagement />} />

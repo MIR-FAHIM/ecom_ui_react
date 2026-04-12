@@ -89,9 +89,11 @@ const AdminLogin = () => {
 					if (remember) {
 						localStorage.setItem("authToken", token);
 						localStorage.setItem("userId", userId);
+						localStorage.setItem("userType", userType);
 					} else {
 						sessionStorage.setItem("authToken", token);
 						sessionStorage.setItem("userId", userId);
+						sessionStorage.setItem("userType", userType);
 					}
 					navigate("/admin");
 				}

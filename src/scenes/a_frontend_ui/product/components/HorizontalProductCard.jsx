@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Link, Typography, useTheme } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { image_file_url } from "../../../../api/config/index.jsx";
+import { tokens } from "../../../../theme.js";
 
 const formatMoney = (n) =>
   new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
@@ -25,6 +27,10 @@ const resolveImage = (product) => {
 
 export default function HorizontalProductCard({ product, onView }) {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const colors = tokens(theme.palette.mode);
+  const subInk = colors.gray[300];
+  const accent = theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100];
 
   const price = useMemo(
     () => Number(product?.unit_price ?? product?.price ?? 0),
@@ -44,7 +50,7 @@ export default function HorizontalProductCard({ product, onView }) {
         alignItems: "center",
         gap: 1.25,
         p: 1.25,
-        borderRadius: 3,
+        borderRadius: 1.5,
         border: `1px solid ${theme.palette.divider}`,
         backgroundColor: "background.paper",
         width: 300,
@@ -70,7 +76,7 @@ export default function HorizontalProductCard({ product, onView }) {
         sx={{
           width: 64,
           height: 64,
-          borderRadius: 1.5,
+          borderRadius: 1,
           objectFit: "cover",
           border: `1px solid ${theme.palette.divider}`,
           backgroundColor: "rgba(0,0,0,0.04)",
@@ -83,6 +89,7 @@ export default function HorizontalProductCard({ product, onView }) {
           sx={{
             fontWeight: 600,
             fontSize: 12,
+            lineHeight: 1.2,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -93,6 +100,51 @@ export default function HorizontalProductCard({ product, onView }) {
         >
           {product?.name || "Untitled product"}
         </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
+ 
+            {product?.shop?.id ? (
+              <Link
+                component="button"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/shop/${product.shop.id}`);
+                }}
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: accent,
+                  textDecoration: "none",
+                  lineHeight: 1.2,
+                  textAlign: "left",
+                  display: "inline-block",
+                  maxWidth: 170,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                {product.shop?.name || "View shop"}
+              </Link>
+            ) : (
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 600,
+                  color: subInk,
+                  fontSize: 11,
+                  display: "inline-block",
+                  maxWidth: 170,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {product.shop?.name || " "}
+              </Typography>
+            )}
+          </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.8 }}>
           <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 13 }}>
             {formatMoney(displayPrice)}

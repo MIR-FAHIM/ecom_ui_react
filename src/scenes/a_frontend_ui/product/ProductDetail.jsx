@@ -22,7 +22,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
@@ -308,110 +307,60 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <Container sx={{ py: 8 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-          <CircularProgress size={18} />
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", display: "grid", placeItems: "center" }}>
+        <Stack alignItems="center" spacing={2}>
+          <CircularProgress size={28} sx={{ color: theme.palette.primary.main }} />
           <Typography sx={{ color: subInk, fontWeight: 600 }}>Loading product...</Typography>
-        </Box>
-      </Container>
+        </Stack>
+      </Box>
     );
   }
 
   if (!product) {
     return (
-      <Container sx={{ py: 8 }}>
-        <Typography sx={{ fontWeight: 600, color: ink }}>Product not found</Typography>
-        <Button onClick={() => navigate("/")} sx={{ mt: 2, borderRadius: 999, textTransform: "none", fontWeight: 600 }}>
-          Back to home
-        </Button>
-      </Container>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", display: "grid", placeItems: "center" }}>
+        <Stack alignItems="center" spacing={2}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: ink }}>Product not found</Typography>
+          <Button onClick={() => navigate("/")} variant="contained" sx={{ borderRadius: 999, textTransform: "none", fontWeight: 600 }}>
+            Back to home
+          </Button>
+        </Stack>
+      </Box>
     );
   }
 
+  const ratingValue = Number(product?.average_review?.average_rating || 0);
+  const reviewCount = product?.average_review?.review_count ?? 0;
+  const colorsList = safeJsonParse(product?.colors, []);
+
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: theme.palette.background?.default || colors.primary[500],
-        py: 3,
-      }}
-    >
-      <Container>
-        {/* Header */}
-        <Box
-          sx={{
-            mb: 2,
-            p: 2,
-            borderRadius: 4,
-            border: `1px solid ${divider}`,
-            background: surface,
-            backdropFilter: "blur(12px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            flexWrap: "wrap",
-          }}
-        >
-          <Stack direction="row" spacing={1.2} alignItems="center">
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 6 }}>
+      {/* Breadcrumb / Back bar */}
+      <Box sx={{ bgcolor: surface, borderBottom: `1px solid ${divider}` }}>
+        <Container>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ py: 1.5 }}>
             <IconButton
               onClick={() => navigate(-1)}
+              size="small"
               sx={{
-                borderRadius: 3,
                 border: `1px solid ${divider}`,
-                background: surface,
-                "&:hover": { background: surface2 },
+                borderRadius: 2,
+                bgcolor: surface2,
+                "&:hover": { bgcolor: surface },
               }}
             >
-              <ArrowBackIcon />
+              <ArrowBackIcon fontSize="small" />
             </IconButton>
-
-            <Box sx={{ minWidth: 0 }}>
-              <Typography
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: "-0.02em",
-                  color: theme.palette.secondary.main,
-                  lineHeight: 1.1,
-                }}
-              >
-                Product details
-              </Typography>
-              <Typography variant="body2" sx={{ color: subInk, fontWeight: 700 }}>
-                Tap thumbnails to switch image, zoom if needed.
-              </Typography>
-            </Box>
+            <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
+              {product?.category?.name || "Products"} / <Box component="span" sx={{ color: ink }}>{product?.name}</Box>
+            </Typography>
           </Stack>
+        </Container>
+      </Box>
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Chip
-              icon={<VerifiedIcon />}
-              label={inStock ? "In stock" : "Out of stock"}
-              sx={{
-                borderRadius: 999,
-                fontWeight: 600,
-                background: surface2,
-                border: `1px solid ${divider}`,
-                color: ink,
-              }}
-            />
-            {discountPct > 0 ? (
-              <Chip
-                label={`${discountPct}% OFF`}
-                sx={{
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  background: theme.palette.secondary.main,
-                  color: colors.gray[900],
-                  boxShadow: "none",
-                }}
-              />
-            ) : null}
-          </Stack>
-        </Box>
-
-        <Grid container spacing={2.4}>
-          {/* Left: Media */}
+      <Container sx={{ mt: 3 }}>
+        <Grid container spacing={3}>
+          {/* ────── LEFT: IMAGE ────── */}
           <Grid item xs={12} md={6}>
             <ProductDetailImage
               mainImage={mainImage}
@@ -430,305 +379,278 @@ const ProductDetail = () => {
             />
           </Grid>
 
-          {/* Right: Info */}
+          {/* ────── RIGHT: INFO ────── */}
           <Grid item xs={12} md={6}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                border: `1px solid ${divider}`,
-                background: surface,
-                backdropFilter: "blur(12px)",
-                p: 2.4,
-                height: "100%",
-              }}
-            >
-              <Stack spacing={2}>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: ink, lineHeight: 1.15 }}>
+            <Stack spacing={2.5}>
+              {/* Product name */}
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: ink, lineHeight: 1.2, letterSpacing: "-0.02em" }}>
                   {product?.name}
                 </Typography>
 
-                <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" sx={{ rowGap: 1 }}>
-                  <Rating value={Number(product?.average_review?.average_rating || 0)} precision={0.1} readOnly />
-                  <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
-                    Reviews {product?.average_review?.review_count ?? 0}
-                  </Typography>
-
-                  <Chip
-                    size="small"
-                    label={product?.brand?.name ? `Brand: ${product.brand.name}` : "No brand"}
-                    sx={{
-                      borderRadius: 999,
-                      fontWeight: 600,
-                      background: surface2,
-                      border: `1px solid ${divider}`,
-                      color: ink,
-                      ml: "auto",
-                    }}
-                  />
-                </Stack>
-
-                {/* Color chips (your API: colors JSON string) */}
-                {Array.isArray(colors) && colors.length > 0 ? (
-                  <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" sx={{ rowGap: 1 }}>
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: 1.2 }}>
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Rating value={ratingValue} precision={0.1} size="small" readOnly />
                     <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
-                      Colors:
+                      ({reviewCount})
                     </Typography>
-                    {colors.map((c) => (
-                      <Box
-                        key={c}
-                        title={c}
+                  </Stack>
+                  <Divider orientation="vertical" flexItem />
+                  <Typography variant="body2" sx={{ color: inStock ? "#16a34a" : "#dc2626", fontWeight: 700 }}>
+                    {inStock ? "In Stock" : "Out of Stock"}
+                  </Typography>
+                  {product?.brand?.name && (
+                    <>
+                      <Divider orientation="vertical" flexItem />
+                      <Chip size="small" label={product.brand.name} sx={{ borderRadius: 1.5, fontWeight: 600, bgcolor: surface2, border: `1px solid ${divider}` }} />
+                    </>
+                  )}
+                </Stack>
+              </Box>
+
+              {/* ── Price block ── */}
+              <Card sx={{ borderRadius: 2.5, border: `1px solid ${divider}`, bgcolor: surface, overflow: "visible" }}>
+                <Box sx={{ p: 2.5 }}>
+                  <Stack direction="row" alignItems="flex-end" spacing={1.5}>
+                    <Typography sx={{ fontSize: 32, fontWeight: 800, color: "#6366f1", lineHeight: 1 }}>
+                      {money(displayPrice)}
+                    </Typography>
+                    {hasSale && (
+                      <Typography sx={{ fontSize: 18, fontWeight: 600, color: subInk, textDecoration: "line-through", lineHeight: 1.3 }}>
+                        {money(price)}
+                      </Typography>
+                    )}
+                    {discountPct > 0 && (
+                      <Chip
+                        label={`-${discountPct}%`}
+                        size="small"
                         sx={{
-                          width: 18,
-                          height: 18,
-                          borderRadius: 999,
-                          background: c,
-                          border: `1px solid ${divider}`,
-                          boxShadow: theme.palette.mode === "dark" ? "0 0 0 1px rgba(255,255,255,0.10)" : "none",
+                          fontWeight: 800,
+                          bgcolor: "#fef2f2",
+                          color: "#dc2626",
+                          border: "1px solid #fecaca",
+                          borderRadius: 1.5,
                         }}
                       />
+                    )}
+                  </Stack>
+                  <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, mt: 0.5, display: "block" }}>
+                    Unit: {product?.unit || "pc"} &nbsp;·&nbsp; Min order: {product?.min_qty || 1}
+                  </Typography>
+                </Box>
+              </Card>
+
+              {/* ── Color swatches ── */}
+              {Array.isArray(colorsList) && colorsList.length > 0 && (
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: ink, mb: 1 }}>Colors</Typography>
+                  <Stack direction="row" spacing={1}>
+                    {colorsList.map((c) => (
+                      <Tooltip key={c} title={c}>
+                        <Box
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            bgcolor: c,
+                            border: `2px solid ${divider}`,
+                            cursor: "pointer",
+                            transition: "transform 150ms",
+                            "&:hover": { transform: "scale(1.15)" },
+                          }}
+                        />
+                      </Tooltip>
                     ))}
                   </Stack>
-                ) : null}
+                </Box>
+              )}
 
-                {/* Price block */}
+              {/* ── Attributes ── */}
+              {productAttributeOptions.length > 0 && (
+                <Box>
+                  {productAttributeOptions.map((attr) => (
+                    <Box key={attr.name} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: ink, mb: 0.8 }}>
+                        {attr.name}
+                      </Typography>
+                      <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap sx={{ rowGap: 0.8 }}>
+                        {attr.options.map((opt) => {
+                          const selected = String(selectedAttributeId) === String(opt.id);
+                          return (
+                            <Chip
+                              key={`${attr.name}-${opt.id}`}
+                              size="small"
+                              label={opt.label}
+                              onClick={() => setSelectedAttributeId(opt.id)}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontWeight: 600,
+                                bgcolor: selected ? "#6366f1" : surface2,
+                                color: selected ? "#fff" : ink,
+                                border: `1px solid ${selected ? "#6366f1" : divider}`,
+                                cursor: "pointer",
+                                transition: "all 150ms",
+                                "&:hover": { bgcolor: selected ? "#4f46e5" : surface },
+                              }}
+                            />
+                          );
+                        })}
+                      </Stack>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+              <Divider />
+
+              {/* ── Quantity and Actions ── */}
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }}>
                 <Box
                   sx={{
-                    p: 1.4,
-                    borderRadius: 3,
+                    display: "inline-flex",
+                    alignItems: "center",
                     border: `1px solid ${divider}`,
-                    background: surface2,
+                    borderRadius: 2,
+                    bgcolor: surface2,
+                    overflow: "hidden",
                   }}
                 >
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-end" spacing={1}>
-                    <Box>
-                      <Typography sx={{ fontWeight: 700, color: ink, fontSize: 22, lineHeight: 1.1 }}>
-                        {money(displayPrice)}
-                      </Typography>
-
-                      {hasSale ? (
-                        <Typography variant="body2" sx={{ color: subInk, textDecoration: "line-through", fontWeight: 600 }}>
-                          {money(price)}
-                        </Typography>
-                      ) : null}
-
-                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block", mt: 0.4 }}>
-                        Unit: {product?.unit || "pc"}
-                      </Typography>
-                    </Box>
-
-                    {discountPct > 0 ? (
-                      <Chip
-                        label={`${discountPct}% OFF`}
-                        sx={{
-                          borderRadius: 999,
-                          fontWeight: 700,
-                          background: theme.palette.secondary.main,
-                          color: colors.gray[900],
-                          boxShadow: "none",
-                        }}
-                      />
-                    ) : null}
-                  </Stack>
+                  <IconButton
+                    size="small"
+                    onClick={() => setQty((q) => Math.max(Number(product?.min_qty || 1), q - 1))}
+                    sx={{ borderRadius: 0, px: 1.5 }}
+                  >
+                    <RemoveCircleOutlineIcon fontSize="small" />
+                  </IconButton>
+                  <TextField
+                    size="small"
+                    value={qty}
+                    onChange={(e) => {
+                      const v = Number(e.target.value || product?.min_qty || 1);
+                      const min = Number(product?.min_qty || 1);
+                      setQty(Number.isFinite(v) ? Math.max(min, v) : min);
+                    }}
+                    sx={{
+                      width: 64,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 0,
+                        bgcolor: surface,
+                        "& fieldset": { border: "none" },
+                      },
+                      input: { textAlign: "center", fontWeight: 700, color: ink, py: 0.8 },
+                    }}
+                  />
+                  <IconButton size="small" onClick={() => setQty((q) => q + 1)} sx={{ borderRadius: 0, px: 1.5 }}>
+                    <AddCircleOutlineIcon fontSize="small" />
+                  </IconButton>
                 </Box>
 
-                {productAttributeOptions.length > 0 ? (
-                  <Box
+                <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
+                  <IconButton
+                    onClick={toggleWishlist}
                     sx={{
-                      p: 1.4,
-                      borderRadius: 3,
                       border: `1px solid ${divider}`,
-                      background: surface,
+                      borderRadius: 2,
+                      bgcolor: inWish ? "#fef2f2" : surface2,
+                      "&:hover": { bgcolor: surface },
                     }}
                   >
-                    <Typography sx={{ fontWeight: 600, color: ink, mb: 1 }}>
-                      Attributes
-                    </Typography>
-                    <Stack spacing={1.2}>
-                      {productAttributeOptions.map((attr) => (
-                        <Stack
-                          key={attr.name}
-                          direction="row"
-                          spacing={1.2}
-                          alignItems="center"
-                          flexWrap="wrap"
-                          useFlexGap
-                          sx={{ rowGap: 1 }}
-                        >
-                          <Typography variant="body2" sx={{ color: subInk, fontWeight: 600 }}>
-                            {attr.name}:
-                          </Typography>
-                          <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap sx={{ rowGap: 0.8 }}>
-                            {attr.options.map((opt) => {
-                              const selected = String(selectedAttributeId) === String(opt.id);
-                              return (
-                              <Chip
-                                key={`${attr.name}-${opt.id}`}
-                                size="small"
-                                label={opt.label}
-                                onClick={() => setSelectedAttributeId(opt.id)}
-                                sx={{
-                                  borderRadius: 999,
-                                  fontWeight: 600,
-                                  background: selected ? theme.palette.secondary.main : surface2,
-                                  border: `1px solid ${divider}`,
-                                  color: selected ? colors.gray[900] : ink,
-                                  cursor: "pointer",
-                                }}
-                              />
-                              );
-                            })}
-                          </Stack>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Box>
-                ) : null}
-
-                <Divider sx={{ opacity: 0.12 }} />
-
-                {/* Quantity + Actions */}
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.6} alignItems={{ sm: "center" }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.8,
-                      p: 0.8,
-                      borderRadius: 999,
-                      border: `1px solid ${divider}`,
-                      background: surface2,
-                      width: "fit-content",
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() => setQty((q) => Math.max(Number(product?.min_qty || 1), q - 1))}
-                    >
-                      <RemoveCircleOutlineIcon fontSize="small" />
-                    </IconButton>
-
-                    <TextField
-                      size="small"
-                      value={qty}
-                      onChange={(e) => {
-                        const v = Number(e.target.value || product?.min_qty || 1);
-                        const min = Number(product?.min_qty || 1);
-                        setQty(Number.isFinite(v) ? Math.max(min, v) : min);
-                      }}
-                      sx={{
-                        width: 86,
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 999,
-                          background: surface,
-                          "& fieldset": { borderColor: "transparent" },
-                        },
-                        input: { textAlign: "center", fontWeight: 600, color: ink },
-                      }}
-                    />
-
-                    <IconButton size="small" onClick={() => setQty((q) => q + 1)}>
-                      <AddCircleOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-
-                  <Stack direction="row" spacing={1.2} sx={{ ml: { sm: "auto" } }}>
-                    <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
-                      <IconButton
-                        onClick={toggleWishlist}
-                        sx={{
-                          borderRadius: 3,
-                          border: `1px solid ${divider}`,
-                          background: surface2,
-                          "&:hover": { background: surface },
-                        }}
-                      >
-                        {inWish ? <FavoriteIcon sx={{ color: theme.palette.error.main }} /> : <FavoriteBorderIcon />}
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title={inStock ? "Add to cart" : "Out of stock"}>
-                      <span>
-                        <IconButton
-                          disabled={!inStock || busyCart}
-                          onClick={handleAddToCart}
-                          sx={{
-                            borderRadius: 3,
-                            border: `1px solid ${divider}`,
-                            background: theme.palette.secondary.main,
-                            color: colors.gray[900],
-                            boxShadow: "none",
-                            "&:hover": { opacity: 0.92, boxShadow: "none" },
-                            "&.Mui-disabled": { opacity: 0.55 },
-                          }}
-                        >
-                          {busyCart ? <CircularProgress size={18} /> : <ShoppingCartOutlinedIcon />}
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-
-                    <Button
-                      variant="contained"
-                      disabled={!inStock}
-                      onClick={
-                      
-                        handleAddToCart
-                }
-                      sx={{
-                        borderRadius: 999,
-                        textTransform: "none",
-                        fontWeight: 700,
-                        px: 2.2,
-                        background: surface,
-                        border: `1px solid ${divider}`,
-                        color: ink,
-                        boxShadow: "none",
-                        "&:hover": { background: surface2 },
-                      }}
-                    >
-                      Buy now
-                    </Button>
-                  </Stack>
-                </Stack>
-
-                <Divider sx={{ opacity: 0.12 }} />
-
-                {/* Meta / shipping quick facts based on your response */}
-                <Stack direction="row" spacing={1.2} flexWrap="wrap" useFlexGap sx={{ rowGap: 1 }}>
-                  <Chip
-                    icon={<VerifiedIcon />}
-                    label={`Stock: ${typeof product?.current_stock === "number" ? product.current_stock : "-"}`}
-                    sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
-                  />
-                  <Chip
-                    label={`COD: ${product?.cash_on_delivery ? "Yes" : "No"}`}
-                    sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
-                  />
-                  <Chip
-                    label={`Shipping: ${product?.shipping_type || "flat_rate"}`}
-                    sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
-                  />
-                  {product?.est_shipping_days != null ? (
-                    <Chip
-                      label={`Est: ${product.est_shipping_days} day(s)`}
-                      sx={{ borderRadius: 999, fontWeight: 600, background: surface2, border: `1px solid ${divider}`, color: ink }}
-                    />
-                  ) : null}
-                </Stack>
-
+                    {inWish ? <FavoriteIcon sx={{ color: "#ef4444" }} /> : <FavoriteBorderIcon />}
+                  </IconButton>
+                </Tooltip>
               </Stack>
-            </Card>
+
+              {/* ── CTA Buttons ── */}
+              <Stack direction="row" spacing={1.5}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  disabled={!inStock || busyCart}
+                  onClick={handleAddToCart}
+                  startIcon={busyCart ? <CircularProgress size={16} color="inherit" /> : <ShoppingCartOutlinedIcon />}
+                  sx={{
+                    borderRadius: 2,
+                    py: 1.4,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: 15,
+                    bgcolor: "#6366f1",
+                    color: "#fff",
+                    boxShadow: "0 4px 14px rgba(99,102,241,0.3)",
+                    "&:hover": { bgcolor: "#4f46e5", boxShadow: "0 6px 20px rgba(99,102,241,0.4)" },
+                    "&.Mui-disabled": { opacity: 0.5 },
+                  }}
+                >
+                  Add to Cart
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  disabled={!inStock}
+                  onClick={handleAddToCart}
+                  sx={{
+                    borderRadius: 2,
+                    py: 1.4,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: 15,
+                    borderColor: "#6366f1",
+                    color: "#6366f1",
+                    "&:hover": { bgcolor: "rgba(99,102,241,0.06)", borderColor: "#4f46e5" },
+                  }}
+                >
+                  Buy Now
+                </Button>
+              </Stack>
+
+              <Divider />
+
+              {/* ── Shipping & Meta info ── */}
+              <Card sx={{ borderRadius: 2.5, border: `1px solid ${divider}`, bgcolor: surface }}>
+                <Box sx={{ p: 2 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: ink, mb: 1.5 }}>Delivery & Policies</Typography>
+                  <Grid container spacing={1.5}>
+                    {[
+                      { label: "Stock", value: typeof product?.current_stock === "number" ? product.current_stock : "—", icon: "📦" },
+                      { label: "COD", value: product?.cash_on_delivery ? "Available" : "Not available", icon: "💵" },
+                      { label: "Shipping", value: product?.shipping_type || "Flat rate", icon: "🚚" },
+                      ...(product?.est_shipping_days != null ? [{ label: "Est. delivery", value: `${product.est_shipping_days} day(s)`, icon: "📅" }] : []),
+                    ].map((item) => (
+                      <Grid item xs={6} key={item.label}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.2, borderRadius: 2, bgcolor: surface2, border: `1px solid ${divider}` }}>
+                          <Typography sx={{ fontSize: 18 }}>{item.icon}</Typography>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block", lineHeight: 1.2 }}>
+                              {item.label}
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: ink, lineHeight: 1.2 }}>
+                              {item.value}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              </Card>
+            </Stack>
           </Grid>
         </Grid>
 
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12} md={4}>
-            <RelatedProduct productId={product?.id} />
+        {/* ────── BOTTOM SECTION: Description, Reviews, Related ────── */}
+        <Box sx={{ mt: 4 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <ProductDescription description={product?.description} ink={ink} subInk={subInk} />
+              <Box sx={{ mt: 3 }}>
+                <ProductReview productId={product?.id} />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <RelatedProduct productId={product?.id} />
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={8}>
-            <ProductReview productId={product?.id} />
-            <ProductDescription description={product?.description} ink={ink} subInk={subInk} />
-          </Grid>
-        </Grid>
+        </Box>
 
         <Snackbar open={!!msg} autoHideDuration={2500} onClose={() => setMsg("")} message={msg} />
       </Container>

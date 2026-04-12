@@ -62,7 +62,7 @@ export default function BannerRow() {
             key={banner?.id ?? idx}
             sx={{
               height: { xs: 180, md: 200 },
-              borderRadius: 3,
+              borderRadius: 1,
               overflow: "hidden",
               border: `1px solid ${theme.palette.divider}`,
               boxShadow: "0 12px 24px rgba(0,0,0,0.08)",

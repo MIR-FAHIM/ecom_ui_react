@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Link, Typography, useTheme } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { image_file_url } from "../../../../api/config/index.jsx";
-
+import { tokens } from "../../../../theme.js";
 const formatMoney = (n) =>
   new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
 
@@ -25,7 +26,8 @@ const resolveImage = (product) => {
 
 export default function SquareProductCard({ product, onView, size = 140 }) {
   const theme = useTheme();
-
+  const navigate = useNavigate();
+  const colors = tokens(theme.palette.mode);
   const price = useMemo(
     () => Number(product?.unit_price ?? product?.price ?? 0),
     [product?.unit_price, product?.price]
@@ -33,7 +35,7 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
   const salePrice = useMemo(() => Number(product?.sale_price ?? 0), [product?.sale_price]);
   const hasSale = salePrice > 0 && salePrice < price;
   const displayPrice = hasSale ? salePrice : price;
-
+  const accent = theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100];
   const imageUrl = useMemo(() => resolveImage(product), [product]);
 
   return (
@@ -77,6 +79,35 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
         >
           {product?.name || "Untitled product"}
         </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 0.5, mt: 0.25 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, fontSize: 11, color: accent }}>
+            Shop:
+          </Typography>
+          {product?.shop?.id ? (
+            <Link
+              component="button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/shop/${product.shop.id}`);
+              }}
+              sx={{
+                fontSize: 12,
+                fontWeight: 700,
+                 color: accent,
+                textDecoration: "none",
+                lineHeight: 1.2,
+                "&:hover": { textDecoration: "underline" },
+              }}
+            >
+              {product.shop?.name || "View shop"}
+            </Link>
+          ) : (
+            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: 11, color: accent }}>
+              {product?.shop?.name || "Unknown"}
+            </Typography>
+          )}
+        </Box>
         <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.25, fontSize: 13 }}>
           {formatMoney(displayPrice)}
         </Typography>

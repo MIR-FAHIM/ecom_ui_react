@@ -10,15 +10,23 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	Divider,
 	Grid,
+	IconButton,
 	Stack,
 	TextField,
+	Tooltip,
 	Typography,
 	useTheme,
 } from "@mui/material";
 
-import { tokens } from "../../../theme";
+import LanguageIcon from "@mui/icons-material/Language";
+import PhotoLibraryOutlinedIcon from "@mui/icons-material/PhotoLibraryOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import PanoramaOutlinedIcon from "@mui/icons-material/PanoramaOutlined";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+
 import AllMedia from "../media/AllMedia";
 import { image_file_url } from "../../../api/config/index.jsx";
 import { addWebsite, addWebsiteLogo } from "../../../api/controller/admin_controller/website_setting/website_setting_controller";
@@ -32,9 +40,63 @@ const buildImageUrl = (media) => {
 	return "";
 };
 
+/* ── Dropzone-style media picker ── */
+const MediaPicker = ({ label, icon, preview, onPick, onClear, height = 160 }) => {
+	const theme = useTheme();
+	return (
+		<Box>
+			<Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>{label}</Typography>
+			{preview ? (
+				<Box sx={{ position: "relative", borderRadius: 2.5, overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "action.hover" }}>
+					<Box
+						component="img"
+						src={preview}
+						alt={label}
+						sx={{ width: "100%", height, objectFit: "contain", display: "block", p: 1 }}
+					/>
+					<Stack direction="row" spacing={0.5} sx={{ position: "absolute", top: 8, right: 8 }}>
+						<Tooltip title="Change">
+							<IconButton size="small" onClick={onPick} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "action.hover" } }}>
+								<CloudUploadOutlinedIcon sx={{ fontSize: 16 }} />
+							</IconButton>
+						</Tooltip>
+						<Tooltip title="Remove">
+							<IconButton size="small" onClick={onClear} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "error.main", color: "#fff" } }}>
+								<CloseIcon sx={{ fontSize: 16 }} />
+							</IconButton>
+						</Tooltip>
+					</Stack>
+				</Box>
+			) : (
+				<Box
+					onClick={onPick}
+					sx={{
+						height,
+						borderRadius: 2.5,
+						border: "2px dashed",
+						borderColor: "divider",
+						display: "flex",
+						flexDirection: "column",
+						alignItems: "center",
+						justifyContent: "center",
+						gap: 1,
+						cursor: "pointer",
+						transition: "all 200ms",
+						"&:hover": { borderColor: "primary.main", bgcolor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.08)" : "rgba(99,102,241,0.04)" },
+					}}
+				>
+					{icon}
+					<Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+						Click to select {label.toLowerCase()}
+					</Typography>
+				</Box>
+			)}
+		</Box>
+	);
+};
+
 const WebsiteLogoSetting = () => {
 	const theme = useTheme();
-	const colors = tokens(theme.palette.mode);
 
 	const [form, setForm] = useState({
 		logo_id: "",
@@ -57,30 +119,6 @@ const WebsiteLogoSetting = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
-	const cardSx = {
-		background: colors.primary[400],
-		borderRadius: 3,
-		border: `1px solid ${theme.palette.divider}`,
-		boxShadow: theme.palette.mode === "dark" ? "0 10px 24px rgba(0,0,0,0.35)" : "0 12px 28px rgba(0,0,0,0.08)",
-	};
-	const actionButtonSx = {
-		textTransform: "none",
-		fontWeight: 800,
-		backgroundColor: colors.blueAccent[200],
-		color: colors.gray[100],
-		"&:hover": {
-			backgroundColor: colors.blueAccent[600],
-		},
-	};
-	const secondaryButtonSx = {
-		textTransform: "none",
-		fontWeight: 800,
-		backgroundColor: colors.greenAccent[500],
-		color: colors.gray[900],
-		"&:hover": {
-			backgroundColor: colors.greenAccent[600],
-		},
-	};
 
 	const previewLogo = useMemo(() => buildImageUrl(logoMedia), [logoMedia]);
 	const previewBanner = useMemo(() => buildImageUrl(bannerMedia), [bannerMedia]);
@@ -143,197 +181,209 @@ const WebsiteLogoSetting = () => {
 		}
 	};
 
+	const fieldSx = {
+		"& .MuiOutlinedInput-root": {
+			borderRadius: 2,
+			"&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#6366f1" },
+		},
+		"& .MuiInputLabel-root.Mui-focused": { color: "#6366f1" },
+	};
+
 	return (
-		<Box
-			sx={{
-				minHeight: "100vh",
-				background: theme.palette.background?.default || colors.primary[500],
-				py: 3,
-			}}
-		>
-			<Box sx={{ px: { xs: 2, md: 3 } }}>
-				<Card sx={{ ...cardSx, mb: 2 }}>
-					<CardContent sx={{ py: 2.5 }}>
-						<Typography variant="h4" sx={{ fontWeight: 900 }}>
-							Website Settings
-						</Typography>
-						<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.6 }}>
-							Manage website name, slogan, and brand visuals from the photo library.
-						</Typography>
-					</CardContent>
-				</Card>
+		<Box sx={{ minHeight: "100vh", bgcolor: "background.default", p: { xs: 2, md: 3 } }}>
+			{/* ── Page header ── */}
+			<Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+				<Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: "#eef2ff", display: "grid", placeItems: "center", color: "#6366f1" }}>
+					<LanguageIcon />
+				</Box>
+				<Box>
+					<Typography variant="h5" sx={{ fontWeight: 800 }}>Website Settings</Typography>
+					<Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+						Manage your website name, branding, and visual assets.
+					</Typography>
+				</Box>
+			</Stack>
 
-				{success ? (
-					<Alert severity="success" sx={{ mb: 2 }}>
-						{success}
-					</Alert>
-				) : null}
-				{error ? (
-					<Alert severity="error" sx={{ mb: 2 }}>
-						{error}
-					</Alert>
-				) : null}
+			{/* ── Alerts ── */}
+			{success && <Alert severity="success" onClose={() => setSuccess("")} sx={{ mb: 2, borderRadius: 2 }}>{success}</Alert>}
+			{error && <Alert severity="error" onClose={() => setError("")} sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
-				<Grid container spacing={2}>
-					<Grid item xs={12} lg={7}>
-						<Card sx={cardSx}>
-							<CardContent>
-								<Typography variant="h6" sx={{ fontWeight: 900, mb: 1 }}>
-									Website Info
-								</Typography>
-								<Divider sx={{ mb: 2, opacity: 0.2 }} />
-								<Grid container spacing={2}>
-									<Grid item xs={12} md={6}>
-										<TextField
-											label="Website Name"
-											fullWidth
-											size="small"
-											value={form.website_name}
-											onChange={(e) => update({ website_name: e.target.value })}
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<TextField
-											label="Slogan"
-											fullWidth
-											size="small"
-											value={form.slogan}
-											onChange={(e) => update({ slogan: e.target.value })}
-										/>
-									</Grid>
-									<Grid item xs={12}>
-										<TextField
-											label="Description"
-											fullWidth
-											multiline
-											minRows={3}
-											size="small"
-											value={form.description}
-											onChange={(e) => update({ description: e.target.value })}
-										/>
-									</Grid>
-									<Grid item xs={12}>
-										<TextField
-											label="Short Details"
-											fullWidth
-											multiline
-											minRows={2}
-											size="small"
-											value={form.short_details}
-											onChange={(e) => update({ short_details: e.target.value })}
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<TextField
-											label="Type"
-											fullWidth
-											size="small"
-											value={form.type}
-											onChange={(e) => update({ type: e.target.value })}
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<Stack spacing={1}>
-											<Button variant="contained" onClick={() => openMedia("photo")} sx={actionButtonSx}>
-												Choose Photo
-											</Button>
-											{previewPhoto ? (
-												<Box
-													component="img"
-													src={previewPhoto}
-													alt="photo"
-													sx={{ width: "100%", maxHeight: 140, objectFit: "cover", borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}
-												/>
-											) : (
-												<Typography variant="caption" sx={{ color: colors.gray[300] }}>
-													No photo selected
-												</Typography>
-											)}
-										</Stack>
-									</Grid>
+			<Grid container spacing={3}>
+				{/* ────── LEFT: Website Info ────── */}
+				<Grid item xs={12} lg={7}>
+					<Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider" }}>
+						<CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+							<Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2.5 }}>
+								<Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: "#f0fdf4", display: "grid", placeItems: "center", color: "#16a34a" }}>
+									<LanguageIcon sx={{ fontSize: 18 }} />
+								</Box>
+								<Typography variant="subtitle1" sx={{ fontWeight: 700 }}>General Information</Typography>
+							</Stack>
+
+							<Grid container spacing={2.5}>
+								<Grid item xs={12} sm={6}>
+									<TextField
+										label="Website Name"
+										fullWidth
+										size="small"
+										value={form.website_name}
+										onChange={(e) => update({ website_name: e.target.value })}
+										sx={fieldSx}
+									/>
 								</Grid>
-							</CardContent>
-						</Card>
-					</Grid>
+								<Grid item xs={12} sm={6}>
+									<TextField
+										label="Slogan"
+										fullWidth
+										size="small"
+										value={form.slogan}
+										onChange={(e) => update({ slogan: e.target.value })}
+										placeholder="Your catchy tagline..."
+										sx={fieldSx}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										label="Description"
+										fullWidth
+										multiline
+										minRows={3}
+										size="small"
+										value={form.description}
+										onChange={(e) => update({ description: e.target.value })}
+										placeholder="Tell your customers about your store..."
+										sx={fieldSx}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										label="Short Details"
+										fullWidth
+										multiline
+										minRows={2}
+										size="small"
+										value={form.short_details}
+										onChange={(e) => update({ short_details: e.target.value })}
+										sx={fieldSx}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6}>
+									<TextField
+										label="Type"
+										fullWidth
+										size="small"
+										value={form.type}
+										onChange={(e) => update({ type: e.target.value })}
+										sx={fieldSx}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6}>
+									<MediaPicker
+										label="Site Photo"
+										icon={<PhotoLibraryOutlinedIcon sx={{ fontSize: 28, color: "text.disabled" }} />}
+										preview={previewPhoto}
+										onPick={() => openMedia("photo")}
+										onClear={() => { setPhotoMedia(null); update({ photo_id: "" }); }}
+										height={120}
+									/>
+								</Grid>
+							</Grid>
+						</CardContent>
+					</Card>
+				</Grid>
 
-					<Grid item xs={12} lg={5}>
-						<Card sx={cardSx}>
-							<CardContent>
-								<Typography variant="h6" sx={{ fontWeight: 900, mb: 1 }}>
-									Logo & Banner
-								</Typography>
-								<Divider sx={{ mb: 2, opacity: 0.2 }} />
-								<Stack spacing={2}>
-									<Stack spacing={1}>
-										<Button variant="contained" onClick={() => openMedia("logo")} sx={actionButtonSx}>
-											Choose Logo
-										</Button>
-										{previewLogo ? (
-											<Box
-												component="img"
-												src={previewLogo}
-												alt="logo"
-												sx={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}
-											/>
-										) : (
-											<Typography variant="caption" sx={{ color: colors.gray[300] }}>
-												No logo selected
-											</Typography>
-										)}
-									</Stack>
+				{/* ────── RIGHT: Logo, Banner & Save ────── */}
+				<Grid item xs={12} lg={5}>
+					<Stack spacing={3}>
+						{/* Logo & Banner card */}
+						<Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider" }}>
+							<CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+								<Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2.5 }}>
+									<Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: "#eef2ff", display: "grid", placeItems: "center", color: "#6366f1" }}>
+										<ImageOutlinedIcon sx={{ fontSize: 18 }} />
+									</Box>
+									<Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Logo & Banner</Typography>
+								</Stack>
 
-									<Stack spacing={1}>
-										<Button variant="contained" onClick={() => openMedia("banner")} sx={actionButtonSx}>
-											Choose Banner
-										</Button>
-										{previewBanner ? (
-											<Box
-												component="img"
-												src={previewBanner}
-												alt="banner"
-												sx={{ width: "100%", maxHeight: 160, objectFit: "cover", borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}
-											/>
-										) : (
-											<Typography variant="caption" sx={{ color: colors.gray[300] }}>
-												No banner selected
-											</Typography>
-										)}
-									</Stack>
+								<Stack spacing={2.5}>
+									<MediaPicker
+										label="Logo"
+										icon={<ImageOutlinedIcon sx={{ fontSize: 28, color: "text.disabled" }} />}
+										preview={previewLogo}
+										onPick={() => openMedia("logo")}
+										onClear={() => { setLogoMedia(null); update({ logo_id: "" }); }}
+										height={120}
+									/>
+									<MediaPicker
+										label="Banner"
+										icon={<PanoramaOutlinedIcon sx={{ fontSize: 28, color: "text.disabled" }} />}
+										preview={previewBanner}
+										onPick={() => openMedia("banner")}
+										onClear={() => { setBannerMedia(null); update({ banner_id: "" }); }}
+										height={160}
+									/>
 								</Stack>
 							</CardContent>
 						</Card>
 
-						<Card sx={{ ...cardSx, mt: 2 }}>
-							<CardContent>
-								<Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-									Save Settings
+						{/* Save card */}
+						<Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider" }}>
+							<CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+								<Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: "text.secondary" }}>
+									Save your changes
 								</Typography>
 								<Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
 									<Button
+										fullWidth
 										variant="contained"
 										onClick={() => handleSubmit("website")}
 										disabled={loading}
-										sx={secondaryButtonSx}
+										startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SaveOutlinedIcon />}
+										sx={{
+											borderRadius: 2,
+											py: 1.2,
+											textTransform: "none",
+											fontWeight: 700,
+											bgcolor: "#10b981",
+											color: "#fff",
+											boxShadow: "0 4px 14px rgba(16,185,129,0.25)",
+											"&:hover": { bgcolor: "#059669" },
+										}}
 									>
-										{loading ? <CircularProgress size={18} /> : "Save Website"}
+										Save Website Info
 									</Button>
 									<Button
+										fullWidth
 										variant="contained"
 										onClick={() => handleSubmit("logo")}
 										disabled={loading}
-										sx={actionButtonSx}
+										startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <ImageOutlinedIcon />}
+										sx={{
+											borderRadius: 2,
+											py: 1.2,
+											textTransform: "none",
+											fontWeight: 700,
+											bgcolor: "#6366f1",
+											color: "#fff",
+											boxShadow: "0 4px 14px rgba(99,102,241,0.25)",
+											"&:hover": { bgcolor: "#4f46e5" },
+										}}
 									>
-										{loading ? <CircularProgress size={18} /> : "Save Logo/Banner"}
+										Save Logo/Banner
 									</Button>
 								</Stack>
 							</CardContent>
 						</Card>
-					</Grid>
+					</Stack>
 				</Grid>
-			</Box>
+			</Grid>
 
-			<Dialog open={mediaOpen} onClose={() => setMediaOpen(false)} fullWidth maxWidth="lg">
-				<DialogTitle>Select media</DialogTitle>
+			{/* ── Media Dialog ── */}
+			<Dialog open={mediaOpen} onClose={() => setMediaOpen(false)} fullWidth maxWidth="lg" PaperProps={{ sx: { borderRadius: 2.5 } }}>
+				<DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+					<Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Select Media</Typography>
+					<IconButton size="small" onClick={() => setMediaOpen(false)}><CloseIcon /></IconButton>
+				</DialogTitle>
 				<DialogContent>
 					<AllMedia onSelect={(it) => handleMediaSelect(it)} single />
 				</DialogContent>

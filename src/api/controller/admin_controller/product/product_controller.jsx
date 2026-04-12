@@ -17,6 +17,9 @@ export const getProduct = async (params = {}) => {
     return { status: 'error', message: error.message, data: null };
   }
 };
+
+
+
 export const getStockOutProduct = async (params = {}) => {
   try {
     const response = await axiosInstance.get(`/api/products/list/stock-out`, {

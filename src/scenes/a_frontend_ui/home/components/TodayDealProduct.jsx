@@ -69,6 +69,7 @@ export default function TodayDealProduct({ onView, compact = false, title }) {
                 }}
                 sx={{
                     display: "flex",
+                     borderRadius: 1,
                     gap: 1.5,
                     overflowX: "auto",
                     pb: 1,
@@ -117,7 +118,7 @@ export default function TodayDealProduct({ onView, compact = false, title }) {
             sx={{
                 mt: 0,
                 p: compact ? 2 : 2,
-                borderRadius: 3,
+                borderRadius: 1,
                 bgcolor: "background.paper",
                 boxShadow: "0 16px 32px rgba(0,0,0,0.06)",
                 width: { xs: "100%", md: 820 },

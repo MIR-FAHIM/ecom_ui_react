@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Card, CardContent, Typography, useTheme } from "@mui/material";
 
 const htmlToText = (html) => {
 	if (!html) return "";
@@ -18,12 +18,16 @@ const ProductDescription = ({ description, ink, subInk }) => {
 	const descriptionText = useMemo(() => htmlToText(description), [description]);
 
 	return (
-		<Box sx={{ mt: 3 }}>
-			<Typography sx={{ fontWeight: 700, color: titleColor }}>Description</Typography>
-			<Typography variant="body2" sx={{ color: bodyColor, fontWeight: 700, whiteSpace: "pre-line", mt: 0.5 }}>
-				{descriptionText || "No detailed description available."}
-			</Typography>
-		</Box>
+		<Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider" }}>
+			<CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+				<Typography variant="subtitle1" sx={{ fontWeight: 700, color: titleColor, mb: 1.5 }}>
+					Description
+				</Typography>
+				<Typography variant="body2" sx={{ color: bodyColor, fontWeight: 500, whiteSpace: "pre-line", lineHeight: 1.8 }}>
+					{descriptionText || "No detailed description available."}
+				</Typography>
+			</CardContent>
+		</Card>
 	);
 };
 

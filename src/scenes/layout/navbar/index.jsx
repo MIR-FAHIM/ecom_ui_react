@@ -43,7 +43,10 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    navigate('/login');
+    localStorage.removeItem("userType");
+    sessionStorage.removeItem("authToken");
+    sessionStorage.removeItem("userType");
+    navigate('/admin-login');
   };
   const handlePOS = () => {
     navigate('/admin/pos');

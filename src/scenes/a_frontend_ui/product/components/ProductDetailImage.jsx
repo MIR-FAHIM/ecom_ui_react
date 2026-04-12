@@ -26,24 +26,24 @@ const ProductDetailImage = ({
 	return (
 		<Card
 			sx={{
-				borderRadius: 4,
+				borderRadius: 2.5,
 				border: `1px solid ${divider}`,
 				background: surface,
 				overflow: "hidden",
-				backdropFilter: "blur(12px)",
 			}}
 		>
 			<Box
 				sx={{
 					position: "relative",
-					height: { xs: 360, md: 520 },
+					height: { xs: 360, md: 480 },
 					background:
 						theme.palette.mode === "dark"
-							? "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))"
-							: "linear-gradient(135deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01))",
+							? "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))"
+							: "linear-gradient(160deg, #fafafa, #f5f5f5)",
 					display: "grid",
 					placeItems: "center",
 					overflow: "hidden",
+					p: 2,
 				}}
 			>
 				<Box

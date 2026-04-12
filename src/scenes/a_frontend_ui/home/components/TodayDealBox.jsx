@@ -48,7 +48,7 @@ export default function TodayDealBox({ onView }) {
     <Box
       sx={{
         border: "1px solid #000",
-        borderRadius: 3,
+        borderRadius: 1,
         p: 2,
         display: "grid",
         gridTemplateColumns: "32px 1fr 32px",

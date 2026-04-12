@@ -1,6 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, Typography, Divider, Card, CardContent, Chip, FormHelperText } from "@mui/material";
-import { CloudUpload } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  FormHelperText,
+  Grid,
+  IconButton,
+  Stack,
+  Tooltip,
+} from "@mui/material";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
+import StarIcon from "@mui/icons-material/Star";
+import StarOutlineIcon from "@mui/icons-material/StarOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -160,142 +178,178 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
   };
 
   return (
-    <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Upload product images. The first image will be set as primary by default.
-      </Typography>
+    <Stack spacing={3}>
+      {/* ── Upload zone ── */}
+      <Card variant="outlined" sx={{ borderRadius: 2.5, borderColor: "divider" }}>
+        <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+            <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: "#eef2ff", display: "grid", placeItems: "center", color: "#6366f1" }}>
+              <CloudUploadOutlinedIcon sx={{ fontSize: 18 }} />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Upload Images</Typography>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>First image is primary by default</Typography>
+            </Box>
+          </Stack>
 
-      {/* File Upload Section */}
-      <Box
-        sx={{
-          border: "2px dashed",
-          borderColor: error ? "error.main" : "primary.main",
-          borderRadius: 1,
-          p: 3,
-          textAlign: "center",
-          cursor: "pointer",
-          transition: "all 0.2s",
-          "&:hover": {
-            bgcolor: "action.hover",
-          },
-        }}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleFileSelect}
-          style={{ display: "none" }}
-        />
+          <Box
+            onClick={() => fileInputRef.current?.click()}
+            sx={{
+              border: "2px dashed",
+              borderColor: error ? "error.main" : "divider",
+              borderRadius: 2.5,
+              py: 4,
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all 200ms",
+              "&:hover": { borderColor: "#6366f1", bgcolor: "rgba(99,102,241,0.04)" },
+            }}
+          >
+            <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleFileSelect} style={{ display: "none" }} />
+            <CloudUploadOutlinedIcon sx={{ fontSize: 44, color: "text.disabled", mb: 1 }} />
+            <Typography variant="body1" sx={{ fontWeight: 700, mb: 0.5 }}>Click to upload or drag and drop</Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>PNG, JPG, GIF up to 10MB</Typography>
+          </Box>
 
-        <CloudUpload sx={{ fontSize: 48, color: "primary.main", mb: 1 }} />
-        <Typography variant="body1" fontWeight={600} sx={{ mb: 0.5 }}>
-          Click to upload or drag and drop
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          PNG, JPG, GIF up to 10MB
-        </Typography>
-      </Box>
+          <Button
+            variant="outlined"
+            onClick={() => setMediaOpen(true)}
+            startIcon={<CollectionsOutlinedIcon />}
+            sx={{ mt: 2, borderRadius: 2, textTransform: "none", fontWeight: 700, borderColor: "divider", color: "text.secondary" }}
+          >
+            Choose From Library
+          </Button>
 
-      <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-     
-        <Button variant="contained" onClick={() => setMediaOpen(true)}>Choose From Library</Button>
-      </Box>
+          {error && <FormHelperText error sx={{ mt: 1 }}>{error}</FormHelperText>}
+        </CardContent>
+      </Card>
 
-      {error && (
-        <FormHelperText error sx={{ mt: 1 }}>
-          {error}
-        </FormHelperText>
-      )}
+      {/* ── Image grid ── */}
+      <Card variant="outlined" sx={{ borderRadius: 2.5, borderColor: "divider" }}>
+        <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+            <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: "#f0fdf4", display: "grid", placeItems: "center", color: "#16a34a" }}>
+              <ImageOutlinedIcon sx={{ fontSize: 18 }} />
+            </Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Product Images
+              {value.length > 0 && <Typography component="span" variant="caption" sx={{ ml: 1, color: "text.secondary" }}>({value.length})</Typography>}
+            </Typography>
+          </Stack>
 
-      <Divider sx={{ my: 2, opacity: 0.2 }} />
+          {loadingImages && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Loading images...</Typography>
+          )}
 
-      {/* Images List */}
-      {loadingImages ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Loading images...
-        </Typography>
-      ) : null}
-      {value.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          No images added yet. Upload at least one image.
-        </Typography>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          {value.map((img, idx) => (
-            <Card key={idx} variant="outlined">
-              <CardContent sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
-                <Box sx={{ minWidth: 0, display: "flex", alignItems: "center", gap: 2 }}>
-                  {/* File preview thumbnail */}
-                  {img.file && (
+          {value.length === 0 ? (
+            <Box sx={{ py: 5, textAlign: "center", border: "2px dashed", borderColor: "divider", borderRadius: 2.5 }}>
+              <ImageOutlinedIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
+              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>No images added yet</Typography>
+              <Typography variant="caption" sx={{ color: "text.disabled" }}>Upload at least one image above</Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={2}>
+              {value.map((img, idx) => {
+                const src = img.file
+                  ? URL.createObjectURL(img.file)
+                  : img.file_name
+                  ? `${image_file_url}/${img.file_name}`
+                  : img.url || "";
+                return (
+                  <Grid item xs={6} sm={4} md={3} key={idx}>
                     <Box
-                      component="img"
-                      src={URL.createObjectURL(img.file)}
-                      alt="preview"
                       sx={{
-                        width: 60,
-                        height: 60,
-                        objectFit: "cover",
-                        borderRadius: 0.5,
-                        bgcolor: "action.hover",
+                        position: "relative",
+                        borderRadius: 2.5,
+                        overflow: "hidden",
+                        border: img.is_primary ? "2px solid #6366f1" : "1px solid",
+                        borderColor: img.is_primary ? "#6366f1" : "divider",
+                        transition: "all 200ms",
+                        "&:hover .img-overlay": { opacity: 1 },
                       }}
-                    />
-                  )}
+                    >
+                      <Box
+                        component="img"
+                        src={src}
+                        alt={img.filename}
+                        sx={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
+                      />
 
-                  {/* media library preview */}
-                  {!img.file && img.media_id && (
-                    <Box
-                      component="img"
-                      src={img.file_name ? `${image_file_url}/${img.file_name}` : (img.url || "/assets/images/placeholder.png")}
-                      alt={img.filename}
-                      sx={{ width: 60, height: 60, objectFit: "cover", borderRadius: 0.5, bgcolor: "action.hover" }}
-                    />
-                  )}
+                      {/* Primary badge */}
+                      {img.is_primary && (
+                        <Chip
+                          icon={<StarIcon sx={{ fontSize: 14, color: "#fff !important" }} />}
+                          label="Primary"
+                          size="small"
+                          sx={{ position: "absolute", top: 8, left: 8, bgcolor: "#6366f1", color: "#fff", fontWeight: 700, fontSize: 11, height: 24 }}
+                        />
+                      )}
 
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" fontWeight={700} noWrap title={img.filename}>
-                      {img.filename}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {img.file ? `${(img.file.size / 1024).toFixed(2)} KB` : "No file"}
-                    </Typography>
-                  </Box>
-                </Box>
+                      {/* Hover overlay */}
+                      <Stack
+                        className="img-overlay"
+                        direction="row"
+                        spacing={0.5}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          opacity: 0,
+                          transition: "opacity 200ms",
+                        }}
+                      >
+                        {!img.is_primary && (
+                          <Tooltip title="Set as primary">
+                            <IconButton
+                              size="small"
+                              onClick={() => onPrimary(idx)}
+                              sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "#eef2ff" } }}
+                            >
+                              <StarOutlineIcon sx={{ fontSize: 16, color: "#6366f1" }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        <Tooltip title="Remove">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRemove(img, idx)}
+                            disabled={removingId != null}
+                            sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "#fef2f2", color: "#ef4444" } }}
+                          >
+                            <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
-                  {img.is_primary ? (
-                    <Chip label="Primary" color="success" size="small" />
-                  ) : (
-                    <Button size="small" variant="outlined" onClick={() => onPrimary(idx)}>
-                      Set Primary
-                    </Button>
-                  )}
+                      {/* Filename bar */}
+                      <Box sx={{ px: 1.5, py: 1, borderTop: "1px solid", borderColor: "divider" }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, display: "block" }} noWrap title={img.filename}>
+                          {img.filename}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "text.disabled", fontSize: 11 }}>
+                          {img.file ? `${(img.file.size / 1024).toFixed(1)} KB` : "Library"}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
+        </CardContent>
+      </Card>
 
-                  <Button
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                    onClick={() => handleRemove(img, idx)}
-                    disabled={removingId != null}
-                  >
-                    Remove
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      )}
-
-      <Dialog open={mediaOpen} onClose={() => setMediaOpen(false)} fullWidth maxWidth="lg">
-        <DialogTitle>Select media</DialogTitle>
+      {/* ── Media dialog ── */}
+      <Dialog open={mediaOpen} onClose={() => setMediaOpen(false)} fullWidth maxWidth="lg" PaperProps={{ sx: { borderRadius: 2.5 } }}>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Select Media</Typography>
+          <IconButton size="small" onClick={() => setMediaOpen(false)}><CloseIcon /></IconButton>
+        </DialogTitle>
         <DialogContent>
           <AllMedia onSelect={(it) => { handleMediaSelect(it); setMediaOpen(false); }} single={false} />
         </DialogContent>
       </Dialog>
-    </Box>
+    </Stack>
   );
 }
 

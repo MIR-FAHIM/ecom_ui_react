@@ -356,7 +356,7 @@ function AddProductTabSeller() {
       <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "start", gap: 2 }}>
         <Box>
           <Typography variant="h4" fontWeight={800}>
-            Add Product
+            Add Products
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Create a new product with images.

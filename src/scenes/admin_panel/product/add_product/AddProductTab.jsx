@@ -9,12 +9,21 @@ import {
   Stepper,
   Step,
   StepLabel,
+  StepConnector,
   Button,
-  Divider,
   CircularProgress,
   Alert,
+  Stack,
+  stepConnectorClasses,
 } from "@mui/material";
-import { tokens } from "../../../../theme";
+import { styled } from "@mui/material/styles";
+import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import TuneIcon from "@mui/icons-material/Tune";
+import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller";
@@ -24,6 +33,36 @@ import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/c
 import StepGeneral from "../../../admin_panel/product/add_product/components/productWizard/StepGeneral";
 import StepAttributes from "../../../admin_panel/product/add_product/components/productWizard/StepAttributes";
 import StepImages from "../../../admin_panel/product/add_product/components/productWizard/StepImages";
+
+/* ── Custom stepper connector ── */
+const IndConnector = styled(StepConnector)(() => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: { top: 20 },
+  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: { background: "#6366f1" },
+  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: { background: "#6366f1" },
+  [`& .${stepConnectorClasses.line}`]: { height: 3, border: 0, borderRadius: 2, background: "#e0e0e0" },
+}));
+
+const stepIcons = { 1: <InfoOutlinedIcon />, 2: <TuneIcon />, 3: <CollectionsOutlinedIcon /> };
+
+function StepIconComponent({ active, completed, icon }) {
+  return (
+    <Box
+      sx={{
+        width: 42,
+        height: 42,
+        borderRadius: "50%",
+        display: "grid",
+        placeItems: "center",
+        transition: "all 250ms",
+        bgcolor: completed ? "#6366f1" : active ? "#6366f1" : "#f1f5f9",
+        color: completed || active ? "#fff" : "#94a3b8",
+        boxShadow: active ? "0 4px 14px rgba(99,102,241,0.35)" : "none",
+      }}
+    >
+      {completed ? <CheckCircleOutlineIcon sx={{ fontSize: 22 }} /> : stepIcons[icon]}
+    </Box>
+  );
+}
 
 const normalizeList = (x) => {
   if (!x) return [];
@@ -50,7 +89,6 @@ const normalizeList = (x) => {
 
 function AddProductTab() {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
@@ -348,53 +386,63 @@ productFormData.append("weight", general.weight || "");
   }, [step, general, attributes, images, errors]);
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "start", gap: 2 }}>
-        <Box>
-          <Typography variant="h4" fontWeight={800}>
-            Add Product
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Create a new product with images.
-          </Typography>
-        </Box>
-
-        <Button variant="outlined" onClick={() => navigate(-1)} disabled={loading}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", p: { xs: 2, md: 3 } }}>
+      {/* ── Header ── */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: "#eef2ff", display: "grid", placeItems: "center", color: "#6366f1" }}>
+            <AddBoxOutlinedIcon />
+          </Box>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 800 }}>Add Product</Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              Create a new product — fill in details, attributes, and images.
+            </Typography>
+          </Box>
+        </Stack>
+        <Button
+          variant="outlined"
+          onClick={() => navigate(-1)}
+          disabled={loading}
+          startIcon={<ArrowBackIcon />}
+          sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, borderColor: "divider", color: "text.secondary" }}
+        >
           Back
         </Button>
-      </Box>
+      </Stack>
 
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {successMessage}
-        </Alert>
-      )}
+      {/* ── Alerts ── */}
+      {successMessage && <Alert severity="success" onClose={() => setSuccessMessage("")} sx={{ mb: 2, borderRadius: 2 }}>{successMessage}</Alert>}
+      {errorMessage && <Alert severity="error" onClose={() => setErrorMessage("")} sx={{ mb: 2, borderRadius: 2 }}>{errorMessage}</Alert>}
 
-      {errorMessage && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {errorMessage}
-        </Alert>
-      )}
-
-      <Card sx={{ background: colors.primary[400], borderRadius: 2 }}>
-        <CardContent>
-          <Stepper activeStep={step} alternativeLabel>
+      {/* ── Stepper card ── */}
+      <Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider", mb: 3 }}>
+        <CardContent sx={{ py: 3 }}>
+          <Stepper activeStep={step} alternativeLabel connector={<IndConnector />}>
             {PRODUCT_WIZARD_STEPS.map((s) => (
               <Step key={s.key}>
-                <StepLabel>{s.label}</StepLabel>
+                <StepLabel StepIconComponent={StepIconComponent}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>{s.label}</Typography>
+                </StepLabel>
               </Step>
             ))}
           </Stepper>
+        </CardContent>
+      </Card>
 
-          <Divider sx={{ my: 2, opacity: 0.2 }} />
-
+      {/* ── Step content card ── */}
+      <Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider" }}>
+        <CardContent sx={{ p: { xs: 2, md: 3 }, "&:last-child": { pb: 3 } }}>
           {stepView}
 
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between", gap: 2 }}>
+          {/* ── Navigation buttons ── */}
+          <Stack direction="row" justifyContent="space-between" sx={{ mt: 3, pt: 2.5, borderTop: "1px solid", borderColor: "divider" }}>
             <Button
-              variant="contained"
+              variant="outlined"
               disabled={!canGoBack || loading}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
+              startIcon={<ArrowBackIcon />}
+              sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, borderColor: "divider", color: "text.secondary", px: 3, py: 1 }}
             >
               Previous
             </Button>
@@ -403,10 +451,9 @@ productFormData.append("weight", general.weight || "");
               <Button
                 variant="contained"
                 disabled={loading}
-                onClick={() => {
-                  if (!validateStep(step)) return;
-                  setStep((s) => Math.min(PRODUCT_WIZARD_STEPS.length - 1, s + 1));
-                }}
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => { if (!validateStep(step)) return; setStep((s) => Math.min(PRODUCT_WIZARD_STEPS.length - 1, s + 1)); }}
+                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, bgcolor: "#6366f1", px: 3, py: 1, boxShadow: "0 4px 14px rgba(99,102,241,0.25)", "&:hover": { bgcolor: "#4f46e5" } }}
               >
                 Next
               </Button>
@@ -415,12 +462,13 @@ productFormData.append("weight", general.weight || "");
                 variant="contained"
                 disabled={loading}
                 onClick={handleFinish}
-                startIcon={loading ? <CircularProgress size={20} /> : null}
+                startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <CheckCircleOutlineIcon />}
+                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, bgcolor: "#10b981", px: 3, py: 1, boxShadow: "0 4px 14px rgba(16,185,129,0.25)", "&:hover": { bgcolor: "#059669" } }}
               >
-                {loading ? "Creating..." : "Finish"}
+                {loading ? "Creating..." : "Create Product"}
               </Button>
             )}
-          </Box>
+          </Stack>
         </CardContent>
       </Card>
     </Box>

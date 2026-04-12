@@ -41,7 +41,7 @@ export default function FeaturedCategory({ categories = [] }) {
     <Box
       sx={{
         mt: 3,
-        borderRadius: 3,
+        borderRadius: 1,
         p: { xs: 2, sm: 2.5 },
         background: "linear-gradient(90deg, rgba(210,236,255,0.9), rgba(220,243,255,0.6))",
         border: `1px solid ${theme.palette.primary.main}`,

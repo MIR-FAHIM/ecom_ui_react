@@ -27,14 +27,82 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Stack,
+  InputAdornment,
+  Avatar,
 } from "@mui/material";
-import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
-import { tokens } from "../../../theme";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import PendingActionsOutlinedIcon from "@mui/icons-material/PendingActionsOutlined";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import { getAllOrder, deleteOrder, updateOrderStatus } from "../../../api/controller/admin_controller/order/order_controller";
+
+/* ── Status config maps ── */
+const ORDER_STATUS_CONFIG = {
+  pending:    { label: "Pending",    color: "#f59e0b", bg: "#fffbeb", icon: <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} /> },
+  processing: { label: "Processing", color: "#3b82f6", bg: "#eff6ff", icon: <SettingsOutlinedIcon sx={{ fontSize: 14 }} /> },
+  shipped:    { label: "Shipped",    color: "#8b5cf6", bg: "#f5f3ff", icon: <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} /> },
+  completed:  { label: "Completed",  color: "#10b981", bg: "#ecfdf5", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
+  cancelled:  { label: "Cancelled",  color: "#ef4444", bg: "#fef2f2", icon: <CancelOutlinedIcon sx={{ fontSize: 14 }} /> },
+};
+
+const PAYMENT_STATUS_CONFIG = {
+  paid:     { label: "Paid",     color: "#10b981", bg: "#ecfdf5" },
+  unpaid:   { label: "Unpaid",   color: "#ef4444", bg: "#fef2f2" },
+  pending:  { label: "Pending",  color: "#f59e0b", bg: "#fffbeb" },
+  refunded: { label: "Refunded", color: "#6366f1", bg: "#eef2ff" },
+};
+
+/* ── Summary stat card ── */
+const StatMini = ({ icon, label, value, color, bg }) => (
+  <Card variant="outlined" sx={{ borderRadius: 2.5, borderColor: "divider", flex: 1, minWidth: 140 }}>
+    <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", alignItems: "center", gap: 1.5 }}>
+      <Avatar sx={{ width: 38, height: 38, bgcolor: bg, color }}>{icon}</Avatar>
+      <Box>
+        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>{value}</Typography>
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>{label}</Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+/* ── Custom status chip ── */
+const StatusChip = ({ status, config, onClick }) => {
+  const cfg = config[status] || { label: status, color: "#64748b", bg: "#f1f5f9" };
+  return (
+    <Chip
+      icon={cfg.icon || null}
+      label={cfg.label}
+      size="small"
+      onClick={onClick}
+      clickable={!!onClick}
+      sx={{
+        fontWeight: 700,
+        fontSize: 11,
+        height: 26,
+        bgcolor: cfg.bg,
+        color: cfg.color,
+        border: "1px solid",
+        borderColor: cfg.color + "30",
+        "& .MuiChip-icon": { color: cfg.color, ml: 0.5 },
+        cursor: onClick ? "pointer" : "default",
+      }}
+    />
+  );
+};
 
 const AllOrders = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
@@ -49,6 +117,7 @@ const AllOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Fetch orders from API
   const fetchOrders = async (pageZeroBased = 0, perPage = 10) => {
@@ -75,18 +144,35 @@ const AllOrders = () => {
     fetchOrders(page, rowsPerPage);
   }, [page, rowsPerPage]);
 
-  // Client-side search (filtered on current page only)
+  // Client-side search + status filter
   const filteredOrders = useMemo(() => {
-    if (!searchTerm.trim()) return orders;
+    let result = orders;
+    if (statusFilter !== "all") {
+      result = result.filter((o) => o.status === statusFilter);
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (order) =>
+          String(order.order_number || "").toLowerCase().includes(term) ||
+          String(order.customer_name || "").toLowerCase().includes(term) ||
+          String(order.customer_phone || "").toLowerCase().includes(term)
+      );
+    }
+    return result;
+  }, [searchTerm, orders, statusFilter]);
 
-    const term = searchTerm.toLowerCase();
-    return orders.filter(
-      (order) =>
-        order.order_number.toLowerCase().includes(term) ||
-        order.customer_name.toLowerCase().includes(term) ||
-        order.customer_phone.toLowerCase().includes(term)
-    );
-  }, [searchTerm, orders]);
+  // Summary stats from current page data
+  const stats = useMemo(() => {
+    const s = { total: totalOrders, pending: 0, processing: 0, completed: 0, cancelled: 0, revenue: 0 };
+    orders.forEach((o) => {
+      if (o.status === "pending") s.pending++;
+      else if (o.status === "processing") s.processing++;
+      else if (o.status === "completed") { s.completed++; s.revenue += Number(o.total || 0); }
+      else if (o.status === "cancelled") s.cancelled++;
+    });
+    return s;
+  }, [orders, totalOrders]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -146,221 +232,216 @@ const AllOrders = () => {
     }
   };
 
-  const handleDelete = (orderId) => {
+  const handleDelete = async (orderId) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
-      console.log("Delete order:", orderId);
-      // TODO: Call deleteOrder API
+      try {
+        const res = await deleteOrder(orderId);
+        if (res?.status === "success") {
+          setOrders((prev) => prev.filter((o) => o.id !== orderId));
+          setTotalOrders((prev) => Math.max(0, prev - 1));
+        }
+      } catch (err) {
+        console.error("Error deleting order:", err);
+      }
     }
   };
 
-  const getOrderStatusColor = (status) => {
-    const statusMap = {
-      completed: "success",
-      pending: "warning",
-      processing: "info",
-      cancelled: "error",
-      shipped: "primary",
-    };
-    return statusMap[status] || "default";
-  };
-
-  const getPaymentStatusColor = (status) => {
-    const statusMap = {
-      paid: "success",
-      unpaid: "error",
-      pending: "warning",
-      refunded: "info",
-    };
-    return statusMap[status] || "default";
-  };
-
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency: "BDT",
-    }).format(amount || 0);
+    return new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT", maximumFractionDigits: 0 }).format(amount || 0);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-BD", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString("en-BD", { year: "numeric", month: "short", day: "numeric" });
   };
 
+  const cellSx = { borderBottom: "1px solid", borderColor: "divider", py: 1.5 };
+  const headCellSx = { ...cellSx, fontWeight: 700, fontSize: 12, color: "text.secondary", textTransform: "uppercase", letterSpacing: 0.5 };
+
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Box>
-          <Typography variant="h4" fontWeight={800}>
-            Orders
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Manage customer orders
-          </Typography>
-        </Box>
-        <Tooltip title="Refresh orders">
-          <IconButton onClick={handleRefresh} disabled={loading}>
-            <Refresh />
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", p: { xs: 2, md: 3 } }}>
+      {/* ── Header ── */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: "#eef2ff", display: "grid", placeItems: "center", color: "#6366f1" }}>
+            <ShoppingBagOutlinedIcon />
+          </Box>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 800 }}>Orders</Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              Manage and track all customer orders
+            </Typography>
+          </Box>
+        </Stack>
+        <Tooltip title="Refresh">
+          <IconButton
+            onClick={handleRefresh}
+            disabled={loading}
+            sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, width: 40, height: 40 }}
+          >
+            <RefreshIcon sx={{ fontSize: 20 }} />
           </IconButton>
         </Tooltip>
-      </Box>
+      </Stack>
 
-      {/* Search Bar */}
-      <Box sx={{ mb: 2, display: "flex", gap: 1 }}>
-        <TextField
-          size="small"
-          placeholder="Search by order number, customer name, or phone..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: "action.active" }} />,
-          }}
-          sx={{ flex: 1, maxWidth: 500 }}
-        />
-        {searchTerm && (
-          <Button variant="outlined" size="small" onClick={handleResetSearch}>
-            Reset
-          </Button>
-        )}
-      </Box>
+      {/* ── Stat cards ── */}
+      <Stack direction="row" spacing={2} sx={{ mb: 3, overflowX: "auto", pb: 0.5 }}>
+        <StatMini icon={<ReceiptLongOutlinedIcon sx={{ fontSize: 20 }} />} label="Total Orders" value={stats.total} color="#6366f1" bg="#eef2ff" />
+        <StatMini icon={<PendingActionsOutlinedIcon sx={{ fontSize: 20 }} />} label="Pending" value={stats.pending} color="#f59e0b" bg="#fffbeb" />
+        <StatMini icon={<SettingsOutlinedIcon sx={{ fontSize: 20 }} />} label="Processing" value={stats.processing} color="#3b82f6" bg="#eff6ff" />
+        <StatMini icon={<CheckCircleOutlineIcon sx={{ fontSize: 20 }} />} label="Completed" value={stats.completed} color="#10b981" bg="#ecfdf5" />
+        <StatMini icon={<PaymentOutlinedIcon sx={{ fontSize: 20 }} />} label="Revenue" value={formatCurrency(stats.revenue)} color="#8b5cf6" bg="#f5f3ff" />
+      </Stack>
 
-      {/* Table Card */}
-      <Card sx={{ background: colors.primary[400] }}>
-        <CardContent sx={{ p: 0 }}>
+      {/* ── Search & Filter bar ── */}
+      <Card variant="outlined" sx={{ borderRadius: 2.5, borderColor: "divider", mb: 3 }}>
+        <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center">
+            <TextField
+              size="small"
+              placeholder="Search by order #, name, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 20, color: "text.disabled" }} /></InputAdornment>,
+                endAdornment: searchTerm ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={handleResetSearch}><CloseIcon sx={{ fontSize: 16 }} /></IconButton>
+                  </InputAdornment>
+                ) : null,
+              }}
+              sx={{
+                flex: 1,
+                maxWidth: 420,
+                "& .MuiOutlinedInput-root": { borderRadius: 2, "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#6366f1" } },
+              }}
+            />
+            <Stack direction="row" spacing={0.5}>
+              {["all", "pending", "processing", "shipped", "completed", "cancelled"].map((s) => {
+                const active = statusFilter === s;
+                const cfg = ORDER_STATUS_CONFIG[s];
+                return (
+                  <Chip
+                    key={s}
+                    label={s === "all" ? "All" : cfg?.label || s}
+                    size="small"
+                    onClick={() => setStatusFilter(s)}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 12,
+                      borderRadius: 2,
+                      border: "1px solid",
+                      borderColor: active ? (cfg?.color || "#6366f1") + "50" : "divider",
+                      bgcolor: active ? (cfg?.bg || "#eef2ff") : "transparent",
+                      color: active ? (cfg?.color || "#6366f1") : "text.secondary",
+                      cursor: "pointer",
+                      transition: "all 200ms",
+                      "&:hover": { bgcolor: cfg?.bg || "#eef2ff" },
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* ── Orders table ── */}
+      <Card variant="outlined" sx={{ borderRadius: 2.5, borderColor: "divider" }}>
+        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
           {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 4 }}>
-              <CircularProgress />
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 6 }}>
+              <CircularProgress size={32} sx={{ color: "#6366f1" }} />
             </Box>
           ) : filteredOrders.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: "center" }}>
-              <Typography color="text.secondary">
-                {searchTerm ? "No orders found matching your search." : "No orders available."}
+            <Box sx={{ py: 8, textAlign: "center" }}>
+              <ShoppingBagOutlinedIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
+              <Typography variant="body1" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                {searchTerm || statusFilter !== "all" ? "No orders match your filters" : "No orders yet"}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "text.disabled" }}>
+                {searchTerm || statusFilter !== "all" ? "Try adjusting your search or filter" : "Orders will appear here once placed"}
               </Typography>
             </Box>
           ) : (
             <TableContainer>
-              <Table sx={{ borderCollapse: "collapse" }}>
-                <TableHead sx={{ backgroundColor: colors.primary[300] }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Order ID
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Order Number
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Customer
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Phone
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Total
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Order Status
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Payment Status
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}` }}>
-                      Date
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, borderBottom: `1px solid ${colors.primary[200]}`, textAlign: "center" }}>
-                      Actions
-                    </TableCell>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "#f8fafc" }}>
+                    <TableCell sx={headCellSx}>Order</TableCell>
+                    <TableCell sx={headCellSx}>Customer</TableCell>
+                    <TableCell sx={headCellSx} align="right">Total</TableCell>
+                    <TableCell sx={headCellSx}>Status</TableCell>
+                    <TableCell sx={headCellSx}>Payment</TableCell>
+                    <TableCell sx={headCellSx}>Date</TableCell>
+                    <TableCell sx={{ ...headCellSx, textAlign: "center" }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredOrders.map((order, idx) => {
-                    const isEven = idx % 2 === 0;
-
-                    return (
-                      <TableRow
-                        key={order.id}
-                        sx={{
-                          backgroundColor: isEven ? colors.primary[300] : "transparent",
-                          borderBottom: `1px solid ${colors.primary[200]}`,
-                          transition: "background-color 0.2s",
-                          "&:hover": {
-                            backgroundColor: isEven ? colors.primary[250] : colors.primary[400],
-                          },
-                        }}
-                      >
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          {order.id}
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2" fontWeight={600}>
-                            {order.order_number}
+                  {filteredOrders.map((order) => (
+                    <TableRow
+                      key={order.id}
+                      sx={{
+                        transition: "background 200ms",
+                        "&:hover": { bgcolor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.04)" : "#fafafe" },
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleViewDetails(order.id)}
+                    >
+                      <TableCell sx={cellSx}>
+                        <Stack>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: "#6366f1" }}>
+                            #{order.order_number}
                           </Typography>
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2">{order.customer_name}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2">{order.customer_phone}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2" fontWeight={600}>
-                            {formatCurrency(order.total)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Chip
-                            label={order.status}
-                            color={getOrderStatusColor(order.status)}
-                            size="small"
-                            onClick={() => handleOpenStatusDialog(order)}
-                            clickable
-                            sx={{ cursor: "pointer" }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Chip
-                            label={order.payment_status}
-                            color={getPaymentStatusColor(order.payment_status)}
-                            size="small"
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell sx={{ borderBottom: `1px solid ${colors.primary[200]}` }}>
-                          <Typography variant="body2">{formatDate(order.created_at)}</Typography>
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            borderBottom: `1px solid ${colors.primary[200]}`,
-                            textAlign: "center",
-                            display: "flex",
-                            gap: 0.5,
-                            justifyContent: "center",
-                          }}
-                        >
+                          <Typography variant="caption" sx={{ color: "text.disabled" }}>ID: {order.id}</Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        <Stack>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{order.customer_name || "—"}</Typography>
+                          <Typography variant="caption" sx={{ color: "text.secondary" }}>{order.customer_phone || ""}</Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell sx={cellSx} align="right">
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{formatCurrency(order.total)}</Typography>
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        <StatusChip
+                          status={order.status}
+                          config={ORDER_STATUS_CONFIG}
+                          onClick={(e) => { e.stopPropagation(); handleOpenStatusDialog(order); }}
+                        />
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        <StatusChip status={order.payment_status} config={PAYMENT_STATUS_CONFIG} />
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        <Typography variant="body2" sx={{ color: "text.secondary", fontSize: 13 }}>{formatDate(order.created_at)}</Typography>
+                      </TableCell>
+                      <TableCell sx={{ ...cellSx, textAlign: "center" }}>
+                        <Stack direction="row" spacing={0.5} justifyContent="center">
                           <Tooltip title="View Details">
                             <IconButton
                               size="small"
-                              onClick={() => handleViewDetails(order.id)}
-                              sx={{ color: colors.blueAccent[500] }}
+                              onClick={(e) => { e.stopPropagation(); handleViewDetails(order.id); }}
+                              sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, width: 32, height: 32, "&:hover": { bgcolor: "#eef2ff", borderColor: "#6366f1" } }}
                             >
-                              <Visibility fontSize="small" />
+                              <VisibilityOutlinedIcon sx={{ fontSize: 16, color: "#6366f1" }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Delete">
                             <IconButton
                               size="small"
-                              onClick={() => handleDelete(order.id)}
-
+                              onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }}
+                              sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, width: 32, height: 32, "&:hover": { bgcolor: "#fef2f2", borderColor: "#ef4444" } }}
                             >
-                              <Delete fontSize="small" />
+                              <DeleteOutlineIcon sx={{ fontSize: 16, color: "#ef4444" }} />
                             </IconButton>
                           </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -376,23 +457,21 @@ const AllOrders = () => {
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{
-                borderTop: `1px solid ${colors.primary[200]}`,
-                "& .MuiTablePagination-toolbar": {
-                  backgroundColor: colors.primary[300],
-                },
-              }}
+              sx={{ borderTop: "1px solid", borderColor: "divider" }}
             />
           )}
         </CardContent>
       </Card>
 
-      {/* Status Update Dialog */}
-      <Dialog open={statusDialog} onClose={handleCloseStatusDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Update Order Status</DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Order: <strong>{selectedOrder?.order_number}</strong>
+      {/* ── Status Update Dialog ── */}
+      <Dialog open={statusDialog} onClose={handleCloseStatusDialog} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 2.5 } }}>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Update Status</Typography>
+          <IconButton size="small" onClick={handleCloseStatusDialog}><CloseIcon sx={{ fontSize: 18 }} /></IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+            Order <Typography component="span" sx={{ fontWeight: 700, color: "#6366f1" }}>#{selectedOrder?.order_number}</Typography>
           </Typography>
           <FormControl fullWidth size="small">
             <InputLabel>Status</InputLabel>
@@ -400,23 +479,31 @@ const AllOrders = () => {
               value={newStatus}
               onChange={(e) => setNewStatus(e.target.value)}
               label="Status"
+              sx={{ borderRadius: 2, "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#6366f1" } }}
             >
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="processing">Processing</MenuItem>
-              <MenuItem value="shipped">Shipped</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-              <MenuItem value="cancelled">Cancelled</MenuItem>
+              {Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) => (
+                <MenuItem key={key} value={key}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: cfg.color }} />
+                    <Typography variant="body2">{cfg.label}</Typography>
+                  </Stack>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseStatusDialog}>Cancel</Button>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={handleCloseStatusDialog} sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, color: "text.secondary" }}>
+            Cancel
+          </Button>
           <Button
             onClick={handleUpdateStatus}
             variant="contained"
             disabled={updatingStatus || newStatus === selectedOrder?.status}
+            startIcon={updatingStatus ? <CircularProgress size={16} color="inherit" /> : null}
+            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, bgcolor: "#6366f1", boxShadow: "0 4px 14px rgba(99,102,241,0.25)", "&:hover": { bgcolor: "#4f46e5" } }}
           >
-            {updatingStatus ? "Updating..." : "Update"}
+            {updatingStatus ? "Updating..." : "Update Status"}
           </Button>
         </DialogActions>
       </Dialog>

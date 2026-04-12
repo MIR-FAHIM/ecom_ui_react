@@ -7,10 +7,9 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-  Divider,
   Button,
   Stack,
-  Chip,
+  Avatar,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
@@ -21,14 +20,14 @@ import {
   InsightsOutlined,
   AccountBalanceWalletOutlined,
   StorefrontOutlined,
-  SettingsOutlined,
-  SupportAgentOutlined,
+  PointOfSaleOutlined,
+  ReceiptLongOutlined,
+  LogoutOutlined,
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { tokens } from "../../../theme";
 import { getUserDetail } from "../../../api/controller/admin_controller/user_controller";
 
-const drawerWidth = 264;
+const drawerWidth = 260;
 
 const navGroups = [
   {
@@ -41,34 +40,23 @@ const navGroups = [
   {
     title: "Commerce",
     items: [
-      { label: "Pos", icon: <Inventory2Outlined />, path: "/seller/pos" },
-      { label: "Shops", icon: <Inventory2Outlined />, path: "/seller/shops" },
-      // { label: "Products", icon: <Inventory2Outlined />, path: "/seller/products" },
+      { label: "POS", icon: <PointOfSaleOutlined />, path: "/seller/pos" },
+      { label: "Shops", icon: <StorefrontOutlined />, path: "/seller/shops" },
       { label: "Orders", icon: <ShoppingCartOutlined />, path: "/seller/orders" },
-    
     ],
   },
   {
     title: "Accounting",
     items: [
-     
-      { label: "Account", icon: <AccountBalanceWalletOutlined />, path: "/seller/accounting" },
-      { label: "Transaction", icon: <AccountBalanceWalletOutlined />, path: "/seller/accounting/settled-amount-history" },
-    ],
-  },
-  {
-    title: "Store",
-    items: [
-      // { label: "Shop Profile", icon: <StorefrontOutlined />, path: "/seller/shop" },
-      // { label: "Settings", icon: <SettingsOutlined />, path: "/seller/settings" },
-      // { label: "Support", icon: <SupportAgentOutlined />, path: "/seller/support" },
+      { label: "Bank Account", icon: <AccountBalanceWalletOutlined />, path: "/seller/accounting" },
+      { label: "Transactions", icon: <ReceiptLongOutlined />, path: "/seller/accounting/settled-amount-history" },
     ],
   },
 ];
 
 const SideBar = ({ mobileOpen = false, onMobileClose }) => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const isDark = theme.palette.mode === "dark";
   const location = useLocation();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
@@ -78,11 +66,7 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
     const loadUser = async () => {
       try {
         const storedId = localStorage.getItem("userId");
-        if (!storedId) {
-          setUserName("Seller");
-          return;
-        }
-
+        if (!storedId) { setUserName("Seller"); return; }
         const res = await getUserDetail(storedId);
         const user = res?.data?.data ?? res?.data ?? null;
         const name = user?.name || user?.full_name || user?.user_name;
@@ -92,11 +76,9 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
         setUserName("Seller");
       }
     };
-
     loadUser();
     const onAuth = () => loadUser();
     window.addEventListener("auth-changed", onAuth);
-
     return () => window.removeEventListener("auth-changed", onAuth);
   }, []);
 
@@ -110,39 +92,32 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
 
   const renderItem = (item) => {
     const active = location.pathname === item.path;
-
     return (
       <ListItemButton
         key={item.label}
         component={Link}
         to={item.path}
         sx={{
-          borderRadius: 2,
-          mb: 0.6,
-          color: active ? colors.blueAccent[500] : colors.gray[200],
-          backgroundColor: active ? colors.primary[300] : "transparent",
-          border: active ? `1px solid ${colors.blueAccent[400]}` : "1px solid transparent",
-          "&:hover": {
-            backgroundColor: colors.primary[300],
-          },
+          borderRadius: 2.5,
+          mb: 0.4,
+          py: 0.8,
+          px: 1.5,
+          color: active ? "#6366f1" : (isDark ? "#94a3b8" : "#64748b"),
+          bgcolor: active ? (isDark ? "rgba(99,102,241,0.12)" : "#eef2ff") : "transparent",
+          "&:hover": { bgcolor: isDark ? "rgba(99,102,241,0.08)" : "#f1f5f9" },
+          transition: "all .15s ease",
         }}
       >
-        <ListItemIcon
-          sx={{
-            minWidth: 36,
-            color: active ? colors.blueAccent[500] : colors.gray[200],
-          }}
-        >
-          {item.icon}
+        <ListItemIcon sx={{ minWidth: 34, color: active ? "#6366f1" : (isDark ? "#64748b" : "#94a3b8") }}>
+          {React.cloneElement(item.icon, { sx: { fontSize: 20 } })}
         </ListItemIcon>
         <ListItemText
           primary={item.label}
-          primaryTypographyProps={{
-            fontWeight: active ? 700 : 600,
-            fontSize: 13,
-            letterSpacing: 0.2,
-          }}
+          primaryTypographyProps={{ fontWeight: active ? 700 : 500, fontSize: 13, letterSpacing: 0.1 }}
         />
+        {active && (
+          <Box sx={{ width: 4, height: 20, borderRadius: 4, bgcolor: "#6366f1", ml: 0.5 }} />
+        )}
       </ListItemButton>
     );
   };
@@ -151,88 +126,84 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
     <Box
       sx={{
         height: "100%",
-        background: `linear-gradient(180deg, ${colors.primary[400]}, ${colors.primary[500]})`,
-        color: colors.gray[100],
+        bgcolor: isDark ? "#161822" : "#fff",
+        borderRight: "1px solid",
+        borderColor: "divider",
         px: 2,
         py: 2.5,
         display: "flex",
         flexDirection: "column",
-        gap: 2,
       }}
     >
-      <Box>
-        <Typography variant="subtitle2" sx={{ color: colors.blueAccent[400], fontWeight: 900 }}>
-          Seller Console
-        </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 900, letterSpacing: -0.4 }}>
-          {userName}
-        </Typography>
+      {/* Profile section */}
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+          <Avatar sx={{ width: 40, height: 40, bgcolor: "#6366f1", fontWeight: 800, fontSize: 16 }}>
+            {userName.charAt(0).toUpperCase()}
+          </Avatar>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="body2" sx={{ fontWeight: 800, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {userName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.disabled", fontSize: 11 }}>
+              Seller Account
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
+
+      {/* Nav groups */}
+      <Box sx={{ flex: 1, overflowY: "auto", mx: -0.5, px: 0.5 }}>
+        {navGroups.map((group) =>
+          group.items.length === 0 ? null : (
+            <Box key={group.title} sx={{ mb: 2.5 }}>
+              <Typography
+                variant="overline"
+                sx={{ color: "text.disabled", fontWeight: 800, fontSize: 10, letterSpacing: 1.2, pl: 1.5 }}
+              >
+                {group.title}
+              </Typography>
+              <List disablePadding sx={{ mt: 0.5 }}>
+                {group.items.map(renderItem)}
+              </List>
+            </Box>
+          )
+        )}
+      </Box>
+
+      {/* Store status + logout */}
+      <Box sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}>
+        <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: isDark ? "rgba(16,185,129,0.08)" : "#ecfdf5", mb: 1.5 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "#10b981", fontSize: 11 }}>
+                Store Online
+              </Typography>
+              <Typography variant="caption" sx={{ display: "block", color: "text.disabled", fontSize: 10 }}>
+                Accepting orders
+              </Typography>
+            </Box>
+            <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#10b981", boxShadow: "0 0 8px #10b98180" }} />
+          </Stack>
+        </Box>
         <Button
+          fullWidth
           size="small"
+          startIcon={<LogoutOutlined sx={{ fontSize: 16 }} />}
           onClick={handleLogout}
           sx={{
-            mt: 1,
             textTransform: "none",
-            fontWeight: 800,
-            color: colors.gray[100],
-            border: `1px solid ${colors.redAccent[300]}`,
-            borderRadius: 999,
-            px: 2,
-            "&:hover": { backgroundColor: colors.primary[300] },
+            fontWeight: 700,
+            fontSize: 12,
+            borderRadius: 2.5,
+            color: "#ef4444",
+            justifyContent: "flex-start",
+            px: 1.5,
+            "&:hover": { bgcolor: isDark ? "rgba(239,68,68,0.08)" : "#fef2f2" },
           }}
         >
-          Logout
+          Sign Out
         </Button>
-      
-      </Box>
-
-      <Divider sx={{ borderColor: colors.primary[300] }} />
-
-      <Box sx={{ flex: 1, overflowY: "auto", pr: 0.5 }}>
-        {navGroups.map((group) => (
-          <Box key={group.title} sx={{ mb: 2 }}>
-            <Typography
-              variant="overline"
-              sx={{
-                color: colors.gray[400],
-                fontWeight: 900,
-                letterSpacing: 1.4,
-              }}
-            >
-              {group.title}
-            </Typography>
-            <List sx={{ mt: 0.6 }}>{group.items.map(renderItem)}</List>
-          </Box>
-        ))}
-      </Box>
-
-      <Box
-        sx={{
-          borderRadius: 3,
-          p: 2,
-          border: `1px solid ${colors.primary[300]}`,
-          background: `linear-gradient(135deg, ${colors.primary[300]}, ${colors.primary[400]})`,
-        }}
-      >
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-              Store Status
-            </Typography>
-            <Typography variant="caption" sx={{ color: colors.gray[300] }}>
-              Online and accepting orders
-            </Typography>
-          </Box>
-          <Chip
-            size="small"
-            label="Live"
-            sx={{
-              backgroundColor: colors.greenAccent[500],
-              color: colors.gray[900],
-              fontWeight: 800,
-            }}
-          />
-        </Stack>
       </Box>
     </Box>
   );
@@ -245,27 +216,16 @@ const SideBar = ({ mobileOpen = false, onMobileClose }) => {
           open={mobileOpen}
           onClose={onMobileClose}
           ModalProps={{ keepMounted: true }}
-          sx={{
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              borderRight: `1px solid ${colors.primary[300]}`,
-            },
-          }}
+          sx={{ "& .MuiDrawer-paper": { width: drawerWidth, border: "none" } }}
         >
           {content}
         </Drawer>
       )}
-
       {isDesktop && (
         <Drawer
           variant="permanent"
           open
-          sx={{
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              borderRight: `1px solid ${colors.primary[300]}`,
-            },
-          }}
+          sx={{ "& .MuiDrawer-paper": { width: drawerWidth, border: "none" } }}
         >
           {content}
         </Drawer>

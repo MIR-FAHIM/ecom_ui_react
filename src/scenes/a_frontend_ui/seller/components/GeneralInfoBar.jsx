@@ -43,6 +43,21 @@ const GeneralInfoBar = ({ shop, loading, error }) => {
 	const theme = useTheme();
 	const colors = tokens(theme.palette.mode);
 
+	const sectionTitleSx = {
+		fontSize: 11,
+		fontWeight: 700,
+		letterSpacing: "0.08em",
+		textTransform: "uppercase",
+		color: colors.gray[300],
+	};
+
+	const infoCardSx = {
+		p: 1.5,
+		borderRadius: 2,
+		border: `1px solid ${theme.palette.divider}`,
+		background: theme.palette.mode === "dark" ? colors.primary[500] : colors.primary[300],
+	};
+
 	const bannerUrl = useMemo(() => buildImageUrl(shop?.banner), [shop?.banner]);
 	const logoUrl = useMemo(() => buildImageUrl(shop?.logo), [shop?.logo]);
 
@@ -62,8 +77,17 @@ const GeneralInfoBar = ({ shop, loading, error }) => {
 					background: bannerUrl
 						? `url(${bannerUrl}) center/cover no-repeat`
 						: `linear-gradient(120deg, ${colors.blueAccent[700]}, ${colors.blueAccent[400]})`,
+					position: "relative",
 				}}
-			/>
+			>
+				<Box
+					sx={{
+						position: "absolute",
+						inset: 0,
+						background: "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.5))",
+					}}
+				/>
+			</Box>
 			<CardContent>
 				<Stack direction="row" spacing={2} alignItems="center" sx={{ mt: -6 }}>
 					<Avatar
@@ -101,39 +125,38 @@ const GeneralInfoBar = ({ shop, loading, error }) => {
 						{error}
 					</Typography>
 				) : (
-					<Stack spacing={1.2}>
-						{shop?.description ? (
-							<Typography variant="body2" sx={{ color: colors.gray[200] }}>
-								{shop.description}
+					<Stack spacing={1.5}>
+						<Box sx={infoCardSx}>
+							<Typography sx={sectionTitleSx}>About</Typography>
+							<Typography variant="body2" sx={{ color: colors.gray[200], mt: 0.8 }}>
+								{shop?.description || "Quality products and reliable service from a trusted seller."}
 							</Typography>
-						) : null}
+						</Box>
 
-						{shop?.address ? (
-							<Typography variant="body2" sx={{ color: colors.gray[300] }}>
-								{shop.address}
+						<Box sx={infoCardSx}>
+							<Typography sx={sectionTitleSx}>Location</Typography>
+							<Typography variant="body2" sx={{ color: colors.gray[200], mt: 0.8 }}>
+								{shop?.address || "Address not available"}
 							</Typography>
-						) : null}
-
-						{(shop?.phone || shop?.email) ? (
-							<Stack spacing={0.5}>
-								{shop?.phone ? (
-									<Typography variant="body2" sx={{ color: colors.gray[300] }}>
-										Phone: {shop.phone}
-									</Typography>
-								) : null}
-								{shop?.email ? (
-									<Typography variant="body2" sx={{ color: colors.gray[300] }}>
-										Email: {shop.email}
-									</Typography>
-								) : null}
+							<Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+								{shop?.zone ? <Chip size="small" label={shop.zone} /> : null}
+								{shop?.district ? <Chip size="small" label={shop.district} /> : null}
+								{shop?.area ? <Chip size="small" label={shop.area} /> : null}
 							</Stack>
-						) : null}
+						</Box>
 
-						<Stack direction="row" spacing={1} flexWrap="wrap">
-							{shop?.zone ? <Chip size="small" label={shop.zone} /> : null}
-							{shop?.district ? <Chip size="small" label={shop.district} /> : null}
-							{shop?.area ? <Chip size="small" label={shop.area} /> : null}
-						</Stack>
+						<Box sx={infoCardSx}>
+							<Typography sx={sectionTitleSx}>Contact</Typography>
+							{shop?.email ? (
+								<Typography variant="body2" sx={{ color: colors.gray[200], mt: 0.8 }}>
+									Email: {shop.email}
+								</Typography>
+							) : (
+								<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.8 }}>
+									Email not available
+								</Typography>
+							)}
+						</Box>
 					</Stack>
 				)}
 			</CardContent>

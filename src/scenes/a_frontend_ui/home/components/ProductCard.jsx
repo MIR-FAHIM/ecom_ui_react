@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Typography,
+  Link,
   IconButton,
   Chip,
   Stack,
@@ -26,6 +27,7 @@ import { image_file_url } from "../../../../api/config/index.jsx";
 import { tokens } from "../../../../theme.js";
 import { addCart, getCartByUser } from "../../../../api/controller/admin_controller/order/cart_controller.jsx";
 import { getUserWish, addWish, deleteWish } from "../../../../api/controller/admin_controller/wishlist/wish_controller.jsx";
+import { useNavigate } from "react-router-dom";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -123,6 +125,7 @@ export default function SmartProductCard({
   fromSeller = false,
 }) {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [userId, setUserId] = useState(() => {
     const id = localStorage.getItem("userId");
@@ -340,7 +343,7 @@ export default function SmartProductCard({
   return (
     <Card
       sx={{
-        borderRadius: 3.5,
+        borderRadius:1,
         overflow: "hidden",
         border: `1px solid ${divider}`,
         background: surface,
@@ -356,15 +359,15 @@ export default function SmartProductCard({
     >
       <Box
         sx={{
-          p: 1.25,
+          p: 1,
           background: surface,
         }}
       >
         <Box
           onClick={() => onView?.(product)}
           sx={{
-            height: 220,
-            borderRadius: 3,
+            height: { xs: 240, sm: 230, md: 210, lg: 200 },
+            borderRadius: 1,
             overflow: "hidden",
             border: `1px solid ${divider}`,
             background: surface2,
@@ -387,17 +390,18 @@ export default function SmartProductCard({
             sx={{
               width: "100%",
               height: "100%",
-              objectFit: "cover",
+              objectFit: "contain",
+              objectPosition: "center",
               transition: "transform 240ms ease",
               filter: theme.palette.mode === "dark" ? "saturate(1.08) contrast(1.02)" : "saturate(1.02)",
-              ".MuiCard-root:hover &": { transform: "scale(1.05)" },
+              ".MuiCard-root:hover &": { transform: "scale(1.03)" },
             }}
           />
 
           {/* If you still want a letter avatar for missing images, keep it hidden and show only when placeholder triggers.
               For simplicity we rely on placeholder image. */}
 
-          <Stack direction="row" spacing={1} sx={{ position: "absolute", left: 10, top: 10, alignItems: "center" }}>
+          <Stack direction="row" spacing={1} sx={{ position: "absolute", left: 8, top: 8, alignItems: "center" }}>
             {discountLabel ? (
                 <Chip
                   icon={<LocalOffer fontSize="small" />}
@@ -406,7 +410,7 @@ export default function SmartProductCard({
                   sx={{
                     borderRadius: 999,
                     fontWeight: 700,
-                    fontSize: 11,
+                    fontSize: 10,
                     background: accent,
                     color: "#fff",
                     border: `1px solid ${divider}`,
@@ -432,7 +436,7 @@ export default function SmartProductCard({
             )}
           </Stack>
 
-          <Stack spacing={1} sx={{ position: "absolute", right: 10, top: 10 }}>
+          <Stack spacing={1} sx={{ position: "absolute", right: 8, top: 8 }}>
             {fromSeller ? (
               <>
                 <Tooltip title="Edit product">
@@ -442,6 +446,8 @@ export default function SmartProductCard({
                       onEdit?.(product);
                     }}
                     sx={{
+                      width: 36,
+                      height: 36,
                       borderRadius: 3,
                       border: `1px solid ${divider}`,
                       background: surface,
@@ -460,6 +466,8 @@ export default function SmartProductCard({
                       onView?.(product);
                     }}
                     sx={{
+                      width: 36,
+                      height: 36,
                       borderRadius: 3,
                       border: `1px solid ${divider}`,
                       background: surface,
@@ -477,6 +485,8 @@ export default function SmartProductCard({
                   <IconButton
                     onClick={handleToggleWish}
                     sx={{
+                      width: 36,
+                      height: 36,
                       borderRadius: 3,
                       border: `1px solid ${divider}`,
                       background: surface,
@@ -494,8 +504,8 @@ export default function SmartProductCard({
                       disabled={outOfStock}
                       onClick={handleAddToCart}
                       sx={{
-                        width: 50,
-                        height: 50,
+                        width: 44,
+                        height: 44,
                         borderRadius: 4,
                         border: `1px solid ${divider}`,
                         background: surface,
@@ -530,6 +540,8 @@ export default function SmartProductCard({
                       onView?.(product);
                     }}
                     sx={{
+                      width: 36,
+                      height: 36,
                       borderRadius: 3,
                       border: `1px solid ${divider}`,
                       background: surface,
@@ -546,7 +558,7 @@ export default function SmartProductCard({
         </Box>
       </Box>
 
-      <CardContent sx={{ p: 2 }}>
+      <CardContent sx={{ p: 1.5 }}>
         <Stack spacing={1}>
           {/* Row 1: Name */}
           <Typography
@@ -555,14 +567,14 @@ export default function SmartProductCard({
               color: ink,
               letterSpacing: "-0.01em",
               lineHeight: 1.25,
-              fontSize: 14,
+              fontSize: 13,
               display: "-webkit-box",
               WebkitLineClamp: 1,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
           >
-            {product?.name || "Unnamed product"}
+            {product?.name || "Untitled product"}
           </Typography>
 
           {/* Row 2: Price */}
@@ -570,7 +582,7 @@ export default function SmartProductCard({
             <Typography
               fontWeight={700}
               sx={{
-                fontSize: 17,
+                fontSize: 15,
                 color: accent,
                 letterSpacing: "-0.01em",
               }}
@@ -585,14 +597,57 @@ export default function SmartProductCard({
                   fontWeight: 500,
                   color: subInk,
                   textDecoration: "line-through",
-                  fontSize: 12,
+                  fontSize: 11,
                 }}
               >
                 {money(price)}
               </Typography>
             ) : null}
           </Box>
-
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                color: subInk,
+                fontSize: 11,
+              }}
+            >
+              Shop:
+            </Typography>
+            {product?.shop?.id ? (
+              <Link
+                component="button"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/shop/${product.shop.id}`);
+                }}
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: accent,
+                  textDecoration: "none",
+                  lineHeight: 1.2,
+                  textAlign: "left",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                {product.shop?.name || "View shop"}
+              </Link>
+            ) : (
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 600,
+                  color: subInk,
+                  fontSize: 11,
+                }}
+              >
+                {product.shop?.name || " "}
+              </Typography>
+            )}
+          </Box>
           {/* Row 3: Other */}
           <Stack direction="row" spacing={1} alignItems="center">
           
@@ -609,7 +664,7 @@ export default function SmartProductCard({
                 ml: "auto",
                 borderRadius: 999,
                 fontWeight: 600,
-                fontSize: 11,
+                fontSize: 10,
                 background: surface,
                 border: `1px solid ${divider}`,
                 color: subInk,

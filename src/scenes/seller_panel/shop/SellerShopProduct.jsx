@@ -132,9 +132,17 @@ const SellerShopProduct = () => {
 					<Button
 						variant="contained"
 						onClick={handleAddProduct}
-						sx={{ borderRadius: 999, textTransform: "none", fontWeight: 700 }}
+						sx={{
+							borderRadius: 999,
+							textTransform: "none",
+							fontWeight: 700,
+							bgcolor: "#6366f1",
+							px: 3,
+							boxShadow: "0 4px 14px rgba(99,102,241,.35)",
+							"&:hover": { bgcolor: "#4f46e5", boxShadow: "0 6px 20px rgba(99,102,241,.45)" },
+						}}
 					>
-						Add Product
+						+ Add Product
 					</Button>
 					<Button
 						variant="outlined"

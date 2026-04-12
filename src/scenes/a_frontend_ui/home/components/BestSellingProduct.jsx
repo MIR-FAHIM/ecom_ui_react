@@ -105,7 +105,7 @@ export default function BestSellingProduct({ onView }) {
   return (
     <Box
       sx={{
-        borderRadius: 4,
+        borderRadius: 1,
         p: { xs: 2.5, md: 3 },
         bgcolor: "#f1eadc",
         boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
@@ -117,7 +117,7 @@ export default function BestSellingProduct({ onView }) {
     >
       <Box
         sx={{
-          borderRadius: 3,
+          borderRadius: 1,
           height: { xs: 200, md: 250 },
           backgroundImage: `url("${bannerUrl}")`,
           backgroundSize: "cover",

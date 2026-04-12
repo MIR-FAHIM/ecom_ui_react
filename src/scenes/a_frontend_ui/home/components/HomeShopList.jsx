@@ -57,7 +57,7 @@ const ShopCard = ({ shop, onView }) => {
 			sx={{
 				minWidth: 260,
 				maxWidth: 300,
-				borderRadius: 3,
+				borderRadius: 1,
 				border: `1px solid ${theme.palette.divider}`,
 				background: colors.primary[400],
 				cursor: "pointer",

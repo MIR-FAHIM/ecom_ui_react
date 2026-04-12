@@ -141,7 +141,7 @@ export default function CategoryWiseProductHome({
 			sx={{
 				mt: 3,
 				p: { xs: 2, sm: 2.5 },
-				borderRadius: 3,
+				borderRadius: 1,
 				bgcolor: color,
 				boxShadow: "0 6px 20px rgba(0,0,0,0.05)",
 			}}

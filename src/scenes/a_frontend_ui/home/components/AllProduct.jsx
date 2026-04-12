@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, CircularProgress, Grid, Pagination, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Pagination, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import FeaturedTitle from "./FeaturedTitle";
@@ -71,24 +71,34 @@ const AllProduct = ({ categoryId = "" }) => {
 				</Box>
 			) : (
 				<>
-					<Grid container spacing={2}>
+					<Box
+						sx={{
+							display: "grid",
+							gap: 2,
+							gridTemplateColumns: {
+								xs: "1fr",
+								sm: "repeat(2, 1fr)",
+								md: "repeat(3, 1fr)",
+								lg: "repeat(6, 1fr)",
+							},
+						}}
+					>
 						{list.length === 0 ? (
-							<Grid item xs={12}>
+							<Box sx={{ gridColumn: "1 / -1" }}>
 								<Typography variant="h6" align="center" sx={{ py: 6, fontWeight: 600, color: "text.secondary" }}>
 									No products found.
 								</Typography>
-							</Grid>
+							</Box>
 						) : (
 							list.map((product) => (
-								<Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
-									<SmartProductCard
-										product={product}
-										onView={() => navigate(`/product/${product.id}`)}
-									/>
-								</Grid>
+								<SmartProductCard
+									key={product.id}
+									product={product}
+									onView={() => navigate(`/product/${product.id}`)}
+								/>
 							))
 						)}
-					</Grid>
+					</Box>
 
 					{lastPage > 1 ? (
 						<Stack direction="row" justifyContent="center" sx={{ mt: 3 }}>
