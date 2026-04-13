@@ -203,9 +203,29 @@ const OderDetails = () => {
     new Date(dateString).toLocaleDateString("en-BD", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   /* ── PDF generation ── */
-  const generateReceiptPdf = () => {
+  const generateReceiptPdf = async () => {
     if (!order) return;
     const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+    // Load Bangla-supporting font
+    try {
+      const res = await fetch("/fonts/NotoSansBengali.ttf");
+      if (res.ok) {
+        const buf = await res.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i += 0x8000) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+        }
+        const base64 = btoa(binary);
+        doc.addFileToVFS("NotoSansBengali.ttf", base64);
+        doc.addFont("NotoSansBengali.ttf", "NotoSansBengali", "normal");
+        doc.setFont("NotoSansBengali", "normal");
+      }
+    } catch (e) {
+      console.warn("Bangla font load failed, using default font.", e);
+    }
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 40;
     let y = 50;
