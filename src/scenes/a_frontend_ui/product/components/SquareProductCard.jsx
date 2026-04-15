@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { Box, Link, Typography, useTheme } from "@mui/material";
+import { Box, Chip, Link, Typography, useTheme } from "@mui/material";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { useNavigate } from "react-router-dom";
 import { image_file_url } from "../../../../api/config/index.jsx";
 import { tokens } from "../../../../theme.js";
@@ -32,9 +33,59 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
     () => Number(product?.unit_price ?? product?.price ?? 0),
     [product?.unit_price, product?.price]
   );
-  const salePrice = useMemo(() => Number(product?.sale_price ?? 0), [product?.sale_price]);
+  const discountInfo = useMemo(() => {
+    const now = Date.now() / 1000;
+
+    // 1. Try product_discount relation
+    const pd = product?.product_discount;
+    if (pd) {
+      const d = Number(pd.discount ?? 0);
+      if (d > 0) {
+        const start = Number(pd.start_date || pd.discount_start_date || 0);
+        const end = Number(pd.end_date || pd.discount_end_date || 0);
+        if (start && start > now) { /* not started */ }
+        else if (end && end < now) { /* expired */ }
+        else return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
+      }
+    }
+
+    // 2. Fallback: direct product fields
+    const d = Number(product?.discount ?? 0);
+    if (d <= 0) return null;
+    const type = String(product?.discount_type ?? "").toLowerCase();
+    const start = Number(product?.discount_start_date || 0);
+    const end = Number(product?.discount_end_date || 0);
+    if (start && start > now) return null;
+    if (end && end < now) return null;
+    return { amount: d, type };
+  }, [product?.product_discount, product?.discount, product?.discount_type, product?.discount_start_date, product?.discount_end_date]);
+
+  const salePrice = useMemo(() => {
+    const s = Number(product?.sale_price ?? 0);
+    if (s > 0) return s;
+    if (discountInfo && price > 0) {
+      if (discountInfo.type === "percent") return Math.round(price - (price * discountInfo.amount) / 100);
+      const flat = price - discountInfo.amount;
+      return flat > 0 ? flat : 0;
+    }
+    return 0;
+  }, [product?.sale_price, discountInfo, price]);
+
   const hasSale = salePrice > 0 && salePrice < price;
   const displayPrice = hasSale ? salePrice : price;
+
+  const discountLabel = useMemo(() => {
+    if (discountInfo) {
+      if (discountInfo.type === "percent") return `${discountInfo.amount}% OFF`;
+      return `${formatMoney(discountInfo.amount)} OFF`;
+    }
+    if (hasSale && price > 0) {
+      const pct = Math.round(((price - salePrice) / price) * 100);
+      return pct > 0 ? `${pct}% OFF` : null;
+    }
+    return null;
+  }, [discountInfo, hasSale, price, salePrice]);
+
   const accent = theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100];
   const imageUrl = useMemo(() => resolveImage(product), [product]);
 
@@ -53,7 +104,7 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
         sx={{
           width: size,
           height: size,
-          borderRadius: 3,
+          borderRadius: 1,
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -62,8 +113,12 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
           boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
           transition: "transform 0.2s ease, box-shadow 0.2s ease",
           "&:hover": { transform: "scale(1.03)", boxShadow: "0 8px 20px rgba(0,0,0,0.1)" },
+          position: "relative",
+          overflow: "hidden",
         }}
-      />
+      >
+ 
+      </Box>
       <Box sx={{ width: size, textAlign: "center" }}>
         <Typography
           variant="body2"
@@ -108,14 +163,28 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
             </Typography>
           )}
         </Box>
-        <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.25, fontSize: 13 }}>
-          {formatMoney(displayPrice)}
-        </Typography>
-        {hasSale ? (
-          <Typography variant="caption" color="text.secondary" sx={{ textDecoration: "line-through" }}>
-            {formatMoney(price)}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, flexWrap: "wrap", mt: 0.25 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 13, color: accent }}>
+            {formatMoney(displayPrice)}
           </Typography>
-        ) : null}
+          {hasSale && (
+            <Typography variant="caption" color="text.secondary" sx={{ textDecoration: "line-through", fontSize: 10 }}>
+              {formatMoney(price)}
+            </Typography>
+          )}
+        </Box>
+        {discountLabel && (
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+              fontSize: 10,
+              color: theme.palette.error.main,
+            }}
+          >
+            {discountLabel}
+          </Typography>
+        )}
       </Box>
     </Box>
   );

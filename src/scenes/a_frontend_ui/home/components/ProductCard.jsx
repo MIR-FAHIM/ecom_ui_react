@@ -151,32 +151,69 @@ export default function SmartProductCard({
   // Your API uses unit_price + discount info; keep fallbacks for older shapes
   const price = useMemo(() => Number(product?.unit_price ?? product?.price ?? 0), [product?.unit_price, product?.price]);
 
+  // Compute discount from product_discount relation OR direct product fields
+  const discountInfo = useMemo(() => {
+    const now = Date.now() / 1000; // Unix seconds
+
+    // 1. Try product_discount relation
+    const pd = product?.product_discount;
+    if (pd) {
+      const d = Number(pd.discount ?? 0);
+      if (d > 0) {
+        const start = Number(pd.start_date || pd.discount_start_date || 0);
+        const end = Number(pd.end_date || pd.discount_end_date || 0);
+        if (start && start > now) { /* not started */ }
+        else if (end && end < now) { /* expired */ }
+        else return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
+      }
+    }
+
+    // 2. Fallback: direct product fields (discount, discount_type, discount_start_date/discount_end_date as Unix timestamps)
+    const d = Number(product?.discount ?? 0);
+    if (d <= 0) return null;
+    const type = String(product?.discount_type ?? "").toLowerCase();
+    const start = Number(product?.discount_start_date || 0);
+    const end = Number(product?.discount_end_date || 0);
+    if (start && start > now) return null;
+    if (end && end < now) return null;
+    return { amount: d, type };
+  }, [product?.product_discount, product?.discount, product?.discount_type, product?.discount_start_date, product?.discount_end_date]);
+
   const salePrice = useMemo(() => {
-    // If you later introduce sale_price in API, it will work automatically
+    // 1. Explicit sale_price from API
     const s = Number(product?.sale_price ?? 0);
-    return s > 0 ? s : 0;
-  }, [product?.sale_price]);
+    if (s > 0) return s;
+
+    // 2. Compute from product_discount relation
+    if (discountInfo && price > 0) {
+      if (discountInfo.type === "percent") {
+        return Math.round(price - (price * discountInfo.amount) / 100);
+      }
+      // flat / amount discount
+      const flat = price - discountInfo.amount;
+      return flat > 0 ? flat : 0;
+    }
+
+    return 0;
+  }, [product?.sale_price, discountInfo, price]);
 
   const hasSale = useMemo(() => salePrice > 0 && salePrice < price, [salePrice, price]);
 
   const displayPrice = useMemo(() => (hasSale ? money(salePrice) : money(price)), [hasSale, salePrice, price]);
 
   const discountLabel = useMemo(() => {
-    // Supports both: discount_percent OR computed from sale price
-    if (product?.discount_percent) return `${product.discount_percent}% OFF`;
+    if (discountInfo) {
+      if (discountInfo.type === "percent") return `${discountInfo.amount}% OFF`;
+      if (discountInfo.type === "flat" || discountInfo.type === "amount") return `${money(discountInfo.amount)} OFF`;
+    }
 
     if (hasSale && price > 0) {
       const pct = Math.round(((price - salePrice) / price) * 100);
       return pct > 0 ? `${pct}% OFF` : null;
     }
 
-    // Supports your API fields: discount + discount_type
-    const d = Number(product?.discount ?? 0);
-    const t = String(product?.discount_type ?? "").toLowerCase();
-    if (d > 0 && t === "percent") return `${d}% OFF`;
-
     return null;
-  }, [product?.discount_percent, hasSale, price, salePrice, product?.discount, product?.discount_type]);
+  }, [discountInfo, hasSale, price, salePrice]);
 
   const ratingValue = useMemo(() => {
     const r = Number(product?.average_review?.average_rating);
@@ -402,21 +439,7 @@ export default function SmartProductCard({
               For simplicity we rely on placeholder image. */}
 
           <Stack direction="row" spacing={1} sx={{ position: "absolute", left: 8, top: 8, alignItems: "center" }}>
-            {discountLabel ? (
-                <Chip
-                  icon={<LocalOffer fontSize="small" />}
-                  label={discountLabel}
-                  size="small"
-                  sx={{
-                    borderRadius: 999,
-                    fontWeight: 700,
-                    fontSize: 10,
-                    background: accent,
-                    color: "#fff",
-                    border: `1px solid ${divider}`,
-                  }}
-                />
-            ) : null}
+
 
             {outOfStock ? (
               <Chip label="Out of stock" size="small" color="error" sx={{ borderRadius: 999, fontWeight: 600 }} />
@@ -577,8 +600,8 @@ export default function SmartProductCard({
             {product?.name || "Untitled product"}
           </Typography>
 
-          {/* Row 2: Price */}
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+          {/* Row 2: Price + Discount */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
             <Typography
               fontWeight={700}
               sx={{
@@ -590,7 +613,7 @@ export default function SmartProductCard({
               {displayPrice}
             </Typography>
 
-            {hasSale ? (
+            {hasSale && (
               <Typography
                 variant="caption"
                 sx={{
@@ -602,7 +625,24 @@ export default function SmartProductCard({
               >
                 {money(price)}
               </Typography>
-            ) : null}
+            )}
+
+            {discountLabel && (
+              <Chip
+                label={discountLabel}
+                size="small"
+                sx={{
+                  height: 18,
+                  borderRadius: 999,
+                  fontWeight: 700,
+                  fontSize: 10,
+                  background: theme.palette.mode === "dark" ? "rgba(244,67,54,0.15)" : "rgba(244,67,54,0.08)",
+                  color: theme.palette.error.main,
+                  border: "none",
+                  "& .MuiChip-label": { px: 0.8 },
+                }}
+              />
+            )}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
             <Typography

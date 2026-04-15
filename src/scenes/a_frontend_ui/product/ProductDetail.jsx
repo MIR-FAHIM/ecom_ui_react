@@ -157,23 +157,67 @@ const ProductDetail = () => {
   // Pricing: your API uses unit_price, and discount fields
   const price = useMemo(() => Number(product?.unit_price ?? 0), [product?.unit_price]);
 
-  // If later you introduce sale_price, it will automatically work
+  // Compute discount from product_discount relation OR direct product fields
+  const discountInfo = useMemo(() => {
+    const now = Date.now() / 1000;
+
+    // 1. Try product_discount relation
+    const pd = product?.product_discount;
+    if (pd) {
+      const d = Number(pd.discount ?? 0);
+      if (d > 0) {
+        const start = Number(pd.start_date || pd.discount_start_date || 0);
+        const end = Number(pd.end_date || pd.discount_end_date || 0);
+        if (start && start > now) { /* not started */ }
+        else if (end && end < now) { /* expired */ }
+        else return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
+      }
+    }
+
+    // 2. Fallback: direct product fields (discount_start_date / discount_end_date are Unix timestamps)
+    const d = Number(product?.discount ?? 0);
+    if (d <= 0) return null;
+    const type = String(product?.discount_type ?? "").toLowerCase();
+    const start = Number(product?.discount_start_date || 0);
+    const end = Number(product?.discount_end_date || 0);
+    if (start && start > now) return null;
+    if (end && end < now) return null;
+    return { amount: d, type };
+  }, [product?.product_discount, product?.discount, product?.discount_type, product?.discount_start_date, product?.discount_end_date]);
+
   const sale = useMemo(() => {
+    // 1. Explicit sale_price from API
     const s = Number(product?.sale_price ?? 0);
-    return s > 0 ? s : 0;
-  }, [product?.sale_price]);
+    if (s > 0) return s;
+
+    // 2. Compute from product_discount relation
+    if (discountInfo && price > 0) {
+      if (discountInfo.type === "percent") return Math.round(price - (price * discountInfo.amount) / 100);
+      const flat = price - discountInfo.amount;
+      return flat > 0 ? flat : 0;
+    }
+
+    return 0;
+  }, [product?.sale_price, discountInfo, price]);
 
   const hasSale = useMemo(() => sale > 0 && price > 0 && sale < price, [sale, price]);
 
   const discountPct = useMemo(() => {
-    if (hasSale) return Math.round(((price - sale) / price) * 100);
-
-    const d = Number(product?.discount ?? 0);
-    const t = String(product?.discount_type ?? "").toLowerCase();
-    if (d > 0 && t === "percent") return Math.round(d);
-
+    if (discountInfo) {
+      if (discountInfo.type === "percent") return Math.round(discountInfo.amount);
+      if (hasSale && price > 0) return Math.round(((price - sale) / price) * 100);
+    }
+    if (hasSale && price > 0) return Math.round(((price - sale) / price) * 100);
     return 0;
-  }, [hasSale, price, sale, product?.discount, product?.discount_type]);
+  }, [discountInfo, hasSale, price, sale]);
+
+  const discountLabel = useMemo(() => {
+    if (discountPct > 0) return `-${discountPct}%`;
+    if (discountInfo && (discountInfo.type === "flat" || discountInfo.type === "amount")) {
+      return `-${money(discountInfo.amount)}`;
+    }
+    return null;
+  }, [discountPct, discountInfo]);
 
   const displayPrice = useMemo(() => (hasSale ? sale : price), [hasSale, sale, price]);
 
@@ -420,9 +464,9 @@ const ProductDetail = () => {
                         {money(price)}
                       </Typography>
                     )}
-                    {discountPct > 0 && (
+                    {discountLabel && (
                       <Chip
-                        label={`-${discountPct}%`}
+                        label={discountLabel}
                         size="small"
                         sx={{
                           fontWeight: 800,

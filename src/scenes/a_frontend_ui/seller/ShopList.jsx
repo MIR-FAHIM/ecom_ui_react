@@ -87,7 +87,7 @@ const ShopCard = ({ shop, onView }) => {
 							{shop?.name || "Shop"}
 						</Typography>
 						<Typography variant="body2" sx={{ color: colors.gray[300] }} noWrap>
-							{shop?.phone || shop?.email || ""}
+							{shop?.description || "No description"}
 						</Typography>
 					</Box>
 				</Stack>

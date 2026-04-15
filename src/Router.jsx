@@ -64,6 +64,7 @@ import AddShop from "./scenes/a_frontend_ui/seller/AddShop";
 import ShopProducts from "./scenes/a_frontend_ui/seller/ShopProducts";
 import EditSellerTab from "./scenes/admin_panel/seller/EditSellerTab";
 import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
+import SearchedProductList from "./scenes/a_frontend_ui/search_product/SearchedProductList";
 import PosManagement from "./scenes/admin_panel/pos_management/PosManagement";
 import RequireAdmin from "./components/RequireAdmin";
 
@@ -120,6 +121,7 @@ const AppRouter = () => {
           <Route path="brands" element={<Brand />} />
           <Route path="categories" element={<AllCategory />} />
           <Route path="categories/home" element={<CategoryWiseProductHome />} />
+          <Route path="search" element={<SearchedProductList />} />
 
         </Route>
 

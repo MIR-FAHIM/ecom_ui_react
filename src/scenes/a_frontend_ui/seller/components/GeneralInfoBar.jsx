@@ -146,14 +146,14 @@ const GeneralInfoBar = ({ shop, loading, error }) => {
 						</Box>
 
 						<Box sx={infoCardSx}>
-							<Typography sx={sectionTitleSx}>Contact</Typography>
-							{shop?.email ? (
+							<Typography sx={sectionTitleSx}>Description</Typography>
+							{shop?.description ? (
 								<Typography variant="body2" sx={{ color: colors.gray[200], mt: 0.8 }}>
-									Email: {shop.email}
+									 {shop.description}
 								</Typography>
 							) : (
 								<Typography variant="body2" sx={{ color: colors.gray[300], mt: 0.8 }}>
-									Email not available
+									description not available
 								</Typography>
 							)}
 						</Box>
