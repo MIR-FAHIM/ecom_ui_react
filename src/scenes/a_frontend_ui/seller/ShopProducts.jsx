@@ -142,12 +142,13 @@ const ShopProducts = () => {
 						<Card
 							sx={{
 								background: colors.primary[400],
-								borderRadius: 3,
+								borderRadius: 1,
 								border: `1px solid ${theme.palette.divider}`,
 							}}
 						>
 							<CardContent>
-								<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+								<Box sx={{ display: "flex", alignItems: "center",
+									 justifyContent: "space-between", mb: 2 }}>
 									<Box>
 										<Typography variant="h5" sx={{ fontWeight: 600 }}>
 											Products
@@ -173,7 +174,7 @@ const ShopProducts = () => {
 
 								<Grid container spacing={2}>
 									{products.map((product) => (
-										<Grid item xs={12} sm={6} md={4} lg={3} key={product?.id ?? Math.random()}>
+										<Grid item xs={12} sm={6} md={2} lg={2} key={product?.id ?? Math.random()}>
 											<ProductCard
 												product={product}
 												onView={(p) => {

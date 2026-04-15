@@ -39,6 +39,7 @@ import ShippingCostSetting from "./scenes/admin_panel/setting/shipping_cost";
 
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
+import FeaturedProductList from "./scenes/a_frontend_ui/home/FeaturedProductList";
 import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
 import CategoryWiseProduct from "./scenes/a_frontend_ui/product/category_wise/CategoryWiseProduct";
 import Cart from "./scenes/a_frontend_ui/order/cart";
@@ -97,6 +98,8 @@ const AppRouter = () => {
         <Route path="/" element={<FrontendLayout />}>
           <Route index element={<HomeP1 />} />
           <Route path="home" element={<HomeP1 />} />
+
+          <Route path="featured-products" element={<FeaturedProductList />} />
 
           <Route path="profile" element={<Profile />} />
 

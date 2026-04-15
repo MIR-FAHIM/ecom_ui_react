@@ -586,7 +586,7 @@ const OderDetails = () => {
                     <TableRow key={item.id} sx={{ "&:hover": { bgcolor: "action.hover" }, transition: "background .15s" }}>
                       <TableCell sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
                         <Typography variant="body2" fontWeight={700}>{item.product_name}</Typography>
-                        <Typography variant="caption" sx={{ color: "#6366f1" }}>{item?.shop?.name || item?.product?.shop?.name || ""}</Typography>
+                        <Typography variant="caption" sx={{ color: "#6366f1" }}>Shop: {item?.shop?.name || item?.product?.shop?.name || ""}</Typography>
                       </TableCell>
                       <TableCell sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
                         <Typography variant="body2" sx={{ color: "text.secondary" }}>{item.sku}</Typography>

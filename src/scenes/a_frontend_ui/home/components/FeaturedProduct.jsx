@@ -91,7 +91,7 @@ export default function FeaturedProduct({ onView }) {
 	};
 
 	const handleSeeAll = () => {
-		navigate("/home#all-products");
+		navigate("/featured-products");
 	};
 
 	return (
