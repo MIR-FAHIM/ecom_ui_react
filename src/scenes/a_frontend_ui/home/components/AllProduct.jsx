@@ -15,7 +15,7 @@ const AllProduct = ({ categoryId = "" }) => {
 	const [query, setQuery] = useState("");
 	const [page, setPage] = useState(1);
 	const [lastPage, setLastPage] = useState(1);
-	const [perPage, setPerPage] = useState(20);
+	const [perPage, setPerPage] = useState(24);
 
 	const loadProducts = useCallback(async ({ search = "", category = "", page = 1, per_page = 20 } = {}) => {
 		setLoading(true);

@@ -99,7 +99,7 @@ export default function FeaturedProduct({ onView }) {
 			sx={{
 				mt: 3,
 				p: { xs: 2, sm: 3 },
-				borderRadius: 2,
+				borderRadius: 1,
 				bgcolor: "#cfe1b8",
 				boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
 			}}

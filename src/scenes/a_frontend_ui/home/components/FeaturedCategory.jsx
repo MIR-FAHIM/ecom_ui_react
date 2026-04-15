@@ -171,7 +171,7 @@ export default function FeaturedCategory({ categories = [] }) {
                     sx={{
                       width: { xs: 90, sm: 100, md: 110 },
                       height: { xs: 90, sm: 100, md: 110 },
-                      borderRadius: 2,
+                      borderRadius: 1,
                       backgroundImage: `url("${resolveCategoryImage(cat)}")`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
