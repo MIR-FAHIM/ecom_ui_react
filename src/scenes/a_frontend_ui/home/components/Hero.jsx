@@ -2,10 +2,12 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Box, IconButton, CircularProgress, useTheme, useMediaQuery } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { getBanner } from "../../../../api/controller/admin_controller/media/banner_controller";
+import { useNavigate } from "react-router-dom";
 import { image_file_url } from "../../../../api/config";
 
 export default function Hero() {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   // MUI breakpoints: xs <600, sm 600-899, md 900-1199, lg 1200-1535, xl 1536+
   const isXs = useMediaQuery(theme.breakpoints.down("sm")); // phones
@@ -101,6 +103,15 @@ export default function Hero() {
     height: isXs ? 40 : 44,
   };
 
+  // Banner click handler
+  const handleBannerClick = () => {
+    if (current?.related_category_id) {
+      navigate(`/category/${current.related_category_id}`);
+    } else if (current?.related_product_id) {
+      navigate(`/product/${current.related_product_id}`);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -116,12 +127,14 @@ export default function Hero() {
         mx: "auto",
         boxShadow: { xs: "0 10px 24px rgba(0,0,0,0.12)", md: "0 16px 32px rgba(0,0,0,0.12)" },
         bgcolor: "rgba(0,0,0,0.02)",
+        cursor: (current?.related_category_id || current?.related_product_id) ? "pointer" : "default",
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       // On touch devices, hover doesn't exist; pause while finger is on slider
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
+      onClick={handleBannerClick}
     >
       {/* Background image */}
       <Box
@@ -131,7 +144,7 @@ export default function Hero() {
           backgroundImage: `url("${bg}")`,
           backgroundPosition: "center",
           backgroundSize: { xs: "cover", sm: "cover" },
-          backgroundRepeat: "no-repeat",
+          backgroundRepeat: "repeat",
           bgcolor: "rgba(0,0,0,0.06)",
           transition: "background-image 300ms ease",
         }}

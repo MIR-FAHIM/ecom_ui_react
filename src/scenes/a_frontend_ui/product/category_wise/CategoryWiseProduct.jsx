@@ -202,7 +202,8 @@ const CategoryWiseProduct = () => {
 							<>
 								<Grid container spacing={2.5}>
 									{products.map((product, index) => (
-										<Grid key={product?.id ?? product?.product_id ?? index} item xs={12} sm={6} md={4} lg={3}>
+										<Grid key={product?.id ?? product?.product_id ?? index} 
+										item xs={12} sm={6} md={2} lg={2}>
 											<SmartProductCard
 												product={product}
 												onView={(p) => navigate(`/product/${p?.id}`)}

@@ -154,12 +154,10 @@ const ProductDetail = () => {
 
   const mainImage = useMemo(() => buildImageUrl(mainImagePath) || "/assets/images/placeholder.png", [mainImagePath]);
 
-  // Pricing: your API uses unit_price, and discount fields
-  const price = useMemo(() => Number(product?.unit_price ?? 0), [product?.unit_price]);
-
-  // Compute discount from product_discount relation OR direct product fields
+  // Pricing: use final_sale_price for main price
+  const unitPrice = useMemo(() => Number(product?.unit_price ?? 0), [product?.unit_price]);
+  const finalSalePrice = useMemo(() => Number(product?.final_sale_price ?? 0), [product?.final_sale_price]);
   const discountInfo = useMemo(() => {
-    // 1. Try product_discount relation
     const pd = product?.product_discount;
     if (pd) {
       const d = Number(pd.discount ?? 0);
@@ -167,39 +165,20 @@ const ProductDetail = () => {
         return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
       }
     }
-
-    // 2. Fallback: direct product fields (ignore discount_start_date / discount_end_date)
     const d = Number(product?.discount ?? 0);
     if (d <= 0) return null;
     const type = String(product?.discount_type ?? "").toLowerCase();
     return { amount: d, type };
   }, [product?.product_discount, product?.discount, product?.discount_type]);
 
-  const sale = useMemo(() => {
-    // 1. Explicit sale_price from API
-    const s = Number(product?.sale_price ?? 0);
-    if (s > 0) return s;
-
-    // 2. Compute from product_discount relation
-    if (discountInfo && price > 0) {
-      if (discountInfo.type === "percent") return Math.round(price - (price * discountInfo.amount) / 100);
-      const flat = price - discountInfo.amount;
-      return flat > 0 ? flat : 0;
-    }
-
-    return 0;
-  }, [product?.sale_price, discountInfo, price]);
-
-  const hasSale = useMemo(() => sale > 0 && price > 0 && sale < price, [sale, price]);
-
+  // Discount percent for badge
   const discountPct = useMemo(() => {
-    if (discountInfo) {
-      if (discountInfo.type === "percent") return Math.round(discountInfo.amount);
-      if (hasSale && price > 0) return Math.round(((price - sale) / price) * 100);
+    if (unitPrice > 0 && finalSalePrice > 0 && finalSalePrice < unitPrice) {
+      return Math.round(((unitPrice - finalSalePrice) / unitPrice) * 100);
     }
-    if (hasSale && price > 0) return Math.round(((price - sale) / price) * 100);
+    if (discountInfo && discountInfo.type === "percent") return Math.round(discountInfo.amount);
     return 0;
-  }, [discountInfo, hasSale, price, sale]);
+  }, [unitPrice, finalSalePrice, discountInfo]);
 
   const discountLabel = useMemo(() => {
     if (discountPct > 0) return `-${discountPct}%`;
@@ -207,9 +186,23 @@ const ProductDetail = () => {
       return `-${money(discountInfo.amount)}`;
     }
     return null;
-  }, [discountPct, discountInfo]);
+  }, [discountPct, discountInfo, money]);
 
-  const displayPrice = useMemo(() => (hasSale ? sale : price), [hasSale, sale, price]);
+  // Main price to display
+  const mainPrice = useMemo(() => (finalSalePrice > 0 ? finalSalePrice : unitPrice), [finalSalePrice, unitPrice]);
+  const hasDiscount = useMemo(() => finalSalePrice > 0 && finalSalePrice < unitPrice, [finalSalePrice, unitPrice]);
+
+  const calculatedDiscountAmount = useMemo(() => {
+    if (hasDiscount) return Math.max(unitPrice - finalSalePrice, 0);
+
+    if (!discountInfo) return 0;
+
+    if (discountInfo.type === "percent") {
+      return Math.max((unitPrice * discountInfo.amount) / 100, 0);
+    }
+
+    return Math.max(discountInfo.amount, 0);
+  }, [discountInfo, hasDiscount, unitPrice, finalSalePrice]);
 
   const inStock = useMemo(() => {
     // Your API: current_stock
@@ -317,6 +310,7 @@ const ProductDetail = () => {
         product_id: product.id,
         qty: Number(qty || 1),
         attribute_id: selectedAttributeId ?? null,
+        price: mainPrice, // send final_sale_price to cart
       };
       const res = await addCart(payload);
 
@@ -448,11 +442,11 @@ const ProductDetail = () => {
                 <Box sx={{ p: 2.5 }}>
                   <Stack direction="row" alignItems="flex-end" spacing={1.5}>
                     <Typography sx={{ fontSize: 32, fontWeight: 800, color: "#6366f1", lineHeight: 1 }}>
-                      {money(displayPrice)}
+                     {money(mainPrice)}
                     </Typography>
-                    {hasSale && (
+                    {hasDiscount && (
                       <Typography sx={{ fontSize: 18, fontWeight: 600, color: subInk, textDecoration: "line-through", lineHeight: 1.3 }}>
-                        {money(price)}
+                        {money(unitPrice)}
                       </Typography>
                     )}
                     {discountLabel && (
@@ -469,6 +463,21 @@ const ProductDetail = () => {
                       />
                     )}
                   </Stack>
+                  <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                    <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block" }}>
+                      Unit Price: {money(unitPrice)}
+                    </Typography>
+                    {hasDiscount && (
+                      <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block" }}>
+                        Final Sale Price: {money(finalSalePrice)}
+                      </Typography>
+                    )}
+                  </Stack>
+                  {discountInfo && (
+                    <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block" }}>
+                      Discount: {discountInfo.type === "percent" ? `${discountInfo.amount}%` : money(discountInfo.amount)}
+                    </Typography>
+                  )}
                   <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, mt: 0.5, display: "block" }}>
                     Unit: {product?.unit || "pc"} &nbsp;·&nbsp; Min order: {product?.min_qty || 1}
                   </Typography>

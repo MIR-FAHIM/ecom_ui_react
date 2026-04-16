@@ -158,7 +158,7 @@ const AllCategory = () => {
 
 												{children.length > 0 ? (
 													<Grid container spacing={1}>
-														{children.slice(0, 8).map((child) => (
+														{children.slice(0, 40).map((child) => (
 															<Grid item xs={6} key={child?.id ?? child?.name}>
 																<Box
 																	onClick={() => child?.id && navigate(`/category/${child.id}`)}
