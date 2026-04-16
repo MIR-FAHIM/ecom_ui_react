@@ -151,33 +151,23 @@ export default function SmartProductCard({
   // Your API uses unit_price + discount info; keep fallbacks for older shapes
   const price = useMemo(() => Number(product?.unit_price ?? product?.price ?? 0), [product?.unit_price, product?.price]);
 
-  // Compute discount from product_discount relation OR direct product fields
+  // Compute discount from product_discount relation OR direct product fields, ignoring start/end date
   const discountInfo = useMemo(() => {
-    const now = Date.now() / 1000; // Unix seconds
-
     // 1. Try product_discount relation
     const pd = product?.product_discount;
     if (pd) {
       const d = Number(pd.discount ?? 0);
       if (d > 0) {
-        const start = Number(pd.start_date || pd.discount_start_date || 0);
-        const end = Number(pd.end_date || pd.discount_end_date || 0);
-        if (start && start > now) { /* not started */ }
-        else if (end && end < now) { /* expired */ }
-        else return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
+        return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
       }
     }
 
-    // 2. Fallback: direct product fields (discount, discount_type, discount_start_date/discount_end_date as Unix timestamps)
+    // 2. Fallback: direct product fields (discount, discount_type)
     const d = Number(product?.discount ?? 0);
     if (d <= 0) return null;
     const type = String(product?.discount_type ?? "").toLowerCase();
-    const start = Number(product?.discount_start_date || 0);
-    const end = Number(product?.discount_end_date || 0);
-    if (start && start > now) return null;
-    if (end && end < now) return null;
     return { amount: d, type };
-  }, [product?.product_discount, product?.discount, product?.discount_type, product?.discount_start_date, product?.discount_end_date]);
+  }, [product?.product_discount, product?.discount, product?.discount_type]);
 
   const salePrice = useMemo(() => {
     // 1. Explicit sale_price from API
