@@ -170,6 +170,9 @@ function StepGeneral({
               <TextField fullWidth size="small" label="Unit Price" type="number" value={value.unit_price} onChange={(e) => onChange({ unit_price: e.target.value })} sx={fieldSx} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
+              <TextField fullWidth size="small" label="Discount" type="number" value={value.discount} onChange={(e) => onChange({ discount: e.target.value })} sx={fieldSx} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth size="small" label="Purchase Price" type="number" value={value.purchase_price} onChange={(e) => onChange({ purchase_price: e.target.value })} sx={fieldSx} />
             </Grid>
             <Grid item xs={12} sm={6} md={2}>

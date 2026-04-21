@@ -59,3 +59,13 @@ export const updateShop = async (id, data) => {
     return { status: 'error', message: error.message };
   }
 };
+export const updateShopStatus = async (id, data) => {
+  try {
+    // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description
+    const response = await axiosInstance.patch(`/api/shops/status/${id}`, data,); 
+    return response.data;
+  } catch (error) {
+    console.error('Error updating shop updateShopStatus:', error);
+    return { status: 'error', message: error.message };
+  }
+};

@@ -4,6 +4,7 @@ import Dashboard from "./admin_panel/dashboard";
 import Login from "./auth/login";
 import AdminLogin from "./auth/admin_login";
 import SellerLogin from "./auth/seller_login";
+import SellerRegister from "./auth/SellerRegister";
 import LoginOtp from "./auth/LoginOtp";
 
 // Ecommerce imports
@@ -117,7 +118,7 @@ export {
   PosManagement,
 Privacy,
 RelatedProductAdd,
-
+SellerRegister,
   // user frontend
   HomeP1,
 

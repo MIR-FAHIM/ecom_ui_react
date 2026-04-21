@@ -13,7 +13,6 @@ import {
 	useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
 import { tokens } from "../../../theme";
 import { image_file_url } from "../../../api/config/index.jsx";
 import { getAllShops } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
@@ -124,7 +123,7 @@ const ShopList = () => {
 			setLoading(true);
 			setError("");
 			try {
-				const res = await getAllShops({ page, per_page: pagination.per_page });
+				const res = await getAllShops({ page, per_page: pagination.per_page, status: "active" });
 				const pageData = res?.data ?? {};
 				const list = safeArray(pageData?.data);
 				if (mounted) {

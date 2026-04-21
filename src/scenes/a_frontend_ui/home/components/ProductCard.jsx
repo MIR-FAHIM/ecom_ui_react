@@ -498,8 +498,8 @@ export default function SmartProductCard({
                   <IconButton
                     onClick={handleToggleWish}
                     sx={{
-                      width: 36,
-                      height: 36,
+                      width: 30,
+                      height: 30,
                       borderRadius: 3,
                       border: `1px solid ${divider}`,
                       background: surface,
@@ -517,8 +517,8 @@ export default function SmartProductCard({
                       disabled={outOfStock}
                       onClick={handleAddToCart}
                       sx={{
-                        width: 44,
-                        height: 44,
+                        width: 30,
+                        height: 30,
                         borderRadius: 4,
                         border: `1px solid ${divider}`,
                         background: surface,
@@ -553,8 +553,8 @@ export default function SmartProductCard({
                       onView?.(product);
                     }}
                     sx={{
-                      width: 36,
-                      height: 36,
+                      width: 30,
+                      height: 30,
                       borderRadius: 3,
                       border: `1px solid ${divider}`,
                       background: surface,

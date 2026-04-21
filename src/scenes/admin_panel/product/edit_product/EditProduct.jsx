@@ -38,6 +38,7 @@ const DEFAULT_GENERAL = {
 	added_by: 1,
 	description: "",
 	unit_price: "",
+	discount: "",
 	purchase_price: "",
 	current_stock: "",
 	variant_product: 0,
@@ -189,6 +190,7 @@ function EditProduct() {
 				added_by: product?.added_by ?? localStorage.getItem("userId") ?? 1,
 				description: product?.description ?? "",
 				unit_price: product?.unit_price ?? "",
+				discount: product?.discount ?? "",
 				purchase_price: product?.purchase_price ?? "",
 				current_stock: product?.current_stock ?? "",
 				variant_product: product?.variant_product ?? 0,
@@ -306,6 +308,7 @@ function EditProduct() {
 			productFormData.append("user_id", general.user_id);
 			productFormData.append("description", general.description || "");
 			productFormData.append("unit_price", general.unit_price);
+			productFormData.append("discount", general.discount);
 			productFormData.append("purchase_price", general.purchase_price);
 			productFormData.append("current_stock", general.current_stock);
 			productFormData.append("variant_product", general.variant_product ? 1 : 0);

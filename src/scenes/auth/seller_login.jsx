@@ -278,7 +278,7 @@ const SellerLogin = () => {
                 Not a seller yet? Create your seller account to start selling.
               </Typography>
               <Button
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/seller-register")}
                 variant="outlined"
                 sx={{ textTransform: "none", fontWeight: 700, px: 2.5 }}
               >

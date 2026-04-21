@@ -15,7 +15,7 @@ function CategoryCard({ cat }) {
   return (
     <Card
       sx={{
-        borderRadius: 1.5,
+        borderRadius: 1,
         boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
         border: `1px solid ${theme.palette.divider}`,
         height: "100%",
@@ -56,7 +56,7 @@ export default function CategoryGrid({ categories = [] }) {
   return (
     <Box
       sx={{
-        borderRadius: 2,
+        borderRadius: 1,
         p: { xs: 1.5, sm: 2 },
         bgcolor: "background.paper",
         boxShadow: { xs: "0 4px 16px rgba(0,0,0,0.04)", md: "0 6px 20px rgba(0,0,0,0.05)" },

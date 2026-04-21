@@ -146,7 +146,7 @@ function AddProductTab() {
 
       const cats = normalizeList(cRes);
       const brs = normalizeList(bRes);
-      const vens = normalizeList(vRes);
+      const vens = normalizeList(vRes.data);
 
       console.debug("Dropdown raw responses:", { cRes, bRes, vRes });
       console.debug("Dropdown normalized:", { cats, brs, vens });

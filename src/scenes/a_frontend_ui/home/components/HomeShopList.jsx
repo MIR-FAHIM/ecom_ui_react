@@ -131,7 +131,7 @@ const HomeShopList = () => {
 			setLoading(true);
 			setError("");
 			try {
-				const res = await getAllShops({ page: 1, per_page: 20 });
+				const res = await getAllShops({ page: 1, per_page: 20 , status: "active"});
 				const list = res?.data?.data ?? res?.data ?? res ?? [];
 				if (mounted) setItems(safeArray(list));
 			} catch (e) {

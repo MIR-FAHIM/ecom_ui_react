@@ -505,7 +505,7 @@ const Topbar = () => {
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            <Tooltip title={t("topbar.becomeSeller")}>
+            <Tooltip title='Seller Login'>
               <Button
                 onClick={() => navigate("/seller-login")}
                 startIcon={<StorefrontIcon sx={{ fontSize: 16 }} />}
@@ -522,6 +522,25 @@ const Topbar = () => {
                 }}
               >
                 {t("topbar.becomeSeller")}
+              </Button>
+            </Tooltip>
+            <Tooltip title='Seller Register'>
+              <Button
+                onClick={() => navigate("/seller-register")}
+                startIcon={<StorefrontIcon sx={{ fontSize: 16 }} />}
+                sx={{
+                  display: { xs: "none", md: "inline-flex" },
+                  textTransform: "none",
+                  fontWeight: 500,
+                  fontSize: 12,
+                  color: colors.gray[100],
+                  px: 1,
+                  minWidth: 0,
+                  opacity: 0.8,
+                  "&:hover": { opacity: 1 },
+                }}
+              >
+                Seller Register
               </Button>
             </Tooltip>
 

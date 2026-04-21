@@ -7,6 +7,7 @@ import AdminLogin from "./scenes/auth/admin_login";
 import SellerLogin from "./scenes/auth/seller_login";
 import LoginOtp from "./scenes/auth/LoginOtp";
 import Register from "./scenes/auth/Register";
+import SellerRegister from "./scenes/auth/SellerRegister";
 import AddProductTab from "./scenes/admin_panel/product/add_product/AddProductTab";
 import AllProducts from "./scenes/admin_panel/product/AllProducts";
 import StockOutProduct from "./scenes/admin_panel/product/StockOutProduct";
@@ -94,6 +95,7 @@ const AppRouter = () => {
         <Route path="/seller-login" element={<SellerLogin />}></Route>
         <Route path="/login-otp" element={<LoginOtp />}></Route>
         <Route path="/register" element={<Register />}></Route>
+        <Route path="/seller-register" element={<SellerRegister />}></Route>
         {/* Public / storefront routes */}
         <Route path="/" element={<FrontendLayout />}>
           <Route index element={<HomeP1 />} />

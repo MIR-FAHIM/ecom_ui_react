@@ -14,7 +14,81 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 
 import { tokens } from "../../../theme";
-import { getShopDetails, updateShop } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
+import { getShopDetails, updateShop, updateShopStatus } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
+// Status options for shop
+const statusOptions = [
+	{ value: "active", label: "Active", color: "success" },
+	{ value: "pending", label: "Pending", color: "info" },
+	{ value: "suspended", label: "Suspended", color: "warning" },
+	{ value: "banned", label: "Banned", color: "error" },
+];
+
+const StatusSelectChip = ({ shopId, status, onStatusChange }) => {
+	const [selecting, setSelecting] = useState(false);
+	const [current, setCurrent] = useState(status);
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		setCurrent(status);
+	}, [status]);
+
+	const handleStatusChange = async (newStatus) => {
+		setLoading(true);
+		try {
+			const res = await updateShopStatus(shopId, { status: newStatus });
+			if (res?.status === "success") {
+				setCurrent(newStatus);
+				onStatusChange?.(newStatus);
+			} else {
+				alert(res?.message || "Failed to update status");
+			}
+		} catch (e) {
+			alert("Failed to update status");
+		} finally {
+			setLoading(false);
+			setSelecting(false);
+		}
+	};
+
+	const currentOption = statusOptions.find((opt) => opt.value === current) || { label: current, color: "default" };
+
+	return selecting ? (
+		<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
+			{statusOptions.map((opt) => (
+				<Card
+					key={opt.value}
+					sx={{
+						display: "inline-block",
+						p: 0.5,
+						m: 0.2,
+						background: opt.value === current ? "#eee" : undefined,
+						border: opt.value === current ? "2px solid" : "1px solid #ccc",
+						borderColor: opt.value === current ? "primary.main" : "#ccc",
+						cursor: loading ? "not-allowed" : "pointer",
+						opacity: loading ? 0.7 : 1,
+					}}
+					onClick={() => !loading && handleStatusChange(opt.value)}
+				>
+					<Typography variant="body2" color={opt.color} fontWeight={opt.value === current ? 700 : 400}>
+						{opt.label}
+					</Typography>
+				</Card>
+			))}
+			<Card sx={{ display: "inline-block", p: 0.5, m: 0.2, cursor: "pointer" }} onClick={() => setSelecting(false)}>
+				<Typography variant="body2">Cancel</Typography>
+			</Card>
+		</Box>
+	) : (
+		<Card
+			sx={{ display: "inline-block", px: 2, py: 0.5, mb: 1, cursor: "pointer", border: "2px solid", borderColor: "primary.main" }}
+			onClick={() => setSelecting(true)}
+		>
+			<Typography variant="body2" color={currentOption.color} fontWeight={700}>
+				Status: {currentOption.label}
+			</Typography>
+		</Card>
+	);
+};
 import ShopManageGeneral from "./components/ShopManageGeneral";
 import ShopManageProducts from "./components/ShopManageProducts";
 import ShopManageImages from "./components/ShopManageImages";
@@ -153,6 +227,12 @@ const ShopManage = () => {
 
 				<Card sx={{ background: colors.primary[400], borderRadius: 2 }}>
 					<CardContent>
+						{/* Status select chip */}
+						<StatusSelectChip
+						  shopId={shopId}
+						  status={form.status}
+						  onStatusChange={(newStatus) => setForm((prev) => ({ ...prev, status: newStatus }))}
+						/>
 						<Tabs
 							value={tab}
 							onChange={(_, value) => setTab(value)}
