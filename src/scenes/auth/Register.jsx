@@ -23,8 +23,12 @@ const Register = () => {
   }, [location.state?.phoneNumber]);
 
   const handleRegister = async () => {
-    if (!name || !email || !mobile || !password || !role) {
-      setMsg('Please fill required fields');
+    if (!name || !email || !mobile || !password) {
+      if (!mobile) {
+        setMsg('Phone number is required');
+      } else {
+        setMsg('Please fill required fields');
+      }
       return;
     }
     if (password !== confirm) {
@@ -84,54 +88,156 @@ const Register = () => {
     }
   };
 
-  return (
+return (
+  <Box
+    sx={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #f5f7fa, #e4ecf7)',
+      px: 2,
+    }}
+  >
     <Container maxWidth="sm">
-      <Paper sx={{ mt: 6, p: 3 }} elevation={3}>
-        <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>Create an account</Typography>
+      <Paper
+        elevation={6}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: 700, mb: 1, textAlign: 'center' }}
+        >
+          Create Account
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{ mb: 3, textAlign: 'center', color: 'text.secondary' }}
+        >
+          Sign up to get started
+        </Typography>
 
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <TextField fullWidth label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
+            <TextField
+              fullWidth
+              label="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              variant="outlined"
+              sx={{ borderRadius: 2 }}
+            />
           </Grid>
-          <Grid item xs={12}>
-            <TextField fullWidth label="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField fullWidth label="Mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} />
-          </Grid>
+
           <Grid item xs={12}>
             <TextField
+              fullWidth
+              label="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Mobile Number"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+            />
+          </Grid>
+
+          {/* <Grid item xs={12}>
+            <TextField
+              select
               fullWidth
               label="Role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              select
             >
               <MenuItem value="customer">Customer</MenuItem>
             </TextField>
-          </Grid>
+          </Grid> */}
+
           <Grid item xs={12}>
-            <TextField fullWidth label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField fullWidth label="Confirm password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </Grid>
 
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="body2">Already registered?</Typography>
-              <Button variant="text" onClick={() => navigate('/login')}>Login now</Button>
-            </Box>
-            <Button variant="contained" onClick={handleRegister} disabled={loading}>
-              {loading ? <CircularProgress size={18} color="inherit" /> : 'Register'}
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handleRegister}
+              disabled={loading}
+              sx={{
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: '16px',
+                textTransform: 'none',
+                background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4338ca, #4f46e5)',
+                },
+              }}
+            >
+              {loading ? <CircularProgress size={20} color="inherit" /> : 'Create Account'}
+            </Button>
+          </Grid>
+
+          <Grid item xs={12} textAlign="center">
+            <Typography variant="body2">
+              Already have an account?
+            </Typography>
+            <Button
+              onClick={() => navigate('/login')}
+              sx={{
+                textTransform: 'none',
+                color: '#fff',
+                background: 'linear-gradient(135deg, #2563eb, #1e40af)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1e40af, #2563eb)',
+                },
+                mt: 1
+              }}
+            >
+              Login
             </Button>
           </Grid>
         </Grid>
       </Paper>
 
-      <Snackbar open={!!msg} autoHideDuration={3000} onClose={() => setMsg('')} message={msg} />
+      <Snackbar
+        open={!!msg}
+        autoHideDuration={3000}
+        onClose={() => setMsg('')}
+        message={msg}
+      />
     </Container>
-  );
+  </Box>
+);
 };
 
 export default Register;

@@ -44,9 +44,9 @@ const ShopProducts = () => {
 		current_page: 1,
 		last_page: 1,
 		total: 0,
-		per_page: 20,
+		per_page: 24,
 	});
-
+``
 	useEffect(() => {
 		if (!shopId) {
 			setErrorShop("Shop id not found.");
@@ -55,7 +55,7 @@ const ShopProducts = () => {
 
 		const load = async () => {
 			setLoadingShop(true);
-			setErrorShop("");
+			setErrorShop("");  
 			try {
 				const res = await getShopDetails(shopId);
 				if (res?.status === "success") {

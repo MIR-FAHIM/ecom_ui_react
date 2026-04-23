@@ -375,8 +375,9 @@ const Topbar = () => {
             </Tooltip>
 
           {/* Profile */}
-            {user ? (
+            {user && user?.user_type === 'customer' ? (
               <>
+
                 <Tooltip title={t("topbar.menu.account")}>
                   <Button
                     onClick={handleUserClick}
@@ -500,6 +501,30 @@ const Topbar = () => {
                 }}
               >
                 Login
+              </Button>
+            )}
+
+{user && user?.user_type === 'customer' ? (
+              null
+            ) : (
+              <Button
+                onClick={() => navigate("/register")}
+                startIcon={<AccountCircleIcon />}
+                sx={{
+                  ml: 0.4,
+                  color: colors.gray[100],
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  border: `1px solid ${border}`,
+                  background: glass,
+                  sx: {
+                    px: 1.6,
+                    "&:hover": { background: glass2 },
+                  },
+                }}
+              >
+                Register
               </Button>
             )}
           </Box>
