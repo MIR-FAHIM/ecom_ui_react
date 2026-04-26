@@ -614,7 +614,7 @@ const Topbar = () => {
           onClick={handleCategoryOpen}
           endIcon={<KeyboardArrowDownIcon />}
           sx={{
-            borderRadius: 2.5,
+            borderRadius: 1,
             textTransform: "none",
             fontWeight: 700,
             fontSize: 13,
@@ -640,7 +640,7 @@ const Topbar = () => {
           PaperProps={{
             sx: {
               mt: 1,
-              borderRadius: 3,
+              borderRadius: 1,
               minWidth: 220,
               border: `1px solid ${border}`,
               background: colors.primary[500],

@@ -1,4 +1,15 @@
 import React from "react";
+// Scroll to top on route change
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Dashboard from "./scenes/admin_panel/dashboard";
@@ -89,6 +100,7 @@ import SettledAmountHistory from "./scenes/seller_panel/accounting/settled_amoun
 const AppRouter = () => {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/admin-login" element={<AdminLogin />}></Route>

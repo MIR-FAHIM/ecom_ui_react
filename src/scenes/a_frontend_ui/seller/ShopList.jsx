@@ -79,11 +79,11 @@ const ShopCard = ({ shop, onView }) => {
 							fontWeight: 600,
 						}}
 					>
-						{initialsFromName(shop?.name)}
+						{initialsFromName(shop?.shop_name)}
 					</Avatar>
 					<Box sx={{ minWidth: 0 }}>
 							<Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 14 }} noWrap>
-							{shop?.name || "Shop"}
+							{shop?.shop_name || "Shop"}
 						</Typography>
 						<Typography variant="body2" sx={{ color: colors.gray[300] }} noWrap>
 							{shop?.description || "No description"}

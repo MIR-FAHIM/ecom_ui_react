@@ -522,7 +522,7 @@ export default function SmartProductCard({
                         borderRadius: 4,
                         border: `1px solid ${divider}`,
                         background: surface,
-                        boxShadow: `0 10px 22px ${accentSoft}`,
+                       
                         transition: "transform 120ms ease, box-shadow 180ms ease, filter 180ms ease",
                         "&:hover": {
                           transform: "translateY(-1px) scale(1.03)",

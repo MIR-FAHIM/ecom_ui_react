@@ -23,6 +23,17 @@ export const getRelatedProducts = async (id) => {
     return [];
   }
 }
+export const getSellerFeaturedByProduct = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/seller-featured-by-product?product_id=${id}`,
+       
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getSellerFeaturedByProduct:", error);
+    return [];
+  }
+}
 export const addRelatedProducts = async (data) => {
   try {
     const response = await axiosInstance.post(`/api/related-products/add`, data);

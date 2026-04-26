@@ -105,7 +105,7 @@ const GeneralInfoBar = ({ shop, loading, error }) => {
 					</Avatar>
 					<Box>
 						<Typography variant="h6" sx={{ fontWeight: 600 }}>
-							{shop?.name || "Shop"}
+							{shop?.shop_name	 || "Shop"}
 						</Typography>
 						<Typography variant="body2" sx={{ color: colors.gray[300], fontWeight: 600 }}>
 							{shop?.slug ? `@${shop.slug}` : ""}

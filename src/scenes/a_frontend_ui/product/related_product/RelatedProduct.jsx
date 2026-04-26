@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-import { getRelatedProducts } from "../../../../api/controller/admin_controller/product/product_varient_controller";
+import { getRelatedProducts, getSellerFeaturedByProduct } from "../../../../api/controller/admin_controller/product/product_varient_controller";
 import { image_file_url } from "../../../../api/config";
 import { tokens } from "../../../../theme";
 
@@ -45,10 +45,9 @@ const RelatedProduct = ({ productId }) => {
 		const load = async () => {
 			setLoading(true);
 			try {
-				const res = await getRelatedProducts(productId);
-				const payload = res?.data ?? res ?? {};
-				const list = safeArray(payload?.items);
-				const products = list.map((x) => x?.related_product).filter(Boolean);
+				const res = await getSellerFeaturedByProduct(productId);
+				// API returns { status, message, data: [products] }
+				const products = safeArray(res?.data);
 				if (mounted) setItems(products);
 			} catch (e) {
 				console.error("RelatedProduct error:", e);
