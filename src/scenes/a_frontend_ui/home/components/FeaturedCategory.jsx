@@ -122,7 +122,7 @@ export default function FeaturedCategory({ categories = [] }) {
               disabled={!scrollState.canLeft}
               sx={{
                 position: "absolute",
-                left: -6,
+                left: -20,
                 top: "50%",
                 transform: "translateY(-50%)",
                 bgcolor: "#fff",

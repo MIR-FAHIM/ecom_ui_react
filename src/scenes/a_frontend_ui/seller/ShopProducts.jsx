@@ -138,7 +138,7 @@ const ShopProducts = () => {
 						<GeneralInfoBar shop={shop} loading={loadingShop} error={errorShop} />
 					</Grid>
 
-					<Grid item xs={12} md={8} lg={9}>
+					<Grid item xs={12} md={9} lg={9}>
 						<Card
 							sx={{
 								background: colors.primary[400],
@@ -174,7 +174,7 @@ const ShopProducts = () => {
 
 								<Grid container spacing={2}>
 									{products.map((product) => (
-										<Grid item xs={12} sm={6} md={2} lg={2} key={product?.id ?? Math.random()}>
+										<Grid item xs={12} sm={6} md={2} lg={3} key={product?.id ?? Math.random()}>
 											<ProductCard
 												product={product}
 												onView={(p) => {

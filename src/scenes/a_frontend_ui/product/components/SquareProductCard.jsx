@@ -155,11 +155,11 @@ export default function SquareProductCard({ product, onView, size = 140 }) {
                 "&:hover": { textDecoration: "underline" },
               }}
             >
-              {product.shop?.name || "View shop"}
+              {product.shop?.shop_name || "View shop"}
             </Link>
           ) : (
             <Typography variant="caption" sx={{ fontWeight: 600, fontSize: 11, color: accent }}>
-              {product?.shop?.name || "Unknown"}
+              {product?.shop?.shop_name || "Unknown"}
             </Typography>
           )}
         </Box>

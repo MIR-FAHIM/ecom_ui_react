@@ -684,15 +684,17 @@ const ProductDetail = () => {
         {/* ────── BOTTOM SECTION: Description, Reviews, Related ────── */}
         <Box sx={{ mt: 4 }}>
           <Grid container spacing={3}>
+                 <Grid item xs={12} md={4}>
+              <RelatedProduct productId={product?.id} />
+            </Grid>
             <Grid item xs={12} md={8}>
+              
               <ProductDescription description={product?.description} ink={ink} subInk={subInk} />
               <Box sx={{ mt: 3 }}>
                 <ProductReview productId={product?.id} />
               </Box>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <RelatedProduct productId={product?.id} />
-            </Grid>
+       
           </Grid>
         </Box>
 

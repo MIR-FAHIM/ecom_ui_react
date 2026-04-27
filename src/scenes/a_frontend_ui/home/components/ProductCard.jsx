@@ -527,7 +527,7 @@ export default function SmartProductCard({
                         "&:hover": {
                           transform: "translateY(-1px) scale(1.03)",
                           filter: "saturate(1.05)",
-                          boxShadow: `0 14px 28px ${accentSoft}`,
+                        
                         },
                         "&.Mui-disabled": { opacity: 0.5 },
                         position: "relative",

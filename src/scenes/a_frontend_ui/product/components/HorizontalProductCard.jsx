@@ -180,7 +180,7 @@ export default function HorizontalProductCard({ product, onView }) {
                   "&:hover": { textDecoration: "underline" },
                 }}
               >
-                {product.shop?.name || "View shop"}
+                {product.shop?.shop_name || "View shop"}
               </Link>
             ) : (
               <Typography
@@ -196,7 +196,7 @@ export default function HorizontalProductCard({ product, onView }) {
                   whiteSpace: "nowrap",
                 }}
               >
-                {product.shop?.name || " "}
+                {product.shop?.shop_name || " "}
               </Typography>
             )}
           </Box>
