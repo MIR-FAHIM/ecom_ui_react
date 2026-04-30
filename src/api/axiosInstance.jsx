@@ -28,13 +28,14 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
 
-    // 🔐 Token issues
     if (status === 401) {
       localStorage.removeItem("authToken");
       sessionStorage.removeItem("authToken");
 
-      // redirect to login
-      window.location.href = "/login";
+      // ✅ Only redirect if the request opted in
+      if (error.config?.redirectOnUnauth) {
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(error);

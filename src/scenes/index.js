@@ -64,6 +64,8 @@ import CategoryWiseProductHome from "./a_frontend_ui/home/components/category_wi
 
 import Wish from "./a_frontend_ui/wish/Wish";
 import Privacy from "./a_frontend_ui/pages/Privacy";
+import Blogs from "./a_frontend_ui/blogs/Blogs";
+import FlashSale from "./a_frontend_ui/flash_sale/FlashSale";
 
 //seller panel
 import SellerDashboard from "./seller_panel/dashboard/index";
@@ -137,7 +139,8 @@ SellerRegister,
   ShopProducts,
   Brand,
   CategoryWiseProductHome,
-
+  Blogs,
+  FlashSale,
 
   // seller panel
 

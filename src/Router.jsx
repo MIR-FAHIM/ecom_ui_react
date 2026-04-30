@@ -80,6 +80,8 @@ import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
 import SearchedProductList from "./scenes/a_frontend_ui/search_product/SearchedProductList";
 import PosManagement from "./scenes/admin_panel/pos_management/PosManagement";
 import RequireAdmin from "./components/RequireAdmin";
+import Blogs from "./scenes/a_frontend_ui/blogs/Blogs";
+import FlashSale from "./scenes/a_frontend_ui/flash_sale/FlashSale";
 
 // Seller panel
 import SellerLayout from "./scenes/seller_panel/layout/SellerLayout";
@@ -128,6 +130,8 @@ const AppRouter = () => {
           <Route path="order-success" element={<OrderSuccessPage />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="terms" element={<Terms />} />
+          <Route path="blogs" element={<Blogs />} />
+          <Route path="flash-sale" element={<FlashSale />} />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="proceed-order" element={<ProceedOrder />} />

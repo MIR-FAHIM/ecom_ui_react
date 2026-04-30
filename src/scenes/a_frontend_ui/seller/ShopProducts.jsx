@@ -29,6 +29,8 @@ const ShopProducts = () => {
 	const { id } = useParams();
 	const [searchParams] = useSearchParams();
 
+	const productListRef = React.useRef(null);
+
 	const shopId = useMemo(
 		() => id || searchParams.get("shop_id") || searchParams.get("id"),
 		[id, searchParams]
@@ -113,6 +115,12 @@ const ShopProducts = () => {
 			...prev,
 			current_page: value,
 		}));
+		// Scroll to product list top after page change
+		setTimeout(() => {
+			if (productListRef.current) {
+				productListRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+			}
+		}, 100);
 	};
 
 	return (
@@ -172,6 +180,7 @@ const ShopProducts = () => {
 									</Typography>
 								) : null}
 
+								<div ref={productListRef} />
 								<Grid container spacing={2}>
 									{products.map((product) => (
 										<Grid item xs={12} sm={6} md={2} lg={3} key={product?.id ?? Math.random()}>

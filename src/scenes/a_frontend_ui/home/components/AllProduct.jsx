@@ -10,6 +10,8 @@ const safeArray = (x) => (Array.isArray(x) ? x : []);
 const AllProduct = ({ categoryId = "" }) => {
 	const navigate = useNavigate();
 
+	const allProductRef = React.useRef(null);
+
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
@@ -55,12 +57,18 @@ const AllProduct = ({ categoryId = "" }) => {
 	const handlePageChange = (_e, value) => {
 		setPage(value);
 		loadProducts({ page: value, per_page: perPage, search: query, category: categoryId || "" });
+		setTimeout(() => {
+			if (allProductRef.current) {
+				allProductRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+			}
+		}, 100);
 	};
 
 	const list = useMemo(() => products, [products]);
 
 	return (
 		<Box sx={{ my: 4 }}>
+			<div ref={allProductRef} />
 			<Box id="all-products">
 				<FeaturedTitle>All Products</FeaturedTitle>
 			</Box>

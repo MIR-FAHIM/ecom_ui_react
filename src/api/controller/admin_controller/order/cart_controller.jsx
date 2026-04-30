@@ -4,7 +4,7 @@ import axiosInstance from '../../../axiosInstance.jsx'
 
 export const getCartByUser = async (id) => {
   try {
-    const response = await axiosInstance.get(`/api/carts/active/${id}`);
+    const response = await axiosInstance.get(`/api/carts/active/${id}`,  { redirectOnUnauth: false });
     return response.data;
   } catch (error) {
     console.error("Error fetching getCartByUser:", error);
@@ -19,6 +19,7 @@ export const deleteItem = async (id) => {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
         },
+        redirectOnUnauth: true
       }     
     );
     return response.data;
@@ -55,6 +56,7 @@ export const addCart = async (data) => {
           'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
           // 'Content-Type': 'multipart/form-data', // If you're sending FormData
         },
+        redirectOnUnauth: true
       }  
     );
     return response.data;

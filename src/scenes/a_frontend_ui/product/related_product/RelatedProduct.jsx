@@ -38,6 +38,53 @@ const RelatedProduct = ({ productId }) => {
 	const [loading, setLoading] = useState(false);
 	const [items, setItems] = useState([]);
 
+	// Discount calculation helpers (from HorizontalProductCard)
+	const getDiscountInfo = (product) => {
+		const now = Date.now() / 1000;
+		const pd = product?.product_discount;
+		if (pd) {
+			const d = Number(pd.discount ?? 0);
+			if (d > 0) {
+				const start = Number(pd.start_date || pd.discount_start_date || 0);
+				const end = Number(pd.end_date || pd.discount_end_date || 0);
+				if (start && start > now) return null;
+				if (end && end < now) return null;
+				return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
+			}
+		}
+		const d = Number(product?.discount ?? 0);
+		if (d <= 0) return null;
+		const type = String(product?.discount_type ?? "").toLowerCase();
+		const start = Number(product?.discount_start_date || 0);
+		const end = Number(product?.discount_end_date || 0);
+		if (start && start > now) return null;
+		if (end && end < now) return null;
+		return { amount: d, type };
+	};
+
+	const getPrice = (product) => Number(product?.unit_price ?? product?.price ?? 0);
+	const getSalePrice = (product, price, discountInfo) => {
+		const s = Number(product?.sale_price ?? 0);
+		if (s > 0) return s;
+		if (discountInfo && price > 0) {
+			if (discountInfo.type === "percent") return Math.round(price - (price * discountInfo.amount) / 100);
+			const flat = price - discountInfo.amount;
+			return flat > 0 ? flat : 0;
+		}
+		return 0;
+	};
+	const getDiscountLabel = (discountInfo, hasSale, price, salePrice) => {
+		if (discountInfo) {
+			if (discountInfo.type === "percent") return `${discountInfo.amount}% OFF`;
+			return `${money(discountInfo.amount)} OFF`;
+		}
+		if (hasSale && price > 0) {
+			const pct = Math.round(((price - salePrice) / price) * 100);
+			return pct > 0 ? `${pct}% OFF` : null;
+		}
+		return null;
+	};
+
 	useEffect(() => {
 		if (!productId) return;
 		let mounted = true;
@@ -90,7 +137,12 @@ const RelatedProduct = ({ productId }) => {
 				) : (
 					<Stack spacing={1}>
 						{items.map((p) => {
-							
+							const price = getPrice(p);
+							const discountInfo = getDiscountInfo(p);
+							const salePrice = getSalePrice(p, price, discountInfo);
+							const hasSale = salePrice > 0 && salePrice < price;
+							const displayPrice = hasSale ? salePrice : price;
+							const discountLabel = getDiscountLabel(discountInfo, hasSale, price, salePrice);
 							return (
 								<Box
 									key={p?.id}
@@ -131,9 +183,28 @@ const RelatedProduct = ({ productId }) => {
 										>
 											{p?.name || "Unnamed product"}
 										</Typography>
-										<Typography variant="caption" sx={{ color: subInk, fontWeight: 600 }}>
-											{money(p?.unit_price ?? p?.price ?? 0)}
-										</Typography>
+										<Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
+											<Typography variant="caption" sx={{  fontWeight: 700 }}>
+												{money(displayPrice)}
+											</Typography>
+											{hasSale && (
+												<Typography
+													variant="caption"
+													color="text.secondary"
+													sx={{ textDecoration: "line-through", fontSize: 10, ml: 0.5 }}
+												>
+													{money(price)}
+												</Typography>
+											)}
+											{discountLabel && (
+												<Typography
+													variant="caption"
+													sx={{ fontWeight: 700, fontSize: 9, color: theme.palette.error.main, ml: 0.5 }}
+												>
+													{discountLabel}
+												</Typography>
+											)}
+										</Box>
 									</Box>
 								</Box>
 							);
