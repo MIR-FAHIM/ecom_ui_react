@@ -151,6 +151,7 @@ const SearchProduct = ({
 	return (
 		<Box ref={wrapperRef} sx={{ position: "relative", width: fullWidth ? "100%" : "auto" }}>
 			<TextField
+			borderRadius={1}
 				size={size}
 				placeholder={placeholder}
 				value={query}
@@ -170,7 +171,7 @@ const SearchProduct = ({
 								<IconButton
 									onClick={handleSearch}
 									sx={{
-										borderRadius: 3,
+										borderRadius: 1,
 										border: `1px solid ${border}`,
 										background: theme.palette.secondary.main,
 										color: colors.gray[900],
@@ -184,7 +185,7 @@ const SearchProduct = ({
 									size="small"
 									variant="contained"
 									sx={{
-										borderRadius: 999,
+										borderRadius: 1,
 										textTransform: "none",
 										fontWeight: 600,
 										fontSize: 13,
@@ -202,7 +203,7 @@ const SearchProduct = ({
 				}}
 				sx={{
 					"& .MuiOutlinedInput-root": {
-						borderRadius: 999,
+						borderRadius: 1,
 						background: glass,
 						border: `1px solid ${border}`,
 						"& fieldset": { borderColor: "transparent" },
@@ -224,7 +225,7 @@ const SearchProduct = ({
 						left: 0,
 						right: 0,
 						zIndex: 10,
-						borderRadius: 3,
+						borderRadius: 1,
 						border: `1px solid ${border}`,
 						background: glass,
 						backdropFilter: "blur(10px)",
@@ -239,7 +240,7 @@ const SearchProduct = ({
 							<Typography variant="caption" sx={{ fontWeight: 700, px: 1, py: 0.5, color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}>
 								<HistoryIcon sx={{ fontSize: 14 }} /> Recent Searches
 							</Typography>
-							<Stack spacing={0.5} sx={{ mb: 1 }}>
+					1		<Stack spacing={0.5} sx={{ mb: 1 }}>
 								{recentSearches.map((term, i) => (
 									<Box
 										key={i}
@@ -309,7 +310,7 @@ const SearchProduct = ({
 												gap: 1.2,
 												alignItems: "center",
 												p: 1,
-												borderRadius: 2,
+												borderRadius: 1,
 												border: `1px solid ${border}`,
 												background: glass2,
 												cursor: "pointer",

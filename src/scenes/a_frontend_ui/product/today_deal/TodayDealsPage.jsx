@@ -1,0 +1,273 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+	Box,
+	Breadcrumbs,
+	Chip,
+	CircularProgress,
+	Container,
+	Divider,
+	InputAdornment,
+	Link,
+	Pagination,
+	Stack,
+	TextField,
+	Typography,
+	useTheme,
+} from "@mui/material";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { getTodayDealProduct } from "../../../../api/controller/admin_controller/product/product_controller";
+import SmartProductCard from "../../home/components/ProductCard";
+
+const safeArray = (x) => (Array.isArray(x) ? x : []);
+const PER_PAGE = 24;
+
+const TodayDealsPage = () => {
+	const theme = useTheme();
+	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	const pageParam = Number(searchParams.get("page") || 1);
+	const searchParam = searchParams.get("search") || "";
+
+	const [products, setProducts] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [total, setTotal] = useState(0);
+	const [lastPage, setLastPage] = useState(1);
+	const [currentPage, setCurrentPage] = useState(pageParam);
+	const [searchInput, setSearchInput] = useState(searchParam);
+	const [searchQuery, setSearchQuery] = useState(searchParam);
+
+	const loadProducts = useCallback(async (page, search) => {
+		setLoading(true);
+		try {
+			const res = await getTodayDealProduct({ page, per_page: PER_PAGE, search });
+			const payload = res?.data ?? res ?? {};
+			const list = payload?.data ?? (Array.isArray(payload) ? payload : []);
+			setProducts(safeArray(list));
+			setLastPage(Number(payload?.last_page || 1));
+			setTotal(Number(payload?.total || safeArray(list).length));
+			setCurrentPage(Number(payload?.current_page || page));
+		} catch (e) {
+			console.error("TodayDealsPage load error:", e);
+			setProducts([]);
+			setLastPage(1);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		setCurrentPage(pageParam);
+		setSearchQuery(searchParam);
+		setSearchInput(searchParam);
+		loadProducts(pageParam, searchParam);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [pageParam, searchParam]);
+
+	const handlePageChange = (_e, value) => {
+		const params = {};
+		if (value > 1) params.page = value;
+		if (searchQuery) params.search = searchQuery;
+		setSearchParams(params);
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
+
+	const handleSearchKeyDown = (e) => {
+		if (e.key === "Enter") {
+			const params = {};
+			if (searchInput.trim()) params.search = searchInput.trim();
+			setSearchParams(params);
+		}
+	};
+
+	const list = useMemo(() => products, [products]);
+	const isDark = theme.palette.mode === "dark";
+
+	return (
+		<Box sx={{ bgcolor: "background.default", minHeight: "100vh", pb: 8 }}>
+			{/* ── Page Header ── */}
+			<Box
+				sx={{
+					background: isDark
+						? "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)"
+						: "linear-gradient(135deg, #e46f4f 0%, #c7a913 100%)",
+					py: { xs: 4, md: 6 },
+					px: 2,
+					mb: 4,
+				}}
+			>
+				<Container maxWidth="xl">
+					{/* Breadcrumbs */}
+					<Breadcrumbs
+						sx={{ mb: 2, "& .MuiBreadcrumbs-separator": { color: "rgba(255,255,255,0.5)" } }}
+					>
+						<Link
+							href="/"
+							underline="hover"
+							sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "rgba(255,255,255,0.75)", fontSize: 14 }}
+						>
+							<HomeOutlinedIcon sx={{ fontSize: 16 }} />
+							Home
+						</Link>
+						<Typography sx={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>
+							Today's Deals
+						</Typography>
+					</Breadcrumbs>
+
+					{/* Title row */}
+					<Stack
+						direction={{ xs: "column", sm: "row" }}
+						alignItems={{ xs: "flex-start", sm: "center" }}
+						justifyContent="space-between"
+						spacing={2}
+					>
+						<Box>
+							<Stack direction="row" alignItems="center" spacing={1.5}>
+								<LocalOfferOutlinedIcon sx={{ color: "#fff", fontSize: 32 }} />
+								<Typography variant="h4" fontWeight={800} color="#fff" lineHeight={1.2}>
+									Today's Deals
+								</Typography>
+								<Chip
+									label="HOT"
+									size="small"
+									sx={{
+										bgcolor: "rgba(255,255,255,0.25)",
+										color: "#fff",
+										fontWeight: 800,
+										fontSize: 11,
+										letterSpacing: 1,
+									}}
+								/>
+							</Stack>
+							{!loading && total > 0 && (
+								<Typography sx={{ color: "rgba(255,255,255,0.8)", mt: 0.5, fontSize: 14 }}>
+									{total.toLocaleString()} deal{total !== 1 ? "s" : ""} available today
+								</Typography>
+							)}
+						</Box>
+
+						{/* Search */}
+						<TextField
+							placeholder="Search deals…"
+							size="small"
+							value={searchInput}
+							onChange={(e) => setSearchInput(e.target.value)}
+							onKeyDown={handleSearchKeyDown}
+							sx={{
+								minWidth: { xs: "100%", sm: 280 },
+								"& .MuiOutlinedInput-root": {
+									bgcolor: "rgba(255,255,255,0.2)",
+									borderRadius: 3,
+									color: "#fff",
+									"& fieldset": { borderColor: "rgba(255,255,255,0.35)" },
+									"&:hover fieldset": { borderColor: "rgba(255,255,255,0.65)" },
+									"&.Mui-focused fieldset": { borderColor: "#fff" },
+								},
+								"& .MuiInputBase-input::placeholder": { color: "rgba(255,255,255,0.65)" },
+							}}
+							InputProps={{
+								startAdornment: (
+									<InputAdornment position="start">
+										<SearchOutlinedIcon sx={{ color: "rgba(255,255,255,0.7)", fontSize: 20 }} />
+									</InputAdornment>
+								),
+							}}
+						/>
+					</Stack>
+				</Container>
+			</Box>
+
+			{/* ── Product Grid ── */}
+			<Container maxWidth="xl">
+				{searchQuery && (
+					<Box sx={{ mb: 3 }}>
+						<Typography variant="body2" color="text.secondary">
+							Showing results for{" "}
+							<Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
+								"{searchQuery}"
+							</Box>
+						</Typography>
+						<Divider sx={{ mt: 1 }} />
+					</Box>
+				)}
+
+				{loading ? (
+					<Box sx={{ display: "flex", justifyContent: "center", py: 12 }}>
+						<CircularProgress size={48} />
+					</Box>
+				) : list.length === 0 ? (
+					<Box sx={{ textAlign: "center", py: 12 }}>
+						<LocalOfferOutlinedIcon sx={{ fontSize: 64, color: "text.disabled", mb: 2 }} />
+						<Typography variant="h6" fontWeight={600} color="text.secondary">
+							No deals available right now.
+						</Typography>
+						{searchQuery && (
+							<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+								Try a different search term.
+							</Typography>
+						)}
+					</Box>
+				) : (
+					<>
+						<Box
+							sx={{
+								display: "grid",
+								gap: 2,
+								gridTemplateColumns: {
+									xs: "repeat(2, 1fr)",
+									sm: "repeat(3, 1fr)",
+									md: "repeat(4, 1fr)",
+									lg: "repeat(6, 1fr)",
+								},
+							}}
+						>
+							{list.map((product) => (
+								<SmartProductCard
+									key={product.id}
+									product={product}
+									onView={() => navigate(`/product/${product.id}`)}
+								/>
+							))}
+						</Box>
+
+						{lastPage > 1 && (
+							<Stack
+								direction="row"
+								justifyContent="center"
+								alignItems="center"
+								spacing={2}
+								sx={{ mt: 6 }}
+							>
+								<Typography variant="body2" color="text.secondary">
+									Page {currentPage} of {lastPage}
+								</Typography>
+								<Pagination
+									count={lastPage}
+									page={currentPage}
+									onChange={handlePageChange}
+									color="primary"
+									shape="rounded"
+									showFirstButton
+									showLastButton
+									siblingCount={1}
+									sx={{
+										"& .MuiPaginationItem-root": {
+											borderRadius: 2,
+											fontWeight: 600,
+										},
+									}}
+								/>
+							</Stack>
+						)}
+					</>
+				)}
+			</Container>
+		</Box>
+	);
+};
+
+export default TodayDealsPage;

@@ -20,6 +20,7 @@ import TodayDealBox from "./components/TodayDealBox";
 import BannerRow from "./components/BannerRow";
 
 import BestSellingProduct from "./components/BestSellingProduct";
+import MobileHome from "./mobile_view_home/MobileHome";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -52,6 +53,10 @@ const HomeP1 = () => {
     loadCategories();
   }, [loadCategories]);
 
+  if (isMobile) {
+    return <MobileHome />;
+  }
+
   return (
     <Box
       sx={{
@@ -69,18 +74,7 @@ const HomeP1 = () => {
     >
       <Container sx={{ py: { xs: 2, md: 3 } }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2.5, md: 3 } }}>
-          {isMobile ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-              <Hero />
-              <CategoryGrid categories={categories} />
-              <TodayDealProduct
-                compact
-                title="Today Deals"
-                onView={(product) => navigate(`/product/${product.id}`)}
-              />
-            </Box>
-          ) : (
-            <Box
+          <Box
               sx={{
                 display: "grid",
                 gap: 2.5,
@@ -107,7 +101,6 @@ const HomeP1 = () => {
                 </Box>
               </Box>
             </Box>
-          )}
           <FeaturedCategory categories={categories} />
            
        

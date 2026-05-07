@@ -82,6 +82,8 @@ import PosManagement from "./scenes/admin_panel/pos_management/PosManagement";
 import RequireAdmin from "./components/RequireAdmin";
 import Blogs from "./scenes/a_frontend_ui/blogs/Blogs";
 import FlashSale from "./scenes/a_frontend_ui/flash_sale/FlashSale";
+import AllProductsPage from "./scenes/a_frontend_ui/product/all_product/AllProductsPage";
+import TodayDealsPage from "./scenes/a_frontend_ui/product/today_deal/TodayDealsPage";
 
 // Seller panel
 import SellerLayout from "./scenes/seller_panel/layout/SellerLayout";
@@ -143,6 +145,8 @@ const AppRouter = () => {
           <Route path="categories" element={<AllCategory />} />
           <Route path="categories/home" element={<CategoryWiseProductHome />} />
           <Route path="search" element={<SearchedProductList />} />
+          <Route path="all-products" element={<AllProductsPage />} />
+          <Route path="today-deals" element={<TodayDealsPage />} />
 
         </Route>
 

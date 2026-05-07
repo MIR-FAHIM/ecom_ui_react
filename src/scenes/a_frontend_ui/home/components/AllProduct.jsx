@@ -55,13 +55,11 @@ const AllProduct = ({ categoryId = "" }) => {
 	}, [categoryId, page]);
 
 	const handlePageChange = (_e, value) => {
-		setPage(value);
-		loadProducts({ page: value, per_page: perPage, search: query, category: categoryId || "" });
-		setTimeout(() => {
-			if (allProductRef.current) {
-				allProductRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-			}
-		}, 100);
+		const params = new URLSearchParams();
+		if (value > 1) params.set("page", value);
+		if (query) params.set("search", query);
+		const qs = params.toString();
+		navigate(`/all-products${qs ? `?${qs}` : ""}`);
 	};
 
 	const list = useMemo(() => products, [products]);

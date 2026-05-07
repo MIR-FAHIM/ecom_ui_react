@@ -118,7 +118,7 @@ const RelatedProduct = ({ productId }) => {
 	return (
 		<Card
 			sx={{
-				borderRadius: 4,
+				borderRadius: 1,
 				border: `1px solid ${border}`,
 				background: surface,
 			}}

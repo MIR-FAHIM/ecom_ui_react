@@ -73,7 +73,7 @@ const ProductReview = ({ productId }) => {
 	return (
 		<Card
 			sx={{
-				borderRadius: 4,
+				borderRadius: 1,
 				border: `1px solid ${border}`,
 				background: surface,
 				mb: 2,
@@ -99,7 +99,7 @@ const ProductReview = ({ productId }) => {
 										sx={{
 											width: 34,
 											height: 34,
-											borderRadius: 2,
+											borderRadius: 1,
 											background: theme.palette.secondary.main,
 											color: colors.gray[900],
 											fontWeight: 600,

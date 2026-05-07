@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Box, CircularProgress, IconButton, Typography, useTheme } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { getTodayDealProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import SmartProductCard from "./ProductCard";
 import FeaturedTitle from "./FeaturedTitle";
@@ -9,6 +10,7 @@ const safeArray = (x) => (Array.isArray(x) ? x : []);
 
 export default function TodayDealBox({ onView }) {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [index, setIndex] = useState(0);
@@ -68,7 +70,16 @@ export default function TodayDealBox({ onView }) {
           <CircularProgress size={22} />
         ) : current ? (
           <Box sx={{ width: "100%" }}>
-            <FeaturedTitle>Todays Deal</FeaturedTitle>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
+              <FeaturedTitle mb={0}>Todays Deal</FeaturedTitle>
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 700, cursor: "pointer", color: "primary.main", whiteSpace: "nowrap" }}
+                onClick={() => navigate("/today-deals")}
+              >
+                See all
+              </Typography>
+            </Box>
             <SmartProductCard product={current} onView={() => onView?.(current)} />
           </Box>
         ) : (

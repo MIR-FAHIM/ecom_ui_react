@@ -61,6 +61,8 @@ import ShopProducts from "./a_frontend_ui/seller/ShopProducts";
 import Brand from "./a_frontend_ui/brand/brand";
 import AllCategory from "./a_frontend_ui/category/AllCategory";
 import CategoryWiseProductHome from "./a_frontend_ui/home/components/category_wise_product_home";
+import AllProductsPage from "./a_frontend_ui/product/all_product/AllProductsPage";
+import TodayDealsPage from "./a_frontend_ui/product/today_deal/TodayDealsPage";
 
 import Wish from "./a_frontend_ui/wish/Wish";
 import Privacy from "./a_frontend_ui/pages/Privacy";
@@ -141,6 +143,8 @@ SellerRegister,
   CategoryWiseProductHome,
   Blogs,
   FlashSale,
+  AllProductsPage,
+  TodayDealsPage,
 
   // seller panel
 

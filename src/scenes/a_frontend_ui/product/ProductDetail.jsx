@@ -431,14 +431,14 @@ const ProductDetail = () => {
                   {product?.brand?.name && (
                     <>
                       <Divider orientation="vertical" flexItem />
-                      <Chip size="small" label={product.brand.name} sx={{ borderRadius: 1.5, fontWeight: 600, bgcolor: surface2, border: `1px solid ${divider}` }} />
+                      <Chip size="small" label={product.brand.name} sx={{ borderRadius: 1, fontWeight: 600, bgcolor: surface2, border: `1px solid ${divider}` }} />
                     </>
                   )}
                 </Stack>
               </Box>
 
               {/* ── Price block ── */}
-              <Card sx={{ borderRadius: 2.5, border: `1px solid ${divider}`, bgcolor: surface, overflow: "visible" }}>
+              <Card sx={{ borderRadius: 1, border: `1px solid ${divider}`, bgcolor: surface, overflow: "visible" }}>
                 <Box sx={{ p: 2.5 }}>
                   <Stack direction="row" alignItems="flex-end" spacing={1.5}>
                     <Typography sx={{ fontSize: 32, fontWeight: 800, color: "#6366f1", lineHeight: 1 }}>
@@ -458,7 +458,7 @@ const ProductDetail = () => {
                           bgcolor: "#fef2f2",
                           color: "#dc2626",
                           border: "1px solid #fecaca",
-                          borderRadius: 1.5,
+                          borderRadius: 1,
                         }}
                       />
                     )}
@@ -495,7 +495,7 @@ const ProductDetail = () => {
                           sx={{
                             width: 28,
                             height: 28,
-                            borderRadius: "50%",
+                            borderRadius: 1,
                             bgcolor: c,
                             border: `2px solid ${divider}`,
                             cursor: "pointer",
@@ -527,7 +527,7 @@ const ProductDetail = () => {
                               label={opt.label}
                               onClick={() => setSelectedAttributeId(opt.id)}
                               sx={{
-                                borderRadius: 1.5,
+                                borderRadius: 1,
                                 fontWeight: 600,
                                 bgcolor: selected ? "#6366f1" : surface2,
                                 color: selected ? "#fff" : ink,
@@ -554,7 +554,7 @@ const ProductDetail = () => {
                     display: "inline-flex",
                     alignItems: "center",
                     border: `1px solid ${divider}`,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     bgcolor: surface2,
                     overflow: "hidden",
                   }}
@@ -594,7 +594,7 @@ const ProductDetail = () => {
                     onClick={toggleWishlist}
                     sx={{
                       border: `1px solid ${divider}`,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       bgcolor: inWish ? "#fef2f2" : surface2,
                       "&:hover": { bgcolor: surface },
                     }}
@@ -613,7 +613,7 @@ const ProductDetail = () => {
                   onClick={handleAddToCart}
                   startIcon={busyCart ? <CircularProgress size={16} color="inherit" /> : <ShoppingCartOutlinedIcon />}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1,
                     py: 1.4,
                     textTransform: "none",
                     fontWeight: 700,
@@ -633,7 +633,7 @@ const ProductDetail = () => {
                   disabled={!inStock}
                   onClick={handleAddToCart}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1,
                     py: 1.4,
                     textTransform: "none",
                     fontWeight: 700,
@@ -650,7 +650,7 @@ const ProductDetail = () => {
               <Divider />
 
               {/* ── Shipping & Meta info ── */}
-              <Card sx={{ borderRadius: 2.5, border: `1px solid ${divider}`, bgcolor: surface }}>
+              <Card sx={{ borderRadius: 1, border: `1px solid ${divider}`, bgcolor: surface }}>
                 <Box sx={{ p: 2 }}>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: ink, mb: 1.5 }}>Delivery & Policies</Typography>
                   <Grid container spacing={1.5}>
@@ -661,7 +661,7 @@ const ProductDetail = () => {
                       ...(product?.est_shipping_days != null ? [{ label: "Est. delivery", value: `${product.est_shipping_days} day(s)`, icon: "📅" }] : []),
                     ].map((item) => (
                       <Grid item xs={6} key={item.label}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.2, borderRadius: 2, bgcolor: surface2, border: `1px solid ${divider}` }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.2, borderRadius: 1, bgcolor: surface2, border: `1px solid ${divider}` }}>
                           <Typography sx={{ fontSize: 18 }}>{item.icon}</Typography>
                           <Box>
                             <Typography variant="caption" sx={{ color: subInk, fontWeight: 600, display: "block", lineHeight: 1.2 }}>

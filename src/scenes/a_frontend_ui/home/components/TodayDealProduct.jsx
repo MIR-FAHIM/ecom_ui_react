@@ -100,7 +100,7 @@ export default function TodayDealProduct({ onView, compact = false, title }) {
     };
 
     const handleSeeAll = () => {
-        navigate("/home#all-products");
+        navigate("/today-deals");
     };
 
     useEffect(() => {

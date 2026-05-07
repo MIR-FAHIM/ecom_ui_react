@@ -18,7 +18,7 @@ const ProductDescription = ({ description, ink, subInk }) => {
 	const descriptionText = useMemo(() => htmlToText(description), [description]);
 
 	return (
-		<Card sx={{ borderRadius: 2.5, border: "1px solid", borderColor: "divider" }}>
+		<Card sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
 			<CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
 				<Typography variant="subtitle1" sx={{ fontWeight: 700, color: titleColor, mb: 1.5 }}>
 					Description
