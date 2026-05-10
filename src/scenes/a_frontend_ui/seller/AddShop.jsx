@@ -30,6 +30,7 @@ const AddShop = () => {
 	const [form, setForm] = useState({
 		user_id: defaultUserId || "",
 		name: "",
+		shop_name: "",
 		slug: "",
 		description: "",
 		phone: "",
@@ -44,7 +45,8 @@ const AddShop = () => {
 
 	const validate = () => {
 		if (!form.user_id) return "User ID is required";
-		if (!form.name.trim()) return "Shop name is required";
+		if (!form.name.trim()) return "Name is required";
+		if (!form.shop_name.trim()) return "Shop name is required";
 		if (!form.slug.trim()) return "Slug is required";
 		if (!form.description.trim()) return "Description is required";
 		if (!form.phone.trim()) return "Phone is required";
@@ -68,6 +70,7 @@ const AddShop = () => {
 			const fd = new FormData();
 			fd.append("user_id", localStorage.getItem("userId"));
 			fd.append("name", form.name);
+			fd.append("shop_name", form.shop_name);
 			fd.append("slug", form.slug);
 			fd.append("description", form.description);
 			fd.append("phone", form.phone);
@@ -79,6 +82,7 @@ const AddShop = () => {
 				setForm((prev) => ({
 					...prev,
 					name: "",
+					shop_name: "",
 					slug: "",
 					description: "",
 					phone: "",
@@ -139,9 +143,18 @@ const AddShop = () => {
 									<TextField
 										fullWidth
 										size="small"
-										label="Shop Name"
+										label="Name"
 										value={form.name}
 										onChange={(e) => update({ name: e.target.value })}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										fullWidth
+										size="small"
+										label="Shop Name"
+										value={form.shop_name}
+										onChange={(e) => update({ shop_name: e.target.value })}
 									/>
 								</Grid>
 

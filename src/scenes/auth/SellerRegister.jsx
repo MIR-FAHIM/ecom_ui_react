@@ -23,6 +23,7 @@ import { registerSeller } from "../../api/controller/admin_controller/user_contr
 
 const initialForm = {
   name: "",
+  shop_name: "",
   email: "",
   password: "",
   user_type: "seller",
@@ -141,6 +142,22 @@ const SellerRegister = () => {
                     label="Full Name"
                     name="name"
                     value={form.name}
+                    onChange={handleChange}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonOutlineIcon fontSize="small" color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Shop Name"
+                    name="shop_name"
+                    value={form.shop_name}
                     onChange={handleChange}
                     fullWidth
                     InputProps={{

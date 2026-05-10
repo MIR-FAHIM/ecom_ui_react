@@ -148,6 +148,42 @@ const SearchProduct = ({
 		[]
 	);
 
+	const getDiscountInfo = (product) => {
+		const pd = product?.product_discount;
+		if (pd) {
+			const d = Number(pd.discount ?? 0);
+			if (d > 0) return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
+		}
+		const d = Number(product?.discount ?? 0);
+		if (d <= 0) return null;
+		return { amount: d, type: String(product?.discount_type ?? "").toLowerCase() };
+	};
+
+	const getPrice = (product) => Number(product?.unit_price ?? product?.price ?? 0);
+
+	const getSalePrice = (product, price, discountInfo) => {
+		const s = Number(product?.sale_price ?? 0);
+		if (s > 0) return s;
+		if (discountInfo && price > 0) {
+			if (discountInfo.type === "percent") return Math.round(price - (price * discountInfo.amount) / 100);
+			const flat = price - discountInfo.amount;
+			return flat > 0 ? flat : 0;
+		}
+		return 0;
+	};
+
+	const getDiscountLabel = (discountInfo, hasSale, price, salePrice) => {
+		if (discountInfo) {
+			if (discountInfo.type === "percent") return `${discountInfo.amount}% OFF`;
+			return `${money(discountInfo.amount)} OFF`;
+		}
+		if (hasSale && price > 0) {
+			const pct = Math.round(((price - salePrice) / price) * 100);
+			return pct > 0 ? `${pct}% OFF` : null;
+		}
+		return null;
+	};
+
 	return (
 		<Box ref={wrapperRef} sx={{ position: "relative", width: fullWidth ? "100%" : "auto" }}>
 			<TextField
@@ -341,9 +377,31 @@ const SearchProduct = ({
 												>
 													{product?.name || "Unnamed product"}
 												</Typography>
-												<Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: 12 }}>
-													{money(product?.unit_price ?? product?.price ?? 0)}
-												</Typography>
+												{(() => {
+													const price = getPrice(product);
+													const discountInfo = getDiscountInfo(product);
+													const salePrice = getSalePrice(product, price, discountInfo);
+													const hasSale = salePrice > 0 && salePrice < price;
+													const displayPrice = hasSale ? salePrice : price;
+													const discountLabel = getDiscountLabel(discountInfo, hasSale, price, salePrice);
+													return (
+														<Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", mt: 0.25 }}>
+															<Typography variant="caption" sx={{ fontWeight: 700, fontSize: 12 }}>
+																{money(displayPrice)}
+															</Typography>
+															{hasSale && (
+																<Typography variant="caption" sx={{ textDecoration: "line-through", color: "text.secondary", fontSize: 10 }}>
+																	{money(price)}
+																</Typography>
+															)}
+															{discountLabel && (
+																<Typography variant="caption" sx={{ fontWeight: 700, fontSize: 9, color: theme.palette.error.main }}>
+																	{discountLabel}
+																</Typography>
+															)}
+														</Box>
+													);
+												})()}
 											</Box>
 										</Box>
 									))}

@@ -23,7 +23,7 @@ const Register = () => {
   }, [location.state?.phoneNumber]);
 
   const handleRegister = async () => {
-    if (!name || !email || !mobile || !password) {
+    if (!name || !mobile || !password) {
       if (!mobile) {
         setMsg('Phone number is required');
       } else {
@@ -137,7 +137,7 @@ return (
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label="Email Address"
+              label="Email (optional)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

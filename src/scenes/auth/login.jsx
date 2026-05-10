@@ -254,6 +254,16 @@ const Login = () => {
               margin="normal"
               autoComplete="email"
               autoFocus
+              sx={{
+                "& input:focus::placeholder": {
+                  color: "#000",
+                  opacity: 1,
+                },
+                "& label.Mui-focused": {
+                  color: "#000",
+                },
+              }}
+              inputProps={{ placeholder: "Email or phone number" }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -271,6 +281,15 @@ const Login = () => {
               fullWidth
               margin="normal"
               autoComplete="current-password"
+                   sx={{
+                "& input:focus::placeholder": {
+                  color: "#000",
+                  opacity: 1,
+                },
+                "& label.Mui-focused": {
+                  color: "#000",
+                },
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

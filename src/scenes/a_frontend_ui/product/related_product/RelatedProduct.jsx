@@ -40,25 +40,16 @@ const RelatedProduct = ({ productId }) => {
 
 	// Discount calculation helpers (from HorizontalProductCard)
 	const getDiscountInfo = (product) => {
-		const now = Date.now() / 1000;
 		const pd = product?.product_discount;
 		if (pd) {
 			const d = Number(pd.discount ?? 0);
 			if (d > 0) {
-				const start = Number(pd.start_date || pd.discount_start_date || 0);
-				const end = Number(pd.end_date || pd.discount_end_date || 0);
-				if (start && start > now) return null;
-				if (end && end < now) return null;
 				return { amount: d, type: String(pd.discount_type ?? "").toLowerCase() };
 			}
 		}
 		const d = Number(product?.discount ?? 0);
 		if (d <= 0) return null;
 		const type = String(product?.discount_type ?? "").toLowerCase();
-		const start = Number(product?.discount_start_date || 0);
-		const end = Number(product?.discount_end_date || 0);
-		if (start && start > now) return null;
-		if (end && end < now) return null;
 		return { amount: d, type };
 	};
 
