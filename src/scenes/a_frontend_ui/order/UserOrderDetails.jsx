@@ -26,7 +26,14 @@ import {
   DialogContent,
   DialogActions,
   useTheme,
+  Stepper,
+  Step,
+  StepLabel,
+  StepConnector,
+  stepConnectorClasses,
+  LinearProgress,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import {
   ArrowBack,
   Print,
@@ -37,11 +44,82 @@ import {
   Payments,
   ReceiptLong,
   ShoppingBag,
+  CheckCircle,
+  Inventory2,
+  HourglassTop,
+  CancelOutlined,
+  StarBorder,
+  InfoOutlined,
 } from "@mui/icons-material";
 import { getOrderDetails } from "../../../api/controller/admin_controller/order/order_controller";
 import { tokens } from "../../../theme";
 import ProductReviewForm from "../review/review_page.jsx";
-import { blueGrey } from "@mui/material/colors";
+
+// ─── Styled stepper connector ───────────────────────────────────────────────
+const ColorConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: { top: 18 },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: "linear-gradient(95deg, #7c3aed 0%, #a78bfa 100%)",
+    },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: "linear-gradient(95deg, #7c3aed 0%, #a78bfa 100%)",
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    backgroundColor: theme.palette.mode === "dark" ? "#3f3f46" : "#e4e4e7",
+    borderRadius: 1,
+  },
+}));
+
+const ColorStepIconRoot = styled("div")(({ theme, ownerState }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#3f3f46" : "#e4e4e7",
+  zIndex: 1,
+  color: "#fff",
+  width: 38,
+  height: 38,
+  display: "flex",
+  borderRadius: "50%",
+  justifyContent: "center",
+  alignItems: "center",
+  ...(ownerState.active && {
+    backgroundImage: "linear-gradient(136deg, #7c3aed 0%, #a78bfa 100%)",
+    boxShadow: "0 4px 10px 0 rgba(124,58,237,.4)",
+  }),
+  ...(ownerState.completed && {
+    backgroundImage: "linear-gradient(136deg, #7c3aed 0%, #a78bfa 100%)",
+  }),
+}));
+
+function ColorStepIcon({ active, completed, icon, icons }) {
+  return (
+    <ColorStepIconRoot ownerState={{ active, completed }}>
+      {icons[String(icon)]}
+    </ColorStepIconRoot>
+  );
+}
+
+
+const ORDER_STEPS = [
+  { label: "Order Placed", icon: <ReceiptLong sx={{ fontSize: 18 }} /> },
+  { label: "Processing", icon: <HourglassTop sx={{ fontSize: 18 }} /> },
+  { label: "Packaging", icon: <Inventory2 sx={{ fontSize: 18 }} /> },
+  { label: "On the Way", icon: <LocalShipping sx={{ fontSize: 18 }} /> },
+  { label: "Delivered", icon: <CheckCircle sx={{ fontSize: 18 }} /> },
+];
+
+const STATUS_TO_STEP = {
+  "new order": 0,
+  processing: 1,
+  packaging: 2,
+  "on the way": 3,
+  delivered: 4,
+  completed: 4,
+};
 
 const UserOrderDetails = () => {
   const { id } = useParams();
@@ -49,10 +127,13 @@ const UserOrderDetails = () => {
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const isDark = theme.palette.mode === "dark";
   const border = theme.palette.divider || colors.primary[200];
-  const pageBg = theme.palette.mode === "dark" ? colors.primary[500] : "#faf8ff";
-  const surface = theme.palette.mode === "dark" ? colors.primary[400] : "#ffffff";
-  const surface2 = theme.palette.mode === "dark" ? colors.primary[300] : "#f3efff";
+  const pageBg = isDark ? colors.primary[500] : "#f5f3ff";
+  const surface = isDark ? colors.primary[400] : "#ffffff";
+  const surface2 = isDark ? colors.primary[300] : "#f3efff";
+  const accentGradient = "linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)";
+  const cardShadow = isDark ? "none" : "0 4px 24px rgba(124,58,237,0.08)";
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -86,20 +167,26 @@ const UserOrderDetails = () => {
 
     const map = {
       "new order": { label: "New Order", tone: "info", icon: <ReceiptLong fontSize="small" /> },
-      processing: { label: "Processing", tone: "warning", icon: <ShoppingBag fontSize="small" /> },
+      processing: { label: "Processing", tone: "warning", icon: <HourglassTop fontSize="small" /> },
+      packaging: { label: "Packaging", tone: "warning", icon: <Inventory2 fontSize="small" /> },
       "on the way": { label: "On the Way", tone: "info", icon: <LocalShipping fontSize="small" /> },
-      delivered: { label: "Delivered", tone: "success", icon: <LocalShipping fontSize="small" /> },
-      completed: { label: "Completed", tone: "success", icon: <LocalShipping fontSize="small" /> },
-      cancelled: { label: "Cancelled", tone: "error", icon: <ReceiptLong fontSize="small" /> },
+      delivered: { label: "Delivered", tone: "success", icon: <CheckCircle fontSize="small" /> },
+      completed: { label: "Completed", tone: "success", icon: <CheckCircle fontSize="small" /> },
+      cancelled: { label: "Cancelled", tone: "error", icon: <CancelOutlined fontSize="small" /> },
     };
 
     return (
       map[s] || {
         label: order?.status || "Unknown",
         tone: "default",
-        icon: <ReceiptLong fontSize="small" />,
+        icon: <InfoOutlined fontSize="small" />,
       }
     );
+  }, [order?.status]);
+
+  const activeStep = useMemo(() => {
+    const s = normalizeStatus(order?.status);
+    return STATUS_TO_STEP[s] ?? -1;
   }, [order?.status]);
 
   const paymentMeta = useMemo(() => {
@@ -158,32 +245,23 @@ const UserOrderDetails = () => {
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          p: { xs: 2, md: 3 },
-          display: "grid",
-          placeItems: "center",
-          minHeight: "70vh",
-          background: theme.palette.background?.default || colors.primary[500],
-        }}
-      >
-        <Card
+      <Box sx={{ p: { xs: 2, md: 3 }, minHeight: "70vh" }}>
+        <LinearProgress
           sx={{
-            width: { xs: "100%", sm: 460 },
-            borderRadius: 4,
-            overflow: "hidden",
-            background: surface,
-            boxShadow: theme.palette.mode === "dark" ? "none" : "0 14px 28px rgba(65, 40, 120, 0.08)",
+            borderRadius: 1,
+            mb: 3,
+            "& .MuiLinearProgress-bar": { backgroundImage: accentGradient },
           }}
-        >
-          <CardContent sx={{ p: 3 }}>
+        />
+        <Card sx={{ borderRadius: 1, background: surface, boxShadow: cardShadow }}>
+          <CardContent sx={{ p: 4 }}>
             <Stack spacing={2} alignItems="center">
-              <CircularProgress />
-              <Typography fontWeight={800} sx={{ letterSpacing: 0.2 }}>
-                Loading order vibes...
+              <CircularProgress sx={{ color: "#7c3aed" }} />
+              <Typography fontWeight={700} fontSize={18}>
+                Loading order details…
               </Typography>
-              <Typography variant="body2" color="text.secondary" align="center">
-                Fetching the latest details for this order. Hang tight.
+              <Typography variant="body2" color="text.secondary">
+                Hang tight while we fetch your order.
               </Typography>
             </Stack>
           </CardContent>
@@ -195,120 +273,121 @@ const UserOrderDetails = () => {
   if (!order) {
     return (
       <Box sx={{ p: { xs: 2, md: 3 } }}>
-        <Alert
-          severity="error"
-          sx={{
-            borderRadius: 3,
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
+        <Alert severity="error" sx={{ borderRadius: 1, mb: 2 }}>
           Order not found
         </Alert>
         <Button
           variant="contained"
           startIcon={<ArrowBack />}
           onClick={() => navigate(-1)}
-          sx={{ mt: 2, borderRadius: 3, textTransform: "none", fontWeight: 700, color: surface, background: theme.palette.secondary.main }}  
+          sx={{
+            borderRadius: 1,
+            textTransform: "none",
+            fontWeight: 700,
+            backgroundImage: accentGradient,
+            boxShadow: "0 4px 14px rgba(124,58,237,0.35)",
+          }}
         >
-          Back
+          Go Back
         </Button>
       </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        p: { xs: 2, md: 3 },
-        minHeight: "100vh",
-        background: pageBg,
-      }}
-    >
-      {/* Header */}
+    <Box sx={{ p: { xs: 1.5, md: 3 }, minHeight: "100vh", background: pageBg }}>
+
+      {/* ── HEADER CARD ───────────────────────────────────────────── */}
       <Card
         sx={{
-          mb: 2,
-          borderRadius: 4,
+          mb: 2.5,
+          borderRadius: 1,
           overflow: "hidden",
           background: surface,
-          boxShadow: theme.palette.mode === "dark" ? "none" : "0 16px 32px rgba(65, 40, 120, 0.1)",
+          boxShadow: cardShadow,
+          border: isDark ? `1px solid ${border}` : "none",
         }}
       >
+        {/* gradient accent bar */}
+        <Box sx={{ height: 4, backgroundImage: accentGradient }} />
+
         <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }} justifyContent="space-between">
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            alignItems={{ sm: "center" }}
+            justifyContent="space-between"
+          >
+            {/* left: back + title */}
             <Stack direction="row" spacing={2} alignItems="center">
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<ArrowBack />}
-                onClick={() => navigate(-1)}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 2,
-                  borderColor: "transparent",
-                  background: blueGrey[500],
-                }}
-              >
-                Back
-              </Button>
+              <Tooltip title="Go back">
+                <IconButton
+                  onClick={() => navigate(-1)}
+                  size="small"
+                  sx={{
+                    borderRadius: 1,
+                    background: surface2,
+                    "&:hover": { backgroundImage: accentGradient, color: "#fff" },
+                    transition: "all 200ms ease",
+                  }}
+                >
+                  <ArrowBack fontSize="small" />
+                </IconButton>
+              </Tooltip>
 
               <Box>
                 <Typography
-                  variant="h4"
+                  variant="h5"
                   fontWeight={900}
-                  sx={{
-                    lineHeight: 1.05,
-                    letterSpacing: "-0.02em",
-                    color: theme.palette.secondary.main,
-                  }}
+                  sx={{ lineHeight: 1.1, letterSpacing: "-0.02em" }}
                 >
                   Order Details
                 </Typography>
-
-                <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mt: 0.6, flexWrap: "wrap" }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-                    {order.order_number}
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5, flexWrap: "wrap" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      color: "text.secondary",
+                      fontFamily: "monospace",
+                      fontSize: 12,
+                    }}
+                  >
+                    #{order.order_number}
                   </Typography>
-
                   <Chip
                     icon={statusMeta.icon}
                     label={statusMeta.label}
                     color={statusMeta.tone}
                     size="small"
-                    sx={{ borderRadius: 999, fontWeight: 600, textTransform: "capitalize" }}
+                    sx={{ borderRadius: 1, fontWeight: 700, fontSize: 11 }}
                   />
-
                   <Chip
-                    icon={<Payments fontSize="small" />}
+                    icon={<Payments sx={{ fontSize: "14px !important" }} />}
                     label={paymentMeta.label}
                     color={paymentMeta.tone}
                     variant="outlined"
                     size="small"
-                    sx={{
-                      borderRadius: 999,
-                      fontWeight: 600,
-                      borderColor: "transparent",
-                      background: surface2,
-                    }}
+                    sx={{ borderRadius: 1, fontWeight: 700, fontSize: 11 }}
                   />
                 </Stack>
               </Box>
             </Stack>
 
-            <Stack direction="row" spacing={1} justifyContent={{ xs: "flex-start", md: "flex-end" }}>
-              <Tooltip title="Print this order">
+            {/* right: actions */}
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Print order">
                 <IconButton
                   onClick={() => window.print()}
+                  size="small"
                   sx={{
-                    borderRadius: 3,
-                    background: surface,
-                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 8px 16px rgba(65, 40, 120, 0.1)",
+                    borderRadius: 1,
+                    background: surface2,
+                    "&:hover": { backgroundImage: accentGradient, color: "#fff" },
+                    transition: "all 200ms ease",
                   }}
                 >
-                  <Print />
+                  <Print fontSize="small" />
                 </IconButton>
               </Tooltip>
             </Stack>
@@ -316,206 +395,188 @@ const UserOrderDetails = () => {
         </CardContent>
       </Card>
 
-      {/* Quick stats row */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              height: "100%",
-              borderRadius: 4,
-              background: surface,
-              overflow: "hidden",
-              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
-            }}
-          >
-            <CardContent sx={{ p: 2.2 }}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 3,
-                    display: "grid",
-                    placeItems: "center",
-                    background: surface2,
-                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
-                  }}
-                >
-                  <CalendarMonth fontSize="small" />
-                </Box>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                    ORDER DATE
-                  </Typography>
-                  <Typography fontWeight={800} sx={{ mt: 0.4 }}>
-                    {formatDate(order.created_at)}
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* ── ORDER PROGRESS STEPPER ────────────────────────────────── */}
+      {activeStep >= 0 && (
+        <Card
+          sx={{
+            mb: 2.5,
+            borderRadius: 1,
+            overflow: "hidden",
+            background: surface,
+            boxShadow: cardShadow,
+            border: isDark ? `1px solid ${border}` : "none",
+          }}
+        >
+          <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 700, letterSpacing: 1, color: "text.secondary", mb: 2.5, textTransform: "uppercase" }}
+            >
+              Order Progress
+            </Typography>
+            <Stepper
+              alternativeLabel
+              activeStep={activeStep}
+              connector={<ColorConnector />}
+            >
+              {ORDER_STEPS.map((step, idx) => (
+                <Step key={step.label} completed={idx <= activeStep}>
+                  <StepLabel
+                    StepIconComponent={(props) =>
+                      ColorStepIcon({
+                        ...props,
+                        icons: Object.fromEntries(
+                          ORDER_STEPS.map((s, i) => [String(i + 1), s.icon])
+                        ),
+                      })
+                    }
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: idx <= activeStep ? 800 : 500,
+                        color: idx <= activeStep ? "#7c3aed" : "text.secondary",
+                      }}
+                    >
+                      {step.label}
+                    </Typography>
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </CardContent>
+        </Card>
+      )}
 
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              height: "100%",
-              borderRadius: 4,
-              background: surface,
-              overflow: "hidden",
-              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
-            }}
-          >
-            <CardContent sx={{ p: 2.2 }}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 3,
-                    display: "grid",
-                    placeItems: "center",
-                    background: surface2,
-                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
-                  }}
-                >
-                  <ReceiptLong fontSize="small" />
-                </Box>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                    ITEMS
-                  </Typography>
-                  <Typography fontWeight={900} sx={{ mt: 0.4, fontSize: 22 }}>
-                    {itemsCount || orderItems.length || 0}
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              height: "100%",
-              borderRadius: 4,
-              background: surface,
-              overflow: "hidden",
-              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
-            }}
-          >
-            <CardContent sx={{ p: 2.2 }}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 3,
-                    display: "grid",
-                    placeItems: "center",
-                    background: surface2,
-                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
-                  }}
-                >
-                  <Payments fontSize="small" />
-                </Box>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                    TOTAL
-                  </Typography>
-                  <Typography
-                    fontWeight={950}
+      {/* ── QUICK STAT CARDS ──────────────────────────────────────── */}
+      <Grid container spacing={2} sx={{ mb: 2.5 }}>
+        {[
+          {
+            icon: <CalendarMonth sx={{ fontSize: 20 }} />,
+            label: "ORDER DATE",
+            value: formatDate(order.created_at),
+            gradient: "linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)",
+          },
+          {
+            icon: <ShoppingBag sx={{ fontSize: 20 }} />,
+            label: "ITEMS",
+            value: String(itemsCount || orderItems.length || 0),
+            gradient: "linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)",
+          },
+          {
+            icon: <Payments sx={{ fontSize: 20 }} />,
+            label: "ORDER TOTAL",
+            value: formatCurrency(order.total),
+            gradient: "linear-gradient(135deg, #059669 0%, #34d399 100%)",
+            highlight: true,
+          },
+        ].map((stat) => (
+          <Grid item xs={12} sm={4} key={stat.label}>
+            <Card
+              sx={{
+                borderRadius: 1,
+                background: surface,
+                boxShadow: cardShadow,
+                border: isDark ? `1px solid ${border}` : "none",
+                transition: "transform 150ms ease, box-shadow 150ms ease",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: isDark ? "none" : "0 8px 32px rgba(124,58,237,0.14)",
+                },
+              }}
+            >
+              <CardContent sx={{ p: 2.2 }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
                     sx={{
-                      mt: 0.4,
-                      fontSize: 22,
-                      color: theme.palette.secondary.main,
+                      width: 46,
+                      height: 46,
+                      borderRadius: 1,
+                      display: "grid",
+                      placeItems: "center",
+                      backgroundImage: stat.gradient,
+                      color: "#fff",
+                      flexShrink: 0,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                     }}
                   >
-                    {formatCurrency(order.total)}
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
+                    {stat.icon}
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{ fontWeight: 700, letterSpacing: 0.8, color: "text.secondary" }}
+                    >
+                      {stat.label}
+                    </Typography>
+                    <Typography
+                      fontWeight={900}
+                      sx={{
+                        mt: 0.2,
+                        fontSize: stat.highlight ? 20 : 15,
+                        color: stat.highlight ? "#7c3aed" : "text.primary",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
-      <Grid container spacing={2}>
-        {/* Customer Information */}
+      {/* ── CUSTOMER & SHIPPING ───────────────────────────────────── */}
+      <Grid container spacing={2} sx={{ mb: 2.5 }}>
+        {/* Customer */}
         <Grid item xs={12} md={6}>
           <Card
             sx={{
               height: "100%",
-              borderRadius: 4,
+              borderRadius: 1,
               background: surface,
-              overflow: "hidden",
-              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
+              boxShadow: cardShadow,
+              border: isDark ? `1px solid ${border}` : "none",
             }}
           >
             <CardContent sx={{ p: 2.5 }}>
-              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 3,
-                    display: "grid",
-                    placeItems: "center",
-                    background: surface2,
-                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
-                  }}
-                >
-                  <Person fontSize="small" />
-                </Box>
-                <Typography variant="h6" fontWeight={900}>
-                  Customer
-                </Typography>
-              </Stack>
+              <SectionHeader icon={<Person />} title="Customer" gradient={accentGradient} />
+              <Divider sx={{ mb: 2, opacity: 0.15 }} />
 
-              <Divider sx={{ mb: 2, opacity: 0.22 }} />
-
-              <Stack spacing={1.7}>
-                <Stack direction="row" spacing={1.6} alignItems="center">
+              <Stack spacing={2}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
                   <Avatar
                     sx={{
-                      width: 40,
-                      height: 40,
-                      fontWeight: 600,
-                      borderRadius: 3,
-                      background: theme.palette.secondary.main,
-                      color: colors.gray[900],
-                      boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
+                      width: 44,
+                      height: 44,
+                      fontWeight: 700,
+                      fontSize: 16,
+                      borderRadius: 1,
+                      backgroundImage: accentGradient,
+                      color: "#fff",
+                      boxShadow: "0 4px 10px rgba(124,58,237,0.3)",
                     }}
                   >
                     {getInitials(order.customer_name)}
                   </Avatar>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                      NAME
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.8, color: "text.secondary" }}>
+                      FULL NAME
                     </Typography>
-                    <Typography fontWeight={850} noWrap>
+                    <Typography fontWeight={800} sx={{ mt: 0.1 }}>
                       {order.customer_name || "N/A"}
                     </Typography>
                   </Box>
                 </Stack>
 
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                        PHONE
-                      </Typography>
-                      <Typography fontWeight={800}>{order.customer_phone || "N/A"}</Typography>
-                    </Box>
+                <Grid container spacing={1.5}>
+                  <Grid item xs={6}>
+                    <InfoBlock label="PHONE" value={order.customer_phone || "N/A"} surface2={surface2} />
                   </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                        USER ID
-                      </Typography>
-                      <Typography fontWeight={800}>{order.user_id ?? "N/A"}</Typography>
-                    </Box>
+                  <Grid item xs={6}>
+                    <InfoBlock label="USER ID" value={String(order.user_id ?? "N/A")} surface2={surface2} />
                   </Grid>
                 </Grid>
               </Stack>
@@ -523,90 +584,67 @@ const UserOrderDetails = () => {
           </Card>
         </Grid>
 
-        {/* Shipping Information */}
+        {/* Shipping */}
         <Grid item xs={12} md={6}>
           <Card
             sx={{
               height: "100%",
-              borderRadius: 4,
+              borderRadius: 1,
               background: surface,
-              overflow: "hidden",
-              boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 24px rgba(65, 40, 120, 0.08)",
+              boxShadow: cardShadow,
+              border: isDark ? `1px solid ${border}` : "none",
             }}
           >
             <CardContent sx={{ p: 2.5 }}>
-              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+              <SectionHeader
+                icon={<LocationOn />}
+                title="Shipping"
+                gradient="linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)"
+              />
+              <Divider sx={{ mb: 2, opacity: 0.15 }} />
+
+              <Stack spacing={1.5}>
                 <Box
                   sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 3,
-                    display: "grid",
-                    placeItems: "center",
+                    p: 1.5,
+                    borderRadius: 1,
                     background: surface2,
-                    boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
+                    border: isDark ? `1px solid ${border}` : "1px solid #ede9fe",
                   }}
                 >
-                  <LocationOn fontSize="small" />
-                </Box>
-                <Typography variant="h6" fontWeight={900}>
-                  Shipping
-                </Typography>
-              </Stack>
-
-              <Divider sx={{ mb: 2, opacity: 0.22 }} />
-
-              <Stack spacing={1.7}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.8, color: "text.secondary" }}>
                     ADDRESS
                   </Typography>
-                  <Typography fontWeight={800} sx={{ mt: 0.3 }}>
+                  <Typography fontWeight={700} sx={{ mt: 0.3 }}>
                     {order.shipping_address || "N/A"}
                   </Typography>
                 </Box>
 
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={4}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                        ZONE
-                      </Typography>
-                      <Typography fontWeight={800}>{order.zone || "N/A"}</Typography>
-                    </Box>
+                <Grid container spacing={1.5}>
+                  <Grid item xs={4}>
+                    <InfoBlock label="ZONE" value={order.zone || "N/A"} surface2={surface2} />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                        DISTRICT
-                      </Typography>
-                      <Typography fontWeight={800}>{order.district || "N/A"}</Typography>
-                    </Box>
+                  <Grid item xs={4}>
+                    <InfoBlock label="DISTRICT" value={order.district || "N/A"} surface2={surface2} />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
-                        AREA
-                      </Typography>
-                      <Typography fontWeight={800}>{order.area || "N/A"}</Typography>
-                    </Box>
+                  <Grid item xs={4}>
+                    <InfoBlock label="AREA" value={order.area || "N/A"} surface2={surface2} />
                   </Grid>
                 </Grid>
 
                 {order.note ? (
                   <Box
                     sx={{
-                      mt: 0.5,
-                      p: 1.4,
-                      borderRadius: 3,
-                      background: surface2,
-                      boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.1)",
+                      p: 1.5,
+                      borderRadius: 1,
+                      background: isDark ? "#422006" : "#fffbeb",
+                      border: "1px solid #fbbf24",
                     }}
                   >
-                    <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.8, color: "text.secondary" }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.8, color: "#d97706" }}>
                       NOTE
                     </Typography>
-                    <Typography sx={{ mt: 0.5, fontWeight: 700 }}>{order.note}</Typography>
+                    <Typography sx={{ mt: 0.3, fontWeight: 600, fontSize: 13 }}>{order.note}</Typography>
                   </Box>
                 ) : null}
               </Stack>
@@ -615,65 +653,45 @@ const UserOrderDetails = () => {
         </Grid>
       </Grid>
 
-      {/* Order Items */}
+      {/* ── ORDER ITEMS TABLE ─────────────────────────────────────── */}
       <Card
         sx={{
-          mt: 2,
-          borderRadius: 4,
+          mb: 2.5,
+          borderRadius: 1,
           overflow: "hidden",
           background: surface,
-          boxShadow: theme.palette.mode === "dark" ? "none" : "0 14px 28px rgba(65, 40, 120, 0.08)",
+          boxShadow: cardShadow,
+          border: isDark ? `1px solid ${border}` : "none",
         }}
       >
-        <Box
-          sx={{
-            px: 2.5,
-            py: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-          }}
-        >
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 3,
-                display: "grid",
-                placeItems: "center",
-                background: surface2,
-                boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
-              }}
-            >
-              <ShoppingBag fontSize="small" />
-            </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={950} sx={{ lineHeight: 1.05 }}>
-                Order Items
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, mt: 0.2 }}>
-                {orderItems.length ? `${orderItems.length} products` : "No items"}
-              </Typography>
-            </Box>
-          </Stack>
+        <Box sx={{ px: 2.5, py: 2 }}>
+          <SectionHeader
+            icon={<ShoppingBag />}
+            title="Order Items"
+            gradient="linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)"
+            subtitle={orderItems.length ? `${orderItems.length} product${orderItems.length > 1 ? "s" : ""}` : "No items"}
+          />
         </Box>
 
-        <Divider sx={{ opacity: 0.22 }} />
+        <Divider sx={{ opacity: 0.12 }} />
 
         {orderItems.length > 0 ? (
-          <TableContainer sx={{ maxHeight: 520 }}>
-            <Table stickyHeader sx={{ borderCollapse: "separate", borderSpacing: 0 }}>
-              <TableHead
-                sx={{
-                  "& th": {
-                    fontWeight: 600,
-                    background: surface2,
-                  },
-                }}
-              >
-                <TableRow>
+          <TableContainer>
+            <Table sx={{ minWidth: 600 }}>
+              <TableHead>
+                <TableRow
+                  sx={{
+                    "& th": {
+                      background: surface2,
+                      fontWeight: 700,
+                      fontSize: 11,
+                      letterSpacing: 0.8,
+                      color: "text.secondary",
+                      textTransform: "uppercase",
+                      py: 1.4,
+                    },
+                  }}
+                >
                   <TableCell>Product</TableCell>
                   <TableCell>SKU</TableCell>
                   <TableCell align="center">Unit Price</TableCell>
@@ -684,189 +702,224 @@ const UserOrderDetails = () => {
                 </TableRow>
               </TableHead>
 
-              <TableBody
-                sx={{
-                  "& td": { borderBottom: `1px solid}` },
-                }}
-              >
-                {orderItems.map((item, idx) => {
-                  const isEven = idx % 2 === 0;
-
-                  return (
-                    <TableRow
-                      key={item.id ?? `${item.sku}-${idx}`}
-                      sx={{
-                        background: isEven ? surface2 : "transparent",
-                        transition: "transform 120ms ease, background 200ms ease",
-                        "&:hover": {
-                          background: surface2,
-                        },
-                      }}
-                    >
-                      <TableCell>
-                        <Typography fontWeight={900} sx={{ letterSpacing: -0.1 }}>
-                          {item.product_name}
-                        </Typography>
-                        {item.variant ? (
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.2, fontWeight: 700 }}>
-                            {item.variant}
-                          </Typography>
-                        ) : null}
-                      </TableCell>
-
-                      <TableCell>
-                        <Typography sx={{ fontWeight: 600 }}>{item.sku || "N/A"}</Typography>
-                      </TableCell>
-
-                      <TableCell align="center">
-                        <Typography sx={{ fontWeight: 600 }}>{formatCurrency(item.unit_price)}</Typography>
-                      </TableCell>
-
-                      <TableCell align="center">
-                        <Chip
-                          label={item.qty}
-                          size="small"
+              <TableBody>
+                {orderItems.map((item, idx) => (
+                  <TableRow
+                    key={item.id ?? `${item.sku}-${idx}`}
+                    sx={{
+                      "&:hover": { background: surface2 },
+                      transition: "background 150ms ease",
+                      "& td": { borderBottom: `1px solid ${border}`, py: 1.4 },
+                    }}
+                  >
+                    <TableCell>
+                      <Stack direction="row" spacing={1.5} alignItems="center">
+                        <Avatar
+                          variant="rounded"
+                          src={item.image || undefined}
                           sx={{
-                            borderRadius: 999,
-                            fontWeight: 600,
-                            background: surface,
-                            border: "none",
+                            width: 40,
+                            height: 40,
+                            borderRadius: 1,
+                            backgroundImage: accentGradient,
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: 13,
                           }}
-                        />
-                      </TableCell>
+                        >
+                          {(item.product_name || "?")[0].toUpperCase()}
+                        </Avatar>
+                        <Box>
+                          <Typography fontWeight={800} fontSize={13} sx={{ lineHeight: 1.2 }}>
+                            {item.product_name}
+                          </Typography>
+                          {item.variant ? (
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                              {item.variant}
+                            </Typography>
+                          ) : null}
+                        </Box>
+                      </Stack>
+                    </TableCell>
 
-                      <TableCell align="right">
-                        <Typography sx={{ fontWeight: 700 }}>
-                          {formatCurrency(item.line_total ?? Number(item.unit_price || 0) * Number(item.qty || 0))}
-                        </Typography>
-                      </TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontFamily: "monospace", fontWeight: 600, color: "text.secondary", fontSize: 11 }}
+                      >
+                        {item.sku || "—"}
+                      </Typography>
+                    </TableCell>
 
+                    <TableCell align="center">
+                      <Typography variant="body2" fontWeight={700}>
+                        {formatCurrency(item.unit_price)}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell align="center">
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 30,
+                          height: 30,
+                          borderRadius: 1,
+                          backgroundImage: accentGradient,
+                          color: "#fff",
+                          fontWeight: 800,
+                          fontSize: 13,
+                        }}
+                      >
+                        {item.qty}
+                      </Box>
+                    </TableCell>
+
+                    <TableCell align="right">
+                      <Typography fontWeight={800} sx={{ color: "#7c3aed" }}>
+                        {formatCurrency(
+                          item.line_total ?? Number(item.unit_price || 0) * Number(item.qty || 0)
+                        )}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell align="center">
+                      <Chip
+                        label={(item.status || "pending").toString()}
+                        size="small"
+                        color={normalizeStatus(item.status) === "pending" ? "warning" : "success"}
+                        sx={{ borderRadius: 1, fontWeight: 700, fontSize: 11, textTransform: "capitalize" }}
+                      />
+                    </TableCell>
+
+                    {isOrderCompleted ? (
                       <TableCell align="center">
-                        <Chip
-                          label={(item.status || "pending").toString()}
+                        <Button
+                          variant="outlined"
                           size="small"
-                          color={normalizeStatus(item.status) === "pending" ? "warning" : "success"}
-                          sx={{ borderRadius: 999, fontWeight: 600, textTransform: "capitalize" }}
-                        />
+                          startIcon={<StarBorder sx={{ fontSize: "14px !important" }} />}
+                          onClick={() => openReview(item)}
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 700,
+                            borderRadius: 1,
+                            borderColor: "#7c3aed",
+                            color: "#7c3aed",
+                            fontSize: 11,
+                            "&:hover": {
+                              backgroundImage: accentGradient,
+                              color: "#fff",
+                              borderColor: "transparent",
+                            },
+                            transition: "all 200ms ease",
+                          }}
+                        >
+                          Review
+                        </Button>
                       </TableCell>
-
-                      {isOrderCompleted ? (
-                        <TableCell align="center">
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => openReview(item)}
-                            sx={{ textTransform: "none", fontWeight: 600, color : 'success.main' }}
-                          >
-                            Add Review
-                          </Button>
-                        </TableCell>
-                      ) : null}
-                    </TableRow>
-                  );
-                })}
+                    ) : null}
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
         ) : (
-          <Box sx={{ p: 3, textAlign: "center" }}>
-            <Typography color="text.secondary" sx={{ fontWeight: 600 }}>
+          <Box sx={{ p: 4, textAlign: "center" }}>
+            <ShoppingBag sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
+            <Typography color="text.secondary" fontWeight={600}>
               No items in this order
             </Typography>
           </Box>
         )}
       </Card>
 
-      {/* Order Summary */}
+      {/* ── ORDER SUMMARY ─────────────────────────────────────────── */}
       <Card
         sx={{
-          mt: 2,
-          borderRadius: 4,
+          borderRadius: 1,
           background: surface,
           overflow: "hidden",
-          boxShadow: theme.palette.mode === "dark" ? "none" : "0 14px 28px rgba(65, 40, 120, 0.08)",
+          boxShadow: cardShadow,
+          border: isDark ? `1px solid ${border}` : "none",
         }}
       >
         <CardContent sx={{ p: 2.5 }}>
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 3,
-                display: "grid",
-                placeItems: "center",
-                background: surface2,
-                boxShadow: theme.palette.mode === "dark" ? "none" : "0 6px 12px rgba(65, 40, 120, 0.12)",
-              }}
-            >
-              <ReceiptLong fontSize="small" />
-            </Box>
-            <Typography variant="h6" fontWeight={950}>
-              Summary
-            </Typography>
-          </Stack>
-
-          <Divider sx={{ mb: 2, opacity: 0.22 }} />
+          <SectionHeader
+            icon={<ReceiptLong />}
+            title="Summary"
+            gradient="linear-gradient(135deg, #059669 0%, #34d399 100%)"
+          />
+          <Divider sx={{ mb: 2, opacity: 0.15 }} />
 
           <Grid container spacing={2}>
+            {/* Cost breakdown */}
             <Grid item xs={12} md={7}>
               <Box
                 sx={{
                   p: 2,
-                  borderRadius: 4,
+                  borderRadius: 1,
                   background: surface2,
-                  boxShadow: theme.palette.mode === "dark" ? "none" : "0 10px 20px rgba(65, 40, 120, 0.08)",
+                  border: isDark ? `1px solid ${border}` : "1px solid #ede9fe",
                 }}
               >
-                <Stack spacing={1.2}>
+                <Stack spacing={1.3}>
                   <Row label="Subtotal" value={formatCurrency(order.subtotal)} />
                   <Row label="Shipping Fee" value={formatCurrency(order.shipping_fee)} />
                   <Row
                     label="Discount"
                     value={`-${formatCurrency(order.discount)}`}
-                    valueSx={{ color: "error.main" }}
+                    valueSx={{ color: "error.main", fontWeight: 800 }}
                   />
-                  <Divider sx={{ opacity: 0.22 }} />
+                  <Divider sx={{ opacity: 0.2 }} />
                   <Row
                     label="Total"
                     value={formatCurrency(order.total)}
-                    labelSx={{ fontSize: 16, fontWeight: 700 }}
-                    valueSx={{
-                      fontSize: 18,
-                      fontWeight: 700,
-                      color: theme.palette.secondary.main,
-                    }}
+                    labelSx={{ fontSize: 15, fontWeight: 800 }}
+                    valueSx={{ fontSize: 20, fontWeight: 900, color: "#7c3aed" }}
                   />
                 </Stack>
               </Box>
             </Grid>
 
+            {/* Timeline */}
             <Grid item xs={12} md={5}>
               <Box
                 sx={{
                   p: 2,
-                  borderRadius: 4,
+                  borderRadius: 1,
                   background: surface2,
-                  boxShadow: theme.palette.mode === "dark" ? "none" : "0 10px 20px rgba(65, 40, 120, 0.08)",
+                  border: isDark ? `1px solid ${border}` : "1px solid #ede9fe",
+                  height: "100%",
                 }}
               >
-                <Typography sx={{ fontWeight: 700, mb: 1.2 }}>Timeline</Typography>
-
-                <Stack spacing={1}>
-                  <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Created" value={formatDate(order.created_at)} border={border} surface2={surface2} />
-                  <MiniMeta icon={<CalendarMonth fontSize="small" />} label="Updated" value={formatDate(order.updated_at)} border={border} surface2={surface2} />
+                <Typography sx={{ fontWeight: 800, mb: 1.5, fontSize: 13, letterSpacing: 0.5 }}>
+                  Timeline
+                </Typography>
+                <Stack spacing={1.2}>
+                  <MiniMeta
+                    icon={<CalendarMonth fontSize="small" />}
+                    label="Created"
+                    value={formatDate(order.created_at)}
+                    surface2={surface2}
+                    border={border}
+                    accentGradient={accentGradient}
+                  />
+                  <MiniMeta
+                    icon={<CalendarMonth fontSize="small" />}
+                    label="Updated"
+                    value={formatDate(order.updated_at)}
+                    surface2={surface2}
+                    border={border}
+                    accentGradient={accentGradient}
+                  />
                   <MiniMeta
                     icon={<LocalShipping fontSize="small" />}
                     label="Status"
-                    value={statusMeta.label}
-                    valueChip={{
-                      label: statusMeta.label,
-                      color: statusMeta.tone,
-                      icon: statusMeta.icon,
-                    }}
-                    border={border}
+                    valueChip={{ label: statusMeta.label, color: statusMeta.tone, icon: statusMeta.icon }}
                     surface2={surface2}
+                    border={border}
+                    accentGradient={accentGradient}
                   />
                 </Stack>
               </Box>
@@ -875,22 +928,30 @@ const UserOrderDetails = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={reviewOpen} onClose={closeReview} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          Write a review
-          {reviewProductName ? `: ${reviewProductName}` : ""}
+      {/* ── REVIEW DIALOG ─────────────────────────────────────────── */}
+      <Dialog
+        open={reviewOpen}
+        onClose={closeReview}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 1, overflow: "hidden" } }}
+      >
+        <Box sx={{ height: 4, backgroundImage: accentGradient }} />
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 18 }}>
+          Write a Review{reviewProductName ? ` — ${reviewProductName}` : ""}
         </DialogTitle>
         <DialogContent dividers>
           <ProductReviewForm
             productId={reviewProductId}
             userId={order?.user_id}
-            onSuccess={() => {
-              closeReview();
-            }}
+            onSuccess={closeReview}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={closeReview} sx={{ textTransform: "none", fontWeight: 600 }}>
+        <DialogActions sx={{ px: 3, py: 1.5 }}>
+          <Button
+            onClick={closeReview}
+            sx={{ textTransform: "none", fontWeight: 700, borderRadius: 1 }}
+          >
             Close
           </Button>
         </DialogActions>
@@ -899,47 +960,102 @@ const UserOrderDetails = () => {
   );
 };
 
-function Row({ label, value, labelSx, valueSx }) {
+// ─── Helper sub-components ───────────────────────────────────────────────────
+
+function SectionHeader({ icon, title, subtitle, gradient }) {
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
-      <Typography sx={{ fontWeight: 850, color: "text.secondary", ...labelSx }}>{label}</Typography>
-      <Typography sx={{ fontWeight: 600, ...valueSx }}>{value}</Typography>
+    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+      <Box
+        sx={{
+          width: 40,
+          height: 40,
+          borderRadius: 1.5,
+          display: "grid",
+          placeItems: "center",
+          backgroundImage: gradient,
+          color: "#fff",
+          flexShrink: 0,
+          boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+        }}
+      >
+        {React.cloneElement(icon, { sx: { fontSize: 18 } })}
+      </Box>
+      <Box>
+        <Typography variant="h6" fontWeight={900} sx={{ lineHeight: 1.1 }}>
+          {title}
+        </Typography>
+        {subtitle ? (
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {subtitle}
+          </Typography>
+        ) : null}
+      </Box>
+    </Stack>
+  );
+}
+
+function InfoBlock({ label, value, surface2 }) {
+  return (
+    <Box
+      sx={{
+        p: 1.2,
+        borderRadius: 1.5,
+        background: surface2,
+      }}
+    >
+      <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.7, color: "text.secondary" }}>
+        {label}
+      </Typography>
+      <Typography fontWeight={800} sx={{ mt: 0.2, fontSize: 13 }}>
+        {value}
+      </Typography>
     </Box>
   );
 }
 
-function MiniMeta({ icon, label, value, valueChip, border, surface2 }) {
+function Row({ label, value, labelSx, valueSx }) {
   return (
-    <Stack direction="row" spacing={1.2} alignItems="center" sx={{ minWidth: 0 }}>
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
+      <Typography sx={{ fontWeight: 700, color: "text.secondary", fontSize: 13, ...labelSx }}>
+        {label}
+      </Typography>
+      <Typography sx={{ fontWeight: 700, fontSize: 14, ...valueSx }}>{value}</Typography>
+    </Box>
+  );
+}
+
+function MiniMeta({ icon, label, value, valueChip, surface2, accentGradient }) {
+  return (
+    <Stack direction="row" spacing={1.2} alignItems="center">
       <Box
         sx={{
-          width: 34,
-          height: 34,
-          borderRadius: 3,
+          width: 32,
+          height: 32,
+          borderRadius: 1,
           display: "grid",
           placeItems: "center",
-          background: surface2,
+          backgroundImage: accentGradient,
+          color: "#fff",
           flexShrink: 0,
+          opacity: 0.85,
         }}
       >
         {icon}
       </Box>
-
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.6, color: "text.secondary" }}>
+        <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.6, color: "text.secondary" }}>
           {label}
         </Typography>
-
         {valueChip ? (
           <Chip
             icon={valueChip.icon}
             label={valueChip.label}
             color={valueChip.color}
             size="small"
-            sx={{ borderRadius: 999, fontWeight: 600, mt: 0.4 }}
+            sx={{ borderRadius: 1, fontWeight: 700, mt: 0.3, display: "flex", width: "fit-content" }}
           />
         ) : (
-          <Typography noWrap sx={{ fontWeight: 850 }}>
+          <Typography noWrap sx={{ fontWeight: 800, fontSize: 13 }}>
             {value}
           </Typography>
         )}

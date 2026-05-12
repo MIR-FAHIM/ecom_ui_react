@@ -159,7 +159,7 @@ const Cart = () => {
           sx={{
             mb: 2,
             p: 2,
-            borderRadius: 4,
+            borderRadius: 1,
             border: `1px solid ${divider}`,
             background: surface,
             backdropFilter: "blur(12px)",
@@ -174,7 +174,7 @@ const Cart = () => {
             <IconButton
               onClick={() => navigate(-1)}
               sx={{
-                borderRadius: 3,
+                borderRadius: 1,
                 border: `1px solid ${divider}`,
                 background: surface,
                 "&:hover": { background: surface2 },
@@ -207,7 +207,7 @@ const Cart = () => {
               icon={<ShoppingCartIcon />}
               label={cart?.total_items ? `${cart.total_items} items` : "0 items"}
               sx={{
-                borderRadius: 999,
+                borderRadius: 1,
                 fontWeight: 600,
                 fontSize: 12,
                 background: surface2,
@@ -219,7 +219,7 @@ const Cart = () => {
               <IconButton
                 onClick={loadCart}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   border: `1px solid ${divider}`,
                   background: surface,
                   "&:hover": { background: surface2 },
@@ -241,7 +241,7 @@ const Cart = () => {
             sx={{
               p: 4,
               textAlign: "center",
-              borderRadius: 4,
+              borderRadius: 1,
               border: `1px solid ${divider}`,
               background: surface,
               backdropFilter: "blur(12px)",
@@ -257,7 +257,7 @@ const Cart = () => {
             <Button
               sx={{
                 mt: 2,
-                borderRadius: 999,
+                borderRadius: 1,
                 textTransform: "none",
                 fontWeight: 600,
                 px: 2.5,
@@ -277,7 +277,7 @@ const Cart = () => {
             {/* Items */}
             <Paper
               sx={{
-                borderRadius: 4,
+                borderRadius: 1,
                 border: `1px solid ${divider}`,
                 background: surface,
                 backdropFilter: "blur(12px)",
@@ -300,7 +300,7 @@ const Cart = () => {
                           sx={{
                             width: 84,
                             height: 84,
-                            borderRadius: 3,
+                            borderRadius: 1,
                             overflow: "hidden",
                             border: `1px solid ${divider}`,
                             background: surface2,
@@ -336,7 +336,7 @@ const Cart = () => {
                                   size="small"
                                   label={`${it.product_attribute?.attribute?.name || "N/A"}`}
                                   sx={{
-                                    borderRadius: 999,
+                                    borderRadius: 1,
                                     fontWeight: 600,
                                     background: "transparent",
                                     border: `1px solid ${divider}`,
@@ -347,7 +347,7 @@ const Cart = () => {
                                   size="small"
                                   label={`Value: ${it.product_attribute?.value?.value || "N/A"}`}
                                   sx={{
-                                    borderRadius: 999,
+                                    borderRadius: 1,
                                     fontWeight: 600,
                                     background: surface2,
                                     border: `1px solid ${divider}`,
@@ -371,7 +371,7 @@ const Cart = () => {
                                       onClick={() => handleUpdateQty(it, it.qty - 1)}
                                       disabled={processing[it.id] || it.qty <= 1}
                                       sx={{
-                                        borderRadius: 2,
+                                        borderRadius: 1,
                                         border: `1px solid ${divider}`,
                                         background: surface,
                                         "&:hover": { background: surface2 },
@@ -385,7 +385,7 @@ const Cart = () => {
                                 <Chip
                                   label={`Qty: ${it.qty}`}
                                   sx={{
-                                    borderRadius: 999,
+                                    borderRadius: 1,
                                     fontWeight: 600,
                                     background: surface2,
                                     border: `1px solid ${divider}`,
@@ -400,7 +400,7 @@ const Cart = () => {
                                       onClick={() => handleUpdateQty(it, it.qty + 1)}
                                       disabled={processing[it.id]}
                                       sx={{
-                                        borderRadius: 2,
+                                        borderRadius: 1,
                                         border: `1px solid ${divider}`,
                                         background: surface,
                                         "&:hover": { background: surface2 },
@@ -417,7 +417,7 @@ const Cart = () => {
                                 <Chip
                                   label={`Unit: ${money(it.unit_price)}`}
                                   sx={{
-                                    borderRadius: 999,
+                                    borderRadius: 1,
                                     fontWeight: 600,
                                     background: "transparent",
                                     border: `1px solid ${divider}`,
@@ -427,7 +427,7 @@ const Cart = () => {
                                 <Chip
                                   label={`Line: ${money(it.line_total)}`}
                                   sx={{
-                                    borderRadius: 999,
+                                    borderRadius: 1,
                                     fontWeight: 600,
                                     background: "transparent",
                                     border: `1px solid ${divider}`,
@@ -445,7 +445,7 @@ const Cart = () => {
                                     onClick={() => handleDeleteItem(it)}
                                     disabled={processing[it.id]}
                                     sx={{
-                                      borderRadius: 2,
+                                      borderRadius: 1,
                                       border: `1px solid ${divider}`,
                                       background: theme.palette.mode === "dark" ? "rgba(250,92,92,0.12)" : "rgba(250,92,92,0.10)",
                                       "&:hover": {
@@ -473,7 +473,7 @@ const Cart = () => {
               sx={{
                 p: 2,
                 mt: 2,
-                borderRadius: 4,
+                borderRadius: 1,
                 border: `1px solid ${divider}`,
                 background: surface,
                 backdropFilter: "blur(12px)",
@@ -508,7 +508,7 @@ const Cart = () => {
                   onClick={loadCart}
                   startIcon={<RefreshIcon />}
                   sx={{
-                    borderRadius: 999,
+                    borderRadius: 1,
                     textTransform: "none",
                     fontWeight: 600,
                      color: colors.gray[100],
@@ -525,7 +525,7 @@ const Cart = () => {
                   onClick={() => navigate("/checkout")}
                   startIcon={<LockCheckoutIcon />}
                   sx={{
-                    borderRadius: 999,
+                    borderRadius: 1,
                     textTransform: "none",
                     fontWeight: 700,
                     px: 2.6,

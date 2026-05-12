@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Divider, IconButton, Link, Typography } from "@mui/material";
-import { Facebook, Instagram, LinkedIn, YouTube, X } from "@mui/icons-material";
+import { Facebook, Instagram, LinkedIn, YouTube, X, Description, Undo, HeadsetMic, Security } from "@mui/icons-material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import { useNavigate } from "react-router-dom";
 import { getWebsiteSetting } from "../../../api/controller/admin_controller/website_setting/website_setting_controller.jsx";
@@ -74,6 +74,47 @@ const BottomBar = () => {
           "radial-gradient(900px 480px at 12% -20%, rgba(255,198,98,0.16), transparent 60%), radial-gradient(900px 520px at 88% -30%, rgba(94,234,212,0.16), transparent 60%), linear-gradient(180deg, #14161f 0%, #0f1118 100%)",
       }}
     >
+           {/* Policy bar */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        {[
+          { icon: <Description sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Terms & Conditions", path: "/privacy" },
+          { icon: <Undo sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Return Policy", path: "/privacy" },
+          { icon: <HeadsetMic sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Support Policy", path: "/privacy" },
+          { icon: <Security sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Privacy Policy", path: "/privacy" },
+        ].map((item, idx, arr) => (
+          <Box
+            key={item.label}
+            component="button"
+            onClick={() => navigate(item.path)}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              py: 3,
+              px: 2,
+              background: "none",
+              border: "none",
+              borderRight: idx < arr.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
+              cursor: "pointer",
+              transition: "background 150ms ease",
+              "&:hover": { background: "rgba(255,255,255,0.04)" },
+            }}
+          >
+            {item.icon}
+            <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 700, textAlign: "center" }}>
+              {item.label}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
       <Box
         sx={{
           px: { xs: 3, md: 8 },
@@ -165,53 +206,29 @@ const BottomBar = () => {
 
       <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
 
+ 
+
       <Box
         sx={{
           px: { xs: 3, md: 8 },
           py: { xs: 4, md: 5 },
           display: "grid",
           gap: { xs: 3, md: 6 },
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
           alignItems: "start",
         }}
       >
-        <Box sx={sectionCard}>
-          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
-            SUPPORT
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
-            <Link component="button" onClick={() => navigate("/privacy")} sx={linkStyle}>
-              Support Policy
-            </Link>
-            <Link component="button" onClick={() => navigate("/privacy")} sx={linkStyle}>
-              Return Policy
-            </Link>
-            <Link component="button" onClick={() => navigate("/privacy")} sx={linkStyle}>
-              About Us
-            </Link>
-            <Link component="button" onClick={() => navigate("/privacy")} sx={linkStyle}>
-              Privacy Policy
-            </Link>
-            <Link component="button" onClick={() => navigate("/privacy")} sx={linkStyle}>
-              Seller Policy
-            </Link>
-            <Link component="button" onClick={() => navigate("/privacy")} sx={linkStyle}>
-              Terms & Conditions
-            </Link>
-          </Box>
-        </Box>
-
         <Box sx={sectionCard}>
           <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
             CONTACTS
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2, color: "rgba(255,255,255,0.7)" }}>
             <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Address</Typography>
-            <Typography variant="body2" sx={{ fontSize: 13 }}>Demo</Typography>
+            <Typography variant="body2" sx={{ fontSize: 13 }}>House 10, Rd No 4,PC Culture Housing, Shekhertek, Mohammadpur, Dhaka-1207</Typography>
             <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Phone</Typography>
-            <Typography variant="body2" sx={{ fontSize: 13 }}>+01 234 567 890</Typography>
+            <Typography variant="body2" sx={{ fontSize: 13 }}>+88 09611 677686</Typography>
             <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Email</Typography>
-            <Typography variant="body2" sx={{ fontSize: 13 }}>yourmail@email.com</Typography>
+            <Typography variant="body2" sx={{ fontSize: 13 }}>hi@myzoo.asia</Typography>
           </Box>
         </Box>
 
@@ -259,6 +276,66 @@ const BottomBar = () => {
               Download Delivery App
             </Link>
           </Box>
+        </Box>
+      </Box>
+
+      <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
+
+      {/* Copyright bar */}
+      <Box
+        sx={{
+          px: { xs: 3, md: 8 },
+          py: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1.5,
+          background: "rgba(0,0,0,0.25)",
+        }}
+      >
+        <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 600 }}>
+          © {new Date().getFullYear()} {brand.name}. All rights reserved.
+        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {/* Visa */}
+          <Box
+            sx={{
+              bgcolor: "#fff",
+              borderRadius: 1,
+              px: 1,
+              py: 0.4,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography sx={{ color: "#1a1f71", fontWeight: 900, fontSize: 13, letterSpacing: "-0.03em", lineHeight: 1 }}>
+              VISA
+            </Typography>
+          </Box>
+
+          {/* Mastercard */}
+          <Box
+            sx={{
+              bgcolor: "#fff",
+              borderRadius: 1,
+              px: 0.8,
+              py: 0.4,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.3,
+            }}
+          >
+            <Box sx={{ width: 16, height: 16, borderRadius: "50%", bgcolor: "#eb001b" }} />
+            <Box sx={{ width: 16, height: 16, borderRadius: "50%", bgcolor: "#f79e1b", ml: -1 }} />
+            <Typography sx={{ color: "#333", fontWeight: 800, fontSize: 10, ml: 0.5, lineHeight: 1 }}>
+              mastercard
+            </Typography>
+          </Box>
+
+         
         </Box>
       </Box>
     </Box>

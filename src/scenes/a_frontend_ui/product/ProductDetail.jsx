@@ -627,7 +627,7 @@ const ProductDetail = () => {
                 >
                   Add to Cart
                 </Button>
-                <Button
+                {/* <Button
                   fullWidth
                   variant="outlined"
                   disabled={!inStock}
@@ -644,7 +644,7 @@ const ProductDetail = () => {
                   }}
                 >
                   Buy Now
-                </Button>
+                </Button> */}
               </Stack>
 
               <Divider />

@@ -102,7 +102,8 @@ const UserOrder = () => {
                       <Button
                         size="small"
                         variant="outlined"
-                        sx={{ minWidth: 64, fontSize: 12, fontWeight: 600, borderRadius: 2, textTransform: 'none' }}
+                        sx={{ minWidth: 64, fontSize: 12, fontWeight: 600, color: ink, borderColor: border, 
+                           borderRadius: 1, textTransform: 'none' }}
                         onClick={() => navigate(`/order/${o.id}`)}
                       >
                         View

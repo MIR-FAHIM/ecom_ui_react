@@ -404,7 +404,7 @@ const ProceedOrder = () => {
         sx={{
           mb: 2,
           p: 2,
-          borderRadius: 4,
+          borderRadius: 1,
           border: `1px solid ${divider}`,
           background: surface,
           backdropFilter: "blur(12px)",
@@ -419,7 +419,7 @@ const ProceedOrder = () => {
           <IconButton
             onClick={() => navigate(-1)}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               border: `1px solid ${divider}`,
               background: surface,
               "&:hover": { background: surface2 },
@@ -457,7 +457,7 @@ const ProceedOrder = () => {
                 : "No address"
             }
             sx={{
-              borderRadius: 999,
+              borderRadius: 1,
               fontWeight: 600,
               background: surface2,
               border: `1px solid ${divider}`,
@@ -470,7 +470,7 @@ const ProceedOrder = () => {
             startIcon={<AddIcon />}
             variant="contained"
             sx={{
-              borderRadius: 999,
+              borderRadius: 1,
               textTransform: "none",
               fontWeight: 700,
               px: 2,
@@ -510,7 +510,7 @@ const ProceedOrder = () => {
           <Paper
             sx={{
               p: 2,
-              borderRadius: 4,
+              borderRadius: 1,
               border: `1px solid ${divider}`,
               background: surface,
               backdropFilter: "blur(12px)",
@@ -523,7 +523,7 @@ const ProceedOrder = () => {
                 sx={{
                   width: 38,
                   height: 38,
-                  borderRadius: 3,
+                  borderRadius: 1,
                   display: "grid",
                   placeItems: "center",
                   background: surface2,
@@ -564,7 +564,7 @@ const ProceedOrder = () => {
                       key={it.id}
                       sx={{
                         p: 1.2,
-                        borderRadius: 3,
+                        borderRadius: 1,
                         border: `1px solid ${divider}`,
                         background: surface2,
                       }}
@@ -587,7 +587,7 @@ const ProceedOrder = () => {
                                 onClick={() => handleUpdateQty(it, it.qty - 1)}
                                 disabled={processing[it.id] || it.qty <= 1}
                                 sx={{
-                                  borderRadius: 2,
+                                  borderRadius: 1,
                                   border: `1px solid ${divider}`,
                                   background: surface,
                                   "&:hover": { background: surface2 },
@@ -601,7 +601,7 @@ const ProceedOrder = () => {
                           <Chip
                             label={it.qty}
                             sx={{
-                              borderRadius: 999,
+                              borderRadius: 1,
                               fontWeight: 700,
                               background: surface,
                               border: `1px solid ${divider}`,
@@ -617,7 +617,7 @@ const ProceedOrder = () => {
                                 onClick={() => handleUpdateQty(it, it.qty + 1)}
                                 disabled={processing[it.id]}
                                 sx={{
-                                  borderRadius: 2,
+                                  borderRadius: 1,
                                   border: `1px solid ${divider}`,
                                   background: surface,
                                   "&:hover": { background: surface2 },
@@ -635,7 +635,7 @@ const ProceedOrder = () => {
                                 onClick={() => handleDeleteItem(it)}
                                 disabled={processing[it.id]}
                                 sx={{
-                                  borderRadius: 2,
+                                  borderRadius: 1,
                                   border: `1px solid ${divider}`,
                                   background:
                                     theme.palette.mode === "dark" ? "rgba(250,92,92,0.12)" : "rgba(250,92,92,0.10)",
@@ -702,7 +702,7 @@ const ProceedOrder = () => {
                   sx={{
                     mt: 2,
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       background: surface,
                       border: `1px solid ${divider}`,
                       "& fieldset": { borderColor: "transparent" },
@@ -723,7 +723,7 @@ const ProceedOrder = () => {
                     onClick={() => navigate(-1)}
                     startIcon={<ArrowBackIcon />}
                     sx={{
-                      borderRadius: 999,
+                      borderRadius: 1,
                       textTransform: "none",
                       fontWeight: 600,
                        color: colors.primary[900],
@@ -742,7 +742,7 @@ const ProceedOrder = () => {
                     startIcon={loadingCheckout ? null : <LockCheckoutIcon />}
                     sx={{
                       ml: "auto",
-                      borderRadius: 999,
+                      borderRadius: 1,
                       textTransform: "none",
                       fontWeight: 700,
                       px: 2.6,
@@ -775,7 +775,7 @@ const ProceedOrder = () => {
         maxWidth="sm"
         PaperProps={{
           sx: {
-            borderRadius: 4,
+            borderRadius: 1,
             border: `1px solid ${divider}`,
             background: surface,
             backdropFilter: "blur(14px)",
@@ -797,7 +797,7 @@ const ProceedOrder = () => {
               color: theme.palette.secondary.main,
             }}
           >
-            Add new address
+            You must add at least one address to place an order.
           </Box>
 
           <Tooltip title={addresses.length === 0 ? "Add an address to continue" : "Close"}>
@@ -805,7 +805,7 @@ const ProceedOrder = () => {
               <IconButton
                 disabled={addresses.length === 0}
                 onClick={() => setOpenAddressModal(false)}
-                sx={{ borderRadius: 3, border: `1px solid ${divider}`, background: surface }}
+                sx={{ borderRadius: 1, border: `1px solid ${divider}`, background: surface }}
               >
                 <CloseIcon fontSize="small" />
               </IconButton>
@@ -822,7 +822,7 @@ const ProceedOrder = () => {
               size="small"
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: surface,
                   border: `1px solid ${divider}`,
                   "& fieldset": { borderColor: "transparent" },
@@ -836,7 +836,7 @@ const ProceedOrder = () => {
               size="small"
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: surface,
                   border: `1px solid ${divider}`,
                   "& fieldset": { borderColor: "transparent" },
@@ -856,7 +856,7 @@ const ProceedOrder = () => {
                   disabled={loadingDivisions}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       background: surface,
                       border: `1px solid ${divider}`,
                       "& fieldset": { borderColor: "transparent" },
@@ -881,7 +881,7 @@ const ProceedOrder = () => {
                   disabled={!newDivision || loadingDistricts}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       background: surface,
                       border: `1px solid ${divider}`,
                       "& fieldset": { borderColor: "transparent" },
@@ -905,7 +905,7 @@ const ProceedOrder = () => {
               fullWidth
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: surface,
                   border: `1px solid ${divider}`,
                   "& fieldset": { borderColor: "transparent" },
@@ -922,7 +922,7 @@ const ProceedOrder = () => {
               minRows={3}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: surface,
                   border: `1px solid ${divider}`,
                   "& fieldset": { borderColor: "transparent" },
@@ -938,7 +938,7 @@ const ProceedOrder = () => {
             onClick={resetNewAddress}
             disabled={adding}
             sx={{
-              borderRadius: 999,
+              borderRadius: 1,
               textTransform: "none",
               fontWeight: 600,
                color: colors.gray[100],
@@ -957,7 +957,7 @@ const ProceedOrder = () => {
             startIcon={adding ? null : <AddIcon />}
             sx={{
               ml: "auto",
-              borderRadius: 999,
+              borderRadius: 1,
               textTransform: "none",
               fontWeight: 700,
               px: 2.4,

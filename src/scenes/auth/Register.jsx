@@ -133,7 +133,14 @@ return (
               sx={{ borderRadius: 2 }}
             />
           </Grid>
-
+ <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Mobile Number"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+            />
+          </Grid>
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -143,14 +150,7 @@ return (
             />
           </Grid>
 
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Mobile Number"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-            />
-          </Grid>
+         
 
           {/* <Grid item xs={12}>
             <TextField
@@ -198,6 +198,7 @@ return (
                 textTransform: 'none',
                 background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                color: '#fff',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #4338ca, #4f46e5)',
                 },

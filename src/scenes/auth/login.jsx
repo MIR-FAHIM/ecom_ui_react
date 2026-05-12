@@ -232,7 +232,7 @@ const Login = () => {
             )}
 
             <TextField
-              label="Email or phone"
+              label="Email or Phone Number"
               type="text"
               value={phone || email}
               onChange={(e) => {
@@ -263,7 +263,7 @@ const Login = () => {
                   color: "#000",
                 },
               }}
-              inputProps={{ placeholder: "Email or phone number" }}
+              inputProps={{ placeholder: "Email or Phone Number" }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
