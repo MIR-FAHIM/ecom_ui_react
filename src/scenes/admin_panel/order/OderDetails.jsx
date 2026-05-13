@@ -47,21 +47,23 @@ import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import jsPDF from "jspdf";
-import { getOrderDetails, updateOrderStatusPatch, assignDeliveryBoy, unassignDeliveryBoy } from "../../../api/controller/admin_controller/order/order_controller";
+import { getOrderDetails, updateOrderStatus, assignDeliveryBoy, unassignDeliveryBoy, getOrderStatusList } from "../../../api/controller/admin_controller/order/order_controller";
 import { getDeliveryMen } from "../../../api/controller/admin_controller/user_controller";
 
-/* ── Status config ── */
-const ORDER_STATUS_CONFIG = {
-  "new order":              { label: "New Order",     color: "#3b82f6", bg: "#eff6ff", icon: <ShoppingBagOutlinedIcon sx={{ fontSize: 14 }} /> },
-  "order received":         { label: "Received",      color: "#f59e0b", bg: "#fffbeb", icon: <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} /> },
-  "assigned deliveryman":   { label: "Assigned",      color: "#8b5cf6", bg: "#f5f3ff", icon: <DeliveryDiningOutlinedIcon sx={{ fontSize: 14 }} /> },
-  "on the way":             { label: "On The Way",    color: "#0ea5e9", bg: "#f0f9ff", icon: <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} /> },
-  delivered:                { label: "Delivered",      color: "#10b981", bg: "#ecfdf5", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
-  completed:                { label: "Completed",      color: "#059669", bg: "#ecfdf5", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
-  cancelled:                { label: "Cancelled",      color: "#ef4444", bg: "#fef2f2", icon: <CancelOutlinedIcon sx={{ fontSize: 14 }} /> },
-  pending:                  { label: "Pending",        color: "#f59e0b", bg: "#fffbeb", icon: <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} /> },
-  processing:               { label: "Processing",     color: "#3b82f6", bg: "#eff6ff", icon: <SettingsOutlinedIcon sx={{ fontSize: 14 }} /> },
-  shipped:                  { label: "Shipped",        color: "#8b5cf6", bg: "#f5f3ff", icon: <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} /> },
+/* ── Static style/icon lookup by normalised status name ── */
+const ORDER_STATUS_STYLE_MAP = {
+  pending:            { color: "#f59e0b", bg: "#fffbeb", icon: <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} /> },
+  confirmed:          { color: "#3b82f6", bg: "#eff6ff", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
+  processing:         { color: "#6366f1", bg: "#eef2ff", icon: <SettingsOutlinedIcon sx={{ fontSize: 14 }} /> },
+  packed:             { color: "#8b5cf6", bg: "#f5f3ff", icon: <SettingsOutlinedIcon sx={{ fontSize: 14 }} /> },
+  shipped:            { color: "#0ea5e9", bg: "#f0f9ff", icon: <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} /> },
+  "out for delivery": { color: "#f97316", bg: "#fff7ed", icon: <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} /> },
+  delivered:          { color: "#10b981", bg: "#ecfdf5", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
+  completed:          { color: "#059669", bg: "#d1fae5", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
+  cancelled:          { color: "#ef4444", bg: "#fef2f2", icon: <CancelOutlinedIcon sx={{ fontSize: 14 }} /> },
+  returned:           { color: "#f59e0b", bg: "#fffbeb", icon: <CancelOutlinedIcon sx={{ fontSize: 14 }} /> },
+  refunded:           { color: "#8b5cf6", bg: "#f5f3ff", icon: <PaymentOutlinedIcon sx={{ fontSize: 14 }} /> },
+  failed:             { color: "#dc2626", bg: "#fee2e2", icon: <CancelOutlinedIcon sx={{ fontSize: 14 }} /> },
 };
 
 const PAYMENT_STATUS_CONFIG = {
@@ -114,8 +116,6 @@ const cardSx = { borderRadius: 2.5, border: "1px solid", borderColor: "divider" 
 const headCellSx = { fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary", py: 1.5, borderBottom: "2px solid", borderColor: "divider" };
 const fieldSx = { "& .MuiOutlinedInput-root": { borderRadius: 2 }, "& .MuiInputLabel-root": { fontSize: 13 } };
 
-const ORDER_STATUSES = ["new order", "order received", "assigned deliveryman", "on the way", "delivered", "completed"];
-
 const OderDetails = () => {
   const theme = useTheme();
   const { id } = useParams();
@@ -130,6 +130,7 @@ const OderDetails = () => {
   const [selectedDeliveryManId, setSelectedDeliveryManId] = useState("");
   const [assignNote, setAssignNote] = useState("");
   const [assigning, setAssigning] = useState(false);
+  const [orderStatusList, setOrderStatusList] = useState([]);
 
   const extractErrorMessage = (value, fallback) => {
     if (typeof value === "string" && value.trim()) return value.trim();
@@ -177,12 +178,36 @@ const OderDetails = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    const loadStatuses = async () => {
+      try {
+        const res = await getOrderStatusList();
+        if (res?.status === "success" && Array.isArray(res?.data)) {
+          setOrderStatusList(res.data.filter((s) => s.is_active !== false));
+        }
+      } catch (e) {
+        console.error("Failed to load order statuses", e);
+      }
+    };
+    loadStatuses();
+  }, []);
+
+  const dynamicOrderStatusConfig = React.useMemo(() => {
+    const cfg = {};
+    orderStatusList.forEach((s) => {
+      const key = s.name.toLowerCase();
+      const style = ORDER_STATUS_STYLE_MAP[key] || { color: "#64748b", bg: "#f1f5f9" };
+      cfg[key] = { label: s.name, ...style };
+    });
+    return cfg;
+  }, [orderStatusList]);
+
   const handleUpdateStatus = async (newStatusValue) => {
-    if (!order || newStatusValue === order.status) return;
+    if (!order || newStatusValue === (order.status || "").toLowerCase()) return;
     try {
       setErrMsg("");
       setUpdatingStatus(true);
-      const response = await updateOrderStatusPatch(order.id, newStatusValue);
+      const response = await updateOrderStatus(order.id, newStatusValue);
       if (response.status === "success") {
         setOrder({ ...order, status: newStatusValue });
       } else {
@@ -339,7 +364,8 @@ const OderDetails = () => {
   }
 
   const itemsArr = Array.isArray(order.items) ? order.items : [];
-  const currentIdx = ORDER_STATUSES.indexOf(order.status);
+  const currentStatusKey = (order.status || "").toLowerCase();
+  const currentIdx = orderStatusList.findIndex((s) => s.name.toLowerCase() === currentStatusKey);
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
@@ -354,7 +380,7 @@ const OderDetails = () => {
             <Typography variant="h5" fontWeight={800}>Order Details</Typography>
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.3 }}>
               <Typography variant="body2" color="text.secondary">{order.order_number}</Typography>
-              <StatusChip status={order.status} config={ORDER_STATUS_CONFIG} />
+              <StatusChip status={currentStatusKey} config={dynamicOrderStatusConfig} />
             </Stack>
           </Box>
         </Stack>
@@ -391,7 +417,7 @@ const OderDetails = () => {
               <Stack spacing={0.5}>
                 <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 700, fontSize: 10, letterSpacing: 0.5 }}>STATUS</Typography>
                 <Stack direction="row" spacing={0.75} flexWrap="wrap">
-                  <StatusChip status={order.status} config={ORDER_STATUS_CONFIG} />
+                  <StatusChip status={currentStatusKey} config={dynamicOrderStatusConfig} />
                   <StatusChip status={order.payment_status} config={PAYMENT_STATUS_CONFIG} />
                 </Stack>
               </Stack>
@@ -408,38 +434,43 @@ const OderDetails = () => {
       <Card variant="outlined" sx={{ ...cardSx, mb: 2.5 }}>
         <CardContent>
           <SectionHeader icon={<SettingsOutlinedIcon sx={{ fontSize: 18 }} />} title="Update Status" />
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {ORDER_STATUSES.map((s, i) => {
-              const cfg = ORDER_STATUS_CONFIG[s] || {};
-              const isActive = order.status === s;
-              const isPast = currentIdx >= 0 && i < currentIdx;
-              return (
-                <Button
-                  key={s}
-                  size="small"
-                  disabled={updatingStatus || isActive}
-                  onClick={() => handleUpdateStatus(s)}
-                  startIcon={cfg.icon || null}
-                  sx={{
-                    textTransform: "capitalize",
-                    fontWeight: 700,
-                    fontSize: 12,
-                    borderRadius: 2,
-                    px: 2,
-                    minWidth: 0,
-                    border: "1.5px solid",
-                    borderColor: isActive ? cfg.color : isPast ? cfg.color + "40" : "divider",
-                    bgcolor: isActive ? cfg.bg : isPast ? cfg.bg + "80" : "transparent",
-                    color: isActive ? cfg.color : isPast ? cfg.color : "text.secondary",
-                    "&:hover": { bgcolor: cfg.bg, borderColor: cfg.color },
-                    ...(isActive && { boxShadow: `0 2px 8px ${cfg.color}30` }),
-                  }}
-                >
-                  {cfg.label || s}
-                </Button>
-              );
-            })}
-          </Stack>
+          {orderStatusList.length === 0 ? (
+            <CircularProgress size={20} sx={{ color: "#6366f1" }} />
+          ) : (
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {orderStatusList.map((s, i) => {
+                const key = s.name.toLowerCase();
+                const cfg = dynamicOrderStatusConfig[key] || { color: "#64748b", bg: "#f1f5f9" };
+                const isActive = currentStatusKey === key;
+                const isPast = currentIdx >= 0 && i < currentIdx;
+                return (
+                  <Button
+                    key={s.id}
+                    size="small"
+                    disabled={updatingStatus || isActive}
+                    onClick={() => handleUpdateStatus(key)}
+                    startIcon={cfg.icon || null}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 700,
+                      fontSize: 12,
+                      borderRadius: 2,
+                      px: 2,
+                      minWidth: 0,
+                      border: "1.5px solid",
+                      borderColor: isActive ? cfg.color : isPast ? cfg.color + "40" : "divider",
+                      bgcolor: isActive ? cfg.bg : isPast ? cfg.bg + "80" : "transparent",
+                      color: isActive ? cfg.color : isPast ? cfg.color : "text.secondary",
+                      "&:hover": { bgcolor: cfg.bg, borderColor: cfg.color },
+                      ...(isActive && { boxShadow: `0 2px 8px ${cfg.color}30` }),
+                    }}
+                  >
+                    {s.name}
+                  </Button>
+                );
+              })}
+            </Stack>
+          )}
         </CardContent>
       </Card>
 
@@ -601,7 +632,7 @@ const OderDetails = () => {
                         <Typography variant="body2" fontWeight={700}>{formatCurrency(item.line_total)}</Typography>
                       </TableCell>
                       <TableCell sx={{ borderBottom: "1px solid", borderColor: "divider", textAlign: "center" }}>
-                        <StatusChip status={item.status} config={ORDER_STATUS_CONFIG} />
+                        <StatusChip status={(item.status || "").toLowerCase()} config={dynamicOrderStatusConfig} />
                       </TableCell>
                     </TableRow>
                   ))}

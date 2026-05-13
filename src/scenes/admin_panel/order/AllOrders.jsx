@@ -45,16 +45,8 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { getAllOrder, deleteOrder, updateOrderStatus } from "../../../api/controller/admin_controller/order/order_controller";
+import { getAllOrder, deleteOrder, updateOrderStatus, getOrderStatusList } from "../../../api/controller/admin_controller/order/order_controller";
 
-/* ── Status config maps ── */
-const ORDER_STATUS_CONFIG = {
-  pending:    { label: "Pending",    color: "#f59e0b", bg: "#fffbeb", icon: <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} /> },
-  processing: { label: "Processing", color: "#3b82f6", bg: "#eff6ff", icon: <SettingsOutlinedIcon sx={{ fontSize: 14 }} /> },
-  shipped:    { label: "Shipped",    color: "#8b5cf6", bg: "#f5f3ff", icon: <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} /> },
-  completed:  { label: "Completed",  color: "#10b981", bg: "#ecfdf5", icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> },
-  cancelled:  { label: "Cancelled",  color: "#ef4444", bg: "#fef2f2", icon: <CancelOutlinedIcon sx={{ fontSize: 14 }} /> },
-};
 
 const PAYMENT_STATUS_CONFIG = {
   paid:     { label: "Paid",     color: "#10b981", bg: "#ecfdf5" },
@@ -78,23 +70,19 @@ const StatMini = ({ icon, label, value, color, bg }) => (
 
 /* ── Custom status chip ── */
 const StatusChip = ({ status, config, onClick }) => {
-  const cfg = config[status] || { label: status, color: "#64748b", bg: "#f1f5f9" };
+  const label = config[status]?.label || status || "—";
   return (
     <Chip
-      icon={cfg.icon || null}
-      label={cfg.label}
+      label={label}
       size="small"
       onClick={onClick}
       clickable={!!onClick}
+      variant="outlined"
       sx={{
-        fontWeight: 700,
+        fontWeight: 600,
         fontSize: 11,
-        height: 26,
-        bgcolor: cfg.bg,
-        color: cfg.color,
-        border: "1px solid",
-        borderColor: cfg.color + "30",
-        "& .MuiChip-icon": { color: cfg.color, ml: 0.5 },
+        height: 24,
+        borderRadius: 1.5,
         cursor: onClick ? "pointer" : "default",
       }}
     />
@@ -118,6 +106,7 @@ const AllOrders = () => {
   const [newStatus, setNewStatus] = useState("");
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [orderStatusList, setOrderStatusList] = useState([]);
 
   // Fetch orders from API
   const fetchOrders = async (pageZeroBased = 0, perPage = 10) => {
@@ -144,11 +133,34 @@ const AllOrders = () => {
     fetchOrders(page, rowsPerPage);
   }, [page, rowsPerPage]);
 
+  useEffect(() => {
+    const loadStatuses = async () => {
+      try {
+        const res = await getOrderStatusList();
+        if (res?.status === "success" && Array.isArray(res?.data)) {
+          setOrderStatusList(res.data.filter((s) => s.is_active !== false));
+        }
+      } catch (e) {
+        console.error("Failed to load order statuses", e);
+      }
+    };
+    loadStatuses();
+  }, []);
+
+  const dynamicStatusConfig = useMemo(() => {
+    const cfg = {};
+    orderStatusList.forEach((s) => {
+      const key = s.name.toLowerCase();
+      cfg[key] = { label: s.name };
+    });
+    return cfg;
+  }, [orderStatusList]);
+
   // Client-side search + status filter
   const filteredOrders = useMemo(() => {
     let result = orders;
     if (statusFilter !== "all") {
-      result = result.filter((o) => o.status === statusFilter);
+      result = result.filter((o) => (o.status || "").toLowerCase() === statusFilter);
     }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
@@ -316,27 +328,22 @@ const AllOrders = () => {
                 "& .MuiOutlinedInput-root": { borderRadius: 2, "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#6366f1" } },
               }}
             />
-            <Stack direction="row" spacing={0.5}>
-              {["all", "pending", "processing", "shipped", "completed", "cancelled"].map((s) => {
-                const active = statusFilter === s;
-                const cfg = ORDER_STATUS_CONFIG[s];
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ rowGap: 0.5 }}>
+              {[{ key: "all", label: "All" }, ...orderStatusList.map((s) => ({ key: s.name.toLowerCase(), label: s.name }))].map(({ key, label }) => {
+                const active = statusFilter === key;
                 return (
                   <Chip
-                    key={s}
-                    label={s === "all" ? "All" : cfg?.label || s}
+                    key={key}
+                    label={label}
                     size="small"
-                    onClick={() => setStatusFilter(s)}
+                    onClick={() => setStatusFilter(key)}
+                    variant={active ? "filled" : "outlined"}
                     sx={{
-                      fontWeight: 700,
+                      fontWeight: active ? 700 : 500,
                       fontSize: 12,
-                      borderRadius: 2,
-                      border: "1px solid",
-                      borderColor: active ? (cfg?.color || "#6366f1") + "50" : "divider",
-                      bgcolor: active ? (cfg?.bg || "#eef2ff") : "transparent",
-                      color: active ? (cfg?.color || "#6366f1") : "text.secondary",
+                      borderRadius: 1.5,
                       cursor: "pointer",
-                      transition: "all 200ms",
-                      "&:hover": { bgcolor: cfg?.bg || "#eef2ff" },
+                      transition: "all 180ms",
                     }}
                   />
                 );
@@ -407,8 +414,8 @@ const AllOrders = () => {
                       </TableCell>
                       <TableCell sx={cellSx}>
                         <StatusChip
-                          status={order.status}
-                          config={ORDER_STATUS_CONFIG}
+                          status={(order.status || "").toLowerCase()}
+                          config={dynamicStatusConfig}
                           onClick={(e) => { e.stopPropagation(); handleOpenStatusDialog(order); }}
                         />
                       </TableCell>
@@ -481,12 +488,9 @@ const AllOrders = () => {
               label="Status"
               sx={{ borderRadius: 2, "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#6366f1" } }}
             >
-              {Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) => (
-                <MenuItem key={key} value={key}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: cfg.color }} />
-                    <Typography variant="body2">{cfg.label}</Typography>
-                  </Stack>
+              {orderStatusList.map((s) => (
+                <MenuItem key={s.id} value={s.name.toLowerCase()}>
+                  <Typography variant="body2">{s.name}</Typography>
                 </MenuItem>
               ))}
             </Select>

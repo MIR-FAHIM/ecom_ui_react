@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Typography,
@@ -9,7 +10,6 @@ import {
   Chip,
   Stack,
   Tooltip,
-  Avatar,
   Rating,
   useTheme,
 } from "@mui/material";
@@ -143,7 +143,6 @@ export default function SmartProductCard({
   const subInk = colors.gray[300];
 
   const accent = theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100];
-  const accentSoft = theme.palette.mode === "dark" ? colors.blueAccent[700] : colors.blueAccent[900];
 
   const money = (n) =>
     new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
@@ -338,6 +337,18 @@ export default function SmartProductCard({
     }
   }, [product?.id, refreshLocalStates, userId]);
 
+  const iconBtnSx = {
+    width: 34,
+    height: 34,
+    borderRadius: 1.5,
+    bgcolor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.92)",
+    backdropFilter: "blur(8px)",
+    border: `1px solid ${divider}`,
+    color: ink,
+    transition: "background 150ms ease, transform 150ms ease",
+    "&:hover": { bgcolor: surface, transform: "scale(1.1)" },
+  };
+
   const handleAddToCart = useCallback(async (e) => {
     e.stopPropagation();
     const pid = product?.id;
@@ -369,42 +380,35 @@ export default function SmartProductCard({
 
   return (
     <Card
+      onClick={() => onView?.(product)}
       sx={{
-        borderRadius:1,
+        borderRadius: 2,
         overflow: "hidden",
         border: `1px solid ${divider}`,
         background: surface,
-        backdropFilter: "blur(12px)",
-        transition: "transform 200ms ease, box-shadow 250ms ease, border-color 250ms ease",
+        cursor: "pointer",
+        transition: "transform 220ms ease, box-shadow 260ms ease, border-color 260ms ease",
         position: "relative",
         "&:hover": {
-          transform: "translateY(-3px)",
-          boxShadow: `0 12px 32px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.08)"}`,
-          borderColor: theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100],
+          transform: "translateY(-4px)",
+          boxShadow: `0 16px 40px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.11)"}`,
+          borderColor: "#6366f1",
+          "& .pc-actions": { opacity: 1, transform: "translateX(0)" },
+          "& .pc-cart-bar": { opacity: 1, transform: "translateY(0)" },
         },
       }}
     >
-      <Box
-        sx={{
-          p: 1,
-          background: surface,
-        }}
-      >
+      {/* ── Image section ── */}
+      <Box sx={{ position: "relative", overflow: "hidden" }}>
         <Box
-          onClick={() => onView?.(product)}
           sx={{
-            height: { xs: 240, sm: 230, md: 210, lg: 200 },
-            borderRadius: 1,
-            overflow: "hidden",
-            border: `1px solid ${divider}`,
+            height: { xs: 220, sm: 210, md: 200 },
             background: surface2,
             display: "grid",
             placeItems: "center",
-            cursor: "pointer",
-            position: "relative",
+            overflow: "hidden",
           }}
         >
-          {/* Always render image; fallback via onError */}
           <Box
             component="img"
             src={imageUrl}
@@ -419,170 +423,127 @@ export default function SmartProductCard({
               height: "100%",
               objectFit: "contain",
               objectPosition: "center",
-              transition: "transform 240ms ease",
-              filter: theme.palette.mode === "dark" ? "saturate(1.08) contrast(1.02)" : "saturate(1.02)",
-              ".MuiCard-root:hover &": { transform: "scale(1.03)" },
+              transition: "transform 300ms ease",
+              ".MuiCard-root:hover &": { transform: "scale(1.06)" },
             }}
           />
-
-          {/* If you still want a letter avatar for missing images, keep it hidden and show only when placeholder triggers.
-              For simplicity we rely on placeholder image. */}
-
-          <Stack direction="row" spacing={1} sx={{ position: "absolute", left: 8, top: 8, alignItems: "center" }}>
-
-
-            {outOfStock ? (
-              <Chip label="Out of stock" size="small" color="error" sx={{ borderRadius: 999, fontWeight: 600 }} />
-            ) : (
-              <Chip
-                label="In stock"
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderRadius: 999,
-                  fontWeight: 600,
-                  color: subInk,
-                  borderColor: divider,
-                  background: surface,
-                }}
-              />
-            )}
-          </Stack>
-
-          <Stack spacing={1} sx={{ position: "absolute", right: 8, top: 8 }}>
-            {fromSeller ? (
-              <>
-                <Tooltip title="Edit product">
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit?.(product);
-                    }}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 3,
-                      border: `1px solid ${divider}`,
-                      background: surface,
-                      backdropFilter: "blur(10px)",
-                      "&:hover": { background: surface2 },
-                    }}
-                  >
-                    <EditOutlined />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title="Quick view">
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onView?.(product);
-                    }}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 3,
-                      border: `1px solid ${divider}`,
-                      background: surface,
-                      backdropFilter: "blur(10px)",
-                      "&:hover": { background: surface2 },
-                    }}
-                  >
-                    <VisibilityOutlined />
-                  </IconButton>
-                </Tooltip>
-              </>
-            ) : (
-              <>
-                <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
-                  <IconButton
-                    onClick={handleToggleWish}
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 3,
-                      border: `1px solid ${divider}`,
-                      background: surface,
-                      backdropFilter: "blur(10px)",
-                      "&:hover": { background: surface2 },
-                    }}
-                  >
-                    {inWish ? <Favorite color="error" /> : <FavoriteBorder />}
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title={outOfStock ? "Out of stock" : inCart ? "Remove from cart" : "Add to cart"}>
-                  <span>
-                    <IconButton
-                      disabled={outOfStock}
-                      onClick={handleAddToCart}
-                      sx={{
-                        width: 30,
-                        height: 30,
-                        borderRadius: 4,
-                        border: `1px solid ${divider}`,
-                        background: surface,
-                       
-                        transition: "transform 120ms ease, box-shadow 180ms ease, filter 180ms ease",
-                        "&:hover": {
-                          transform: "translateY(-1px) scale(1.03)",
-                          filter: "saturate(1.05)",
-                        
-                        },
-                        "&.Mui-disabled": { opacity: 0.5 },
-                        position: "relative",
-                        "&:after": {
-                          content: '""',
-                          position: "absolute",
-                          inset: -4,
-                          borderRadius: 18,
-                          border: `1px solid ${divider}`,
-                          opacity: theme.palette.mode === "dark" ? 0.9 : 0.7,
-                        },
-                      }}
-                    >
-                      {inCart ? <ShoppingCart /> : <ShoppingCartOutlined />}
-                    </IconButton>
-                  </span>
-                </Tooltip>
-
-                <Tooltip title="Quick view">
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onView?.(product);
-                    }}
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 3,
-                      border: `1px solid ${divider}`,
-                      background: surface,
-                      backdropFilter: "blur(10px)",
-                      "&:hover": { background: surface2 },
-                    }}
-                  >
-                    <VisibilityOutlined />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-          </Stack>
         </Box>
+
+        {/* Top-left badge */}
+        <Box sx={{ position: "absolute", left: 8, top: 8, pointerEvents: "none" }}>
+          {outOfStock ? (
+            <Chip
+              label="Out of stock"
+              size="small"
+              sx={{ borderRadius: 1, fontWeight: 700, fontSize: 10, bgcolor: "#dc2626", color: "#fff" }}
+            />
+          ) : discountLabel ? (
+            <Chip
+              label={discountLabel}
+              size="small"
+              sx={{ borderRadius: 1, fontWeight: 700, fontSize: 10, bgcolor: "#dc2626", color: "#fff" }}
+            />
+          ) : null}
+        </Box>
+
+        {/* Action icons — hidden, slide in from right on hover */}
+        <Stack
+          className="pc-actions"
+          spacing={0.8}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            opacity: 0,
+            transform: "translateX(12px)",
+            transition: "opacity 200ms ease, transform 200ms ease",
+          }}
+        >
+          {fromSeller ? (
+            <>
+              <Tooltip title="Edit product">
+                <IconButton onClick={(e) => { e.stopPropagation(); onEdit?.(product); }} sx={iconBtnSx}>
+                  <EditOutlined sx={{ fontSize: 17 }} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Quick view">
+                <IconButton onClick={(e) => { e.stopPropagation(); onView?.(product); }} sx={iconBtnSx}>
+                  <VisibilityOutlined sx={{ fontSize: 17 }} />
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
+                <IconButton onClick={handleToggleWish} sx={iconBtnSx}>
+                  {inWish
+                    ? <Favorite sx={{ fontSize: 17, color: "#ef4444" }} />
+                    : <FavoriteBorder sx={{ fontSize: 17 }} />}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Quick view">
+                <IconButton onClick={(e) => { e.stopPropagation(); onView?.(product); }} sx={iconBtnSx}>
+                  <VisibilityOutlined sx={{ fontSize: 17 }} />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Stack>
+
+        {/* Add to cart bar — slides up from bottom on hover */}
+        {!fromSeller && (
+          <Box
+            className="pc-cart-bar"
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              opacity: 0,
+              transform: "translateY(100%)",
+              transition: "opacity 220ms ease, transform 220ms ease",
+            }}
+          >
+            <Button
+              fullWidth
+              disabled={outOfStock}
+              onClick={(e) => { e.stopPropagation(); handleAddToCart(e); }}
+              startIcon={
+                inCart
+                  ? <ShoppingCart sx={{ fontSize: 16 }} />
+                  : <ShoppingCartOutlined sx={{ fontSize: 16 }} />
+              }
+              sx={{
+                borderRadius: 0,
+                py: 1,
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: 13,
+                letterSpacing: 0,
+                bgcolor: inCart ? "#16a34a" : "#6366f1",
+                color: "#fff",
+                boxShadow: "none",
+                "&:hover": { bgcolor: inCart ? "#15803d" : "#4f46e5", boxShadow: "none" },
+                "&.Mui-disabled": { bgcolor: surface2, color: subInk, opacity: 1 },
+              }}
+            >
+              {outOfStock ? "Out of Stock" : inCart ? "Added to Cart" : "Add to Cart"}
+            </Button>
+          </Box>
+        )}
       </Box>
 
-      <CardContent sx={{ p: 1.5 }}>
-        <Stack spacing={1}>
-          {/* Row 1: Name */}
+      {/* ── Info section ── */}
+      <CardContent sx={{ p: 1.5, pt: 1.2, pb: "12px !important" }}>
+        <Stack spacing={0.7}>
           <Typography
             fontWeight={700}
             sx={{
               color: ink,
-              letterSpacing: "-0.01em",
-              lineHeight: 1.25,
               fontSize: 13,
+              lineHeight: 1.35,
               display: "-webkit-box",
-              WebkitLineClamp: 1,
+              WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
@@ -590,119 +551,61 @@ export default function SmartProductCard({
             {product?.name || "Untitled product"}
           </Typography>
 
-          {/* Row 2: Price + Discount */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-            <Typography
-              fontWeight={700}
-              sx={{
-                fontSize: 15,
-                color: accent,
-                letterSpacing: "-0.01em",
-              }}
-            >
+          {/* Price */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, flexWrap: "wrap" }}>
+            <Typography fontWeight={800} sx={{ fontSize: 15, color: "#6366f1", letterSpacing: "-0.01em" }}>
               {displayPrice}
             </Typography>
-
             {hasSale && (
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 500,
-                  color: subInk,
-                  textDecoration: "line-through",
-                  fontSize: 11,
-                }}
-              >
+              <Typography variant="caption" sx={{ fontWeight: 500, color: subInk, textDecoration: "line-through", fontSize: 11 }}>
                 {money(price)}
               </Typography>
             )}
-
-            {discountLabel && (
-              <Chip
-                label={discountLabel}
-                size="small"
-                sx={{
-                  height: 18,
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  fontSize: 10,
-                  background: theme.palette.mode === "dark" ? "rgba(244,67,54,0.15)" : "rgba(244,67,54,0.08)",
-                  color: theme.palette.error.main,
-                  border: "none",
-                  "& .MuiChip-label": { px: 0.8 },
-                }}
-              />
-            )}
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 600,
-                color: subInk,
-                fontSize: 11,
-              }}
-            >
-              Shop:
-            </Typography>
-            {product?.shop?.id ? (
-              <Link
-                component="button"
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/shop/${product.shop.id}`);
-                }}
-                sx={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: accent,
-                  textDecoration: "none",
-                  lineHeight: 1.2,
-                  textAlign: "left",
-                  "&:hover": { textDecoration: "underline" },
-                }}
-              >
-                {product.shop?.name || "View shop"}
-              </Link>
-            ) : (
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 600,
-                  color: subInk,
-                  fontSize: 11,
-                }}
-              >
-                {product.shop?.name || " "}
-              </Typography>
-            )}
-          </Box>
-          {/* Row 3: Other */}
-          <Stack direction="row" spacing={1} alignItems="center">
-          
 
-            <Rating value={ratingValue} precision={0.5} size="small" readOnly />
+          {/* Shop */}
+          {product?.shop && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography variant="caption" sx={{ color: subInk, fontSize: 11, fontWeight: 600 }}>Shop:</Typography>
+              {product?.shop?.id ? (
+                <Link
+                  component="button"
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); navigate(`/shop/${product.shop.id}`); }}
+                  sx={{ fontSize: 11, fontWeight: 700, color: accent, textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
+                >
+                  {product.shop?.shop_name || product.shop?.name || "View shop"}
+                </Link>
+              ) : (
+                <Typography variant="caption" sx={{ fontWeight: 600, color: subInk, fontSize: 11 }}>
+                  {product.shop?.shop_name || product.shop?.name || " "}
+                </Typography>
+              )}
+            </Box>
+          )}
+
+          {/* Rating + Sales */}
+          <Stack direction="row" spacing={0.8} alignItems="center">
+            <Rating value={ratingValue} precision={0.5} size="small" readOnly sx={{ fontSize: 13 }} />
             <Typography variant="caption" sx={{ fontWeight: 500, color: subInk, fontSize: 11 }}>
               ({reviewsCount})
             </Typography>
-
             <Chip
               size="small"
-              label={"Sold: " + (product?.total_sales ?? product?.sales_count ?? 0)}
+              label={`Sold: ${product?.total_sales ?? product?.sales_count ?? 0}`}
               sx={{
                 ml: "auto",
-                borderRadius: 999,
+                borderRadius: 1,
                 fontWeight: 600,
                 fontSize: 10,
-                background: surface,
+                height: 20,
+                bgcolor: surface2,
                 border: `1px solid ${divider}`,
                 color: subInk,
+                "& .MuiChip-label": { px: 0.8 },
               }}
             />
           </Stack>
-
-        
         </Stack>
       </CardContent>
     </Card>

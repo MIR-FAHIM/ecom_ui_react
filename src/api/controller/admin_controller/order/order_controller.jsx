@@ -48,6 +48,19 @@ export const getAllOrder = async (params = {}) => {
     return { status: 'error', data: [] };
   }
 }
+export const getOrderStatusList = async () => {
+  try {
+    const response = await axiosInstance.get('/api/orders/orderstatus', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
+      },
+      });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getOrderStatusList:", error);
+    return { status: 'error', data: [] };
+  }
+}
 
 // Get order details by ID
 export const getOrderDetails = async (id) => {
@@ -148,15 +161,19 @@ export const unassignDeliveryBoy = async (data) => {
 }
 
 
-// Update order status (PUT endpoint - fallback)
+// Update order status
 export const updateOrderStatus = async (id, status) => {
   try {
-    const response = await axiosInstance.put(`/api/orders/${id}/status`, {
-      params: status,
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem("authToken")}`, // Add the token in Authorization header
-      },
-    });
+    const response = await axiosInstance.patch(
+      `/api/orders/status/${id}?status=${encodeURIComponent(status)}`,
+      { status },
+      {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error updating order status:", error);

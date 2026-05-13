@@ -7,8 +7,7 @@ import { loginController } from "../../api/controller/admin_controller/user_cont
 const Register = () => {
   const location = useLocation();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [mobile, setMobile] = useState(location.state?.phoneNumber || '');
+  const [phoneOrEmail, setPhoneOrEmail] = useState(location.state?.phoneNumber || '');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('customer');
   const [confirm, setConfirm] = useState('');
@@ -16,19 +15,26 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const isPhone = (val) => /^\d{11}$/.test(val.trim());
+  const isEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+
   useEffect(() => {
     if (location.state?.phoneNumber) {
-      setMobile(location.state.phoneNumber);
+      setPhoneOrEmail(location.state.phoneNumber);
     }
   }, [location.state?.phoneNumber]);
 
   const handleRegister = async () => {
-    if (!name || !mobile || !password) {
-      if (!mobile) {
-        setMsg('Phone number is required');
-      } else {
-        setMsg('Please fill required fields');
-      }
+    const trimmed = phoneOrEmail.trim();
+    const phoneDetected = isPhone(trimmed);
+    const emailDetected = isEmail(trimmed);
+
+    if (!name || !trimmed || !password) {
+      setMsg('Please fill required fields');
+      return;
+    }
+    if (!phoneDetected && !emailDetected) {
+      setMsg('Enter a valid 11-digit phone number or email address');
       return;
     }
     if (password !== confirm) {
@@ -40,11 +46,10 @@ const Register = () => {
     try {
       const form = new FormData();
       form.append('name', name);
-      form.append('email', email);
       form.append('password', password);
       form.append('role', role);
-      form.append('phone', mobile);
-
+      if (phoneDetected) form.append('phone', trimmed);
+      if (emailDetected) form.append('email', trimmed);
 
       const res = await registerEmployee(form);
       const ok = res?.status === 200 || res?.status === 'success' || res?.success === true;
@@ -53,7 +58,7 @@ const Register = () => {
         return;
       }
 
-      const loginPayload = email ? { email, password } : { phone: mobile, password };
+      const loginPayload = emailDetected ? { email: trimmed, password } : { phone: trimmed, password };
       const loginRes = await loginController(loginPayload);
       const loginOk =
         loginRes?.status === 200 ||
@@ -133,20 +138,23 @@ return (
               sx={{ borderRadius: 2 }}
             />
           </Grid>
- <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Mobile Number"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-            />
-          </Grid>
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label="Email (optional)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Phone Number or Email"
+              value={phoneOrEmail}
+              onChange={(e) => setPhoneOrEmail(e.target.value)}
+              variant="outlined"
+              helperText={
+                phoneOrEmail.trim()
+                  ? isPhone(phoneOrEmail)
+                    ? 'Phone number detected'
+                    : isEmail(phoneOrEmail)
+                    ? 'Email detected'
+                    : 'Enter an 11-digit phone number or a valid email'
+                  : ''
+              }
+              sx={{ borderRadius: 2 }}
             />
           </Grid>
 

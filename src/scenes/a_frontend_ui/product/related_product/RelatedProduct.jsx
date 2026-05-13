@@ -143,7 +143,7 @@ const RelatedProduct = ({ productId }) => {
 										gap: 1,
 										alignItems: "center",
 										p: 1,
-										borderRadius: 2,
+										borderRadius: 1,
 										border: `1px solid ${border}`,
 										background: surface2,
 										cursor: "pointer",
@@ -154,7 +154,7 @@ const RelatedProduct = ({ productId }) => {
 										component="img"
 										src={getPrimaryImage(p)}
 										alt={p?.name || "product"}
-										sx={{ width: 56, height: 56, borderRadius: 2, objectFit: "cover" }}
+										sx={{ width: 56, height: 56, borderRadius: 0.5, objectFit: "cover" }}
 										onError={(e) => {
 											e.currentTarget.onerror = null;
 											e.currentTarget.src = "https://placehold.co/600x400";

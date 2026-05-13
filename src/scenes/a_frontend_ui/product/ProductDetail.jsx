@@ -15,10 +15,12 @@ import {
   Snackbar,
   Tooltip,
   CircularProgress,
+  Avatar,
   useTheme,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -333,6 +335,49 @@ const ProductDetail = () => {
       setBusyCart(false);
     }
   };
+  const handleBuyNow = async () => {
+    if (!product?.id) return;
+
+    if (!userId) {
+      setMsg("Please login to add to cart.");
+      navigate("/login");
+      return;
+    }
+    if (!inStock) {
+      setMsg("This product is out of stock.");
+      return;
+    }
+
+    setBusyCart(true);
+    try {
+      const payload = {
+        user_id: userId,
+        product_id: product.id,
+        qty: Number(qty || 1),
+        attribute_id: selectedAttributeId ?? null,
+        price: mainPrice, // send final_sale_price to cart
+      };
+      const res = await addCart(payload);
+
+      if (res?.status === "success") {
+        const cartRes = await getCartByUser(userId);
+        const total =
+          cartRes?.data?.total_items ??
+          (Array.isArray(cartRes?.data?.items) ? cartRes.data.items.length : 0);
+
+        localStorage.setItem("cart", JSON.stringify(total));
+        window.dispatchEvent(new Event("cart-updated"));
+        navigate("/cart");
+      } else {
+        setMsg(res?.message || "Failed to add to cart");
+      }
+    } catch (e) {
+      console.error(e);
+      setMsg("Failed to add to cart");
+    } finally {
+      setBusyCart(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -627,11 +672,11 @@ const ProductDetail = () => {
                 >
                   Add to Cart
                 </Button>
-                {/* <Button
+                <Button
                   fullWidth
                   variant="outlined"
                   disabled={!inStock}
-                  onClick={handleAddToCart}
+                  onClick={handleBuyNow}
                   sx={{
                     borderRadius: 1,
                     py: 1.4,
@@ -644,7 +689,7 @@ const ProductDetail = () => {
                   }}
                 >
                   Buy Now
-                </Button> */}
+                </Button>
               </Stack>
 
               <Divider />
@@ -685,6 +730,95 @@ const ProductDetail = () => {
         <Box sx={{ mt: 4 }}>
           <Grid container spacing={3}>
                  <Grid item xs={12} md={4}>
+              {/* ── Shop Card ── */}
+              {product?.shop && (
+                <Card
+                  sx={{
+                    borderRadius: 2,
+                    border: `1px solid ${divider}`,
+                    bgcolor: surface,
+                    mb: 2,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box sx={{ p: 2.5 }}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar
+                        src={
+                          product.shop.logo
+                            ? buildImageUrl(product.shop.logo)
+                            : undefined
+                        }
+                        sx={{
+                          width: 52,
+                          height: 52,
+                          bgcolor: "#6366f1",
+                          fontWeight: 700,
+                          fontSize: 20,
+                          border: `2px solid ${divider}`,
+                        }}
+                      >
+                        {(product.shop.shop_name || product.shop.name || "S")[0].toUpperCase()}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          variant="body1"
+                          sx={{ fontWeight: 700, color: ink, lineHeight: 1.3 }}
+                          noWrap
+                        >
+                          {product.shop.shop_name || product.shop.name}
+                        </Typography>
+                        {product.shop.name && product.shop.shop_name && (
+                          <Typography variant="caption" sx={{ color: subInk, fontWeight: 500 }}>
+                            {product.shop.description || 'No description'}
+                          </Typography>
+                        )}
+                        <Box sx={{ mt: 0.5 }}>
+                          <Chip
+                            label={product.shop.status || "active"}
+                            size="small"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: 11,
+                              height: 20,
+                              bgcolor:
+                                (product.shop.status || "active") === "active"
+                                  ? "#dcfce7"
+                                  : "#fef9c3",
+                              color:
+                                (product.shop.status || "active") === "active"
+                                  ? "#16a34a"
+                                  : "#92400e",
+                              borderRadius: 1,
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    </Stack>
+
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<StorefrontIcon fontSize="small" />}
+                      onClick={() => navigate(`/shop/${product.shop.id}`)}
+                      sx={{
+                        mt: 2,
+                        borderRadius: 1,
+                        textTransform: "none",
+                        fontWeight: 600,
+                        borderColor: "#6366f1",
+                        color: "#6366f1",
+                        "&:hover": {
+                          bgcolor: "rgba(99,102,241,0.06)",
+                          borderColor: "#4f46e5",
+                        },
+                      }}
+                    >
+                      Show Detail
+                    </Button>
+                  </Box>
+                </Card>
+              )}
               <RelatedProduct productId={product?.id} />
             </Grid>
             <Grid item xs={12} md={8}>

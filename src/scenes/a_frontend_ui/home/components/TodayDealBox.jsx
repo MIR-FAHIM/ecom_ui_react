@@ -74,7 +74,7 @@ export default function TodayDealBox({ onView }) {
               <FeaturedTitle mb={0}>Todays Deal</FeaturedTitle>
               <Typography
                 variant="caption"
-                sx={{ fontWeight: 700, cursor: "pointer", color: "primary.main", whiteSpace: "nowrap" }}
+                sx={{ fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", color: "gray" }}
                 onClick={() => navigate("/today-deals")}
               >
                 See all
