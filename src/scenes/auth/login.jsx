@@ -353,7 +353,7 @@ const Login = () => {
               {loading ? <CircularProgress size={22} color="inherit" /> : "Sign in"}
             </Button>
 
-            <Button
+            {/* <Button
               fullWidth
               variant="contained"
               size="large"
@@ -367,7 +367,7 @@ const Login = () => {
               }}
             >
               Login with OTP
-            </Button>
+            </Button> */}
 
             <Divider sx={{ my: 2 }} />
 

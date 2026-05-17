@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Paper, Typography, TextField, Button, Grid, Snackbar, MenuItem, CircularProgress } from '@mui/material';
+import { Container, Box, Paper, Typography, TextField, Button, Grid, Snackbar, MenuItem, CircularProgress, Checkbox, FormControlLabel, Link } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { registerEmployee } from "../../api/controller/admin_controller/user_controller";
 import { loginController } from "../../api/controller/admin_controller/user_controller";
@@ -13,6 +13,7 @@ const Register = () => {
   const [confirm, setConfirm] = useState('');
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
   const isPhone = (val) => /^\d{11}$/.test(val.trim());
@@ -31,6 +32,10 @@ const Register = () => {
 
     if (!name || !trimmed || !password) {
       setMsg('Please fill required fields');
+      return;
+    }
+    if (!agreedToTerms) {
+      setMsg('Please agree to the Terms and Conditions');
       return;
     }
     if (!phoneDetected && !emailDetected) {
@@ -189,6 +194,32 @@ return (
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  color="primary"
+                  sx={{
+                    color: '#1976d2',
+                    '&.Mui-checked': {
+                      color: '#1976d2',
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography variant="body2">
+                  I agree to the{' '}
+                  <Link href="/privacy" target="_blank" underline="hover">
+                    <span style={{ color: '#1976d2' }}>Terms and Conditions</span>
+                  </Link>
+                </Typography>
+              }
             />
           </Grid>
 

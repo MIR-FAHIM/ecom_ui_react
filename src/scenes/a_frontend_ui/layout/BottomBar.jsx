@@ -47,19 +47,14 @@ const BottomBar = () => {
     loadWebsiteSetting();
   }, []);
 
-  const sectionCard = {
-    p: 2.5,
-    borderRadius: 3,
-    border: "1px solid rgba(255,255,255,0.08)",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
-    boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
-  };
+  const sectionCard = {};
 
   const linkStyle = {
     color: "rgba(255,255,255,0.72)",
     fontSize: 13,
     fontWeight: 600,
     textTransform: "capitalize",
+    textAlign: "left",
     "&:hover": { color: "#fff" },
   };
 
@@ -83,10 +78,10 @@ const BottomBar = () => {
         }}
       >
         {[
-          { icon: <Description sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Terms & Conditions", path: "/privacy" },
-          { icon: <Undo sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Return Policy", path: "/privacy" },
-          { icon: <HeadsetMic sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Support Policy", path: "/privacy" },
-          { icon: <Security sx={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }} />, label: "Privacy Policy", path: "/privacy" },
+          { icon: <Description sx={{ fontSize: 28, color: "#444" }} />, label: "Terms & Conditions", path: "/privacy" },
+          { icon: <Undo sx={{ fontSize: 28, color: "#444" }} />, label: "Return Policy", path: "/privacy" },
+          { icon: <HeadsetMic sx={{ fontSize: 28, color: "#444" }} />, label: "Support Policy", path: "/privacy" },
+          { icon: <Security sx={{ fontSize: 28, color: "#444" }} />, label: "Privacy Policy", path: "/privacy" },
         ].map((item, idx, arr) => (
           <Box
             key={item.label}
@@ -100,17 +95,17 @@ const BottomBar = () => {
               gap: 1,
               py: 3,
               px: 2,
-              background: "none",
+              background: "#ededed",
               border: "none",
               borderRight: idx < arr.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
               cursor: "pointer",
               transition: "background 150ms ease",
-              "&:hover": { background: "rgba(255,255,255,0.04)" },
+              "&:hover": { background: "#e0e0e0" },
             }}
           >
             {item.icon}
             <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 700, textAlign: "center" }}>
-              {item.label}
+              <span style={{ color: '#111' }}>{item.label}</span>
             </Typography>
           </Box>
         ))}
@@ -214,7 +209,7 @@ const BottomBar = () => {
           py: { xs: 4, md: 5 },
           display: "grid",
           gap: { xs: 3, md: 6 },
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
           alignItems: "start",
         }}
       >
@@ -222,7 +217,7 @@ const BottomBar = () => {
           <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
             CONTACTS
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2, color: "rgba(255,255,255,0.7)" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2, alignItems: "flex-start", color: "rgba(255,255,255,0.7)" }}>
             <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Address</Typography>
             <Typography variant="body2" sx={{ fontSize: 13 }}>House 10, Rd No 4,PC Culture Housing, Shekhertek, Mohammadpur, Dhaka-1207</Typography>
             <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Phone</Typography>
@@ -236,7 +231,7 @@ const BottomBar = () => {
           <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
             MY ACCOUNT
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2, alignItems: "flex-start" }}>
             <Link component="button" onClick={() => navigate("/ecom/login")} sx={linkStyle}>
               Login
             </Link>
@@ -256,7 +251,7 @@ const BottomBar = () => {
           <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
             SELLER ZONE
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2, alignItems: "flex-start" }}>
             <Link component="button" onClick={() => navigate("/ecom/seller")} sx={linkStyle}>
               Become A Seller
             </Link>
@@ -266,9 +261,14 @@ const BottomBar = () => {
             <Link component="button" onClick={() => navigate("/ecom/seller/app")} sx={linkStyle}>
               Download Seller App
             </Link>
-            <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, mt: 2.5, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
-              DELIVERY BOY
-            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={sectionCard}>
+          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
+            DELIVERY BOY
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2, alignItems: "flex-start" }}>
             <Link component="button" onClick={() => navigate("/login")} sx={linkStyle}>
               Delivery Panel Login
             </Link>
@@ -277,6 +277,7 @@ const BottomBar = () => {
             </Link>
           </Box>
         </Box>
+       
       </Box>
 
       <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />

@@ -814,7 +814,7 @@ const ProductDetail = () => {
                         },
                       }}
                     >
-                      Show Detail
+                      Visit Store
                     </Button>
                   </Box>
                 </Card>

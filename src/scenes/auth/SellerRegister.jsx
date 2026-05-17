@@ -12,6 +12,9 @@ import {
   Typography,
   Alert,
   CircularProgress,
+  Checkbox,
+  FormControlLabel,
+  Link,
 } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -36,6 +39,7 @@ const SellerRegister = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,6 +48,10 @@ const SellerRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!agreedToTerms) {
+      setError("Please agree to the Terms and Conditions");
+      return;
+    }
     setLoading(true);
     setError("");
     setSuccess("");
@@ -249,6 +257,32 @@ const SellerRegister = () => {
                         </InputAdornment>
                       ),
                     }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        color="primary"
+                        sx={{
+                          color: '#1976d2',
+                          '&.Mui-checked': {
+                            color: '#1976d2',
+                          },
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2">
+                        I agree to the{' '}
+                        <Link href="/privacy" target="_blank" underline="hover">
+                          <span style={{ color: '#1976d2' }}>Terms and Conditions</span>
+                        </Link>
+                      </Typography>
+                    }
                   />
                 </Grid>
 
