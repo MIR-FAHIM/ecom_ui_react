@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import {
@@ -59,6 +59,25 @@ function StepGeneral({
 }) {
 	const localUserId = useMemo(() => localStorage.getItem("userId") || "", []);
 	const shopOptions = Array.isArray(shops) ? shops : [];
+
+  // Auto-slug: generate from name unless user has manually customised the slug
+  const prevNameRef = useRef(value.name || "");
+  const slugify = (str) =>
+    (str || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-{2,}/g, "-")
+      .replace(/^-+|-+$/g, "");
+  const handleNameChange = (newName) => {
+    const prevAutoSlug = slugify(prevNameRef.current);
+    const currentSlug = value.slug || "";
+    const isAutoSlug = !currentSlug || currentSlug === prevAutoSlug;
+    onChange(isAutoSlug ? { name: newName, slug: slugify(newName) } : { name: newName });
+    prevNameRef.current = newName;
+  };
+
   const quillModules = useMemo(
     () => ({
       toolbar: [
@@ -92,10 +111,10 @@ function StepGeneral({
           <SectionHeader icon={<InfoOutlinedIcon sx={{ fontSize: 18 }} />} title="Basic Information" />
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth size="small" label="Product Name" value={value.name} error={!!errors.name} helperText={errors.name} onChange={(e) => onChange({ name: e.target.value })} sx={fieldSx} />
+              <TextField fullWidth size="small" label="Product Name *" value={value.name} error={!!errors.name} helperText={errors.name} onChange={(e) => handleNameChange(e.target.value)} sx={fieldSx} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth size="small" label="Slug" value={value.slug} error={!!errors.slug} helperText={errors.slug} onChange={(e) => onChange({ slug: e.target.value })} placeholder="auto-generated-slug" sx={fieldSx} />
+              <TextField fullWidth size="small" label="Slug" value={value.slug} error={!!errors.slug} helperText={errors.slug || "Auto-generated from name. Edit to customise."} onChange={(e) => onChange({ slug: e.target.value })} placeholder="auto-generated-slug" sx={fieldSx} />
             </Grid>
           </Grid>
         </CardContent>
@@ -166,23 +185,20 @@ function StepGeneral({
         <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
           <SectionHeader icon={<AttachMoneyIcon sx={{ fontSize: 18 }} />} title="Pricing & Inventory" color="#ea580c" bg="#fff7ed" />
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField fullWidth size="small" label="Unit Price" type="number" value={value.unit_price} onChange={(e) => onChange({ unit_price: e.target.value })} sx={fieldSx} />
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField fullWidth size="small" label="Unit Price *" type="number" value={value.unit_price} error={!!errors.unit_price} helperText={errors.unit_price || "Selling price (required)"} onChange={(e) => onChange({ unit_price: e.target.value })} inputProps={{ min: 0, step: 0.01 }} sx={fieldSx} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField fullWidth size="small" label="Purchase Price" type="number" value={value.purchase_price} helperText="Cost / purchase price (optional)" onChange={(e) => onChange({ purchase_price: e.target.value })} inputProps={{ min: 0, step: 0.01 }} sx={fieldSx} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField fullWidth size="small" label="Current Stock *" type="number" value={value.current_stock} error={!!errors.current_stock} helperText={errors.current_stock || "Available quantity (0 or more)"} onChange={(e) => onChange({ current_stock: e.target.value })} inputProps={{ min: 0 }} sx={fieldSx} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <TextField fullWidth size="small" label="Discount" type="number" value={value.discount} onChange={(e) => onChange({ discount: e.target.value })} sx={fieldSx} />
+              <TextField fullWidth size="small" label="Unit" value={value.unit} onChange={(e) => onChange({ unit: e.target.value })} placeholder="e.g. pcs" helperText="Unit of measurement" sx={fieldSx} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <TextField fullWidth size="small" label="Purchase Price" type="number" value={value.purchase_price} onChange={(e) => onChange({ purchase_price: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField fullWidth size="small" label="Current Stock" type="number" value={value.current_stock} onChange={(e) => onChange({ current_stock: e.target.value })} sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField fullWidth size="small" label="Unit" value={value.unit} onChange={(e) => onChange({ unit: e.target.value })} placeholder="e.g. pcs" sx={fieldSx} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField fullWidth size="small" label="Weight" value={value.weight} onChange={(e) => onChange({ weight: e.target.value })} placeholder="e.g. 0.5 kg" sx={fieldSx} />
+              <TextField fullWidth size="small" label="Weight" value={value.weight} onChange={(e) => onChange({ weight: e.target.value })} placeholder="e.g. 0.5 kg" helperText="Used for shipping cost" sx={fieldSx} />
             </Grid>
           </Grid>
         </CardContent>

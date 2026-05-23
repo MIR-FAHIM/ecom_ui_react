@@ -287,3 +287,17 @@ export const addProductAttribute = async (data) => {
     return [];
   }
 }
+
+export const deleteProduct = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/api/products/delete/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return { status: 'error', message: error.message };
+  }
+};

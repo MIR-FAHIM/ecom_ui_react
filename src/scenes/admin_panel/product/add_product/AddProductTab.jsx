@@ -24,6 +24,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TuneIcon from "@mui/icons-material/Tune";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller";
@@ -33,6 +34,7 @@ import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/c
 import StepGeneral from "../../../admin_panel/product/add_product/components/productWizard/StepGeneral";
 import StepAttributes from "../../../admin_panel/product/add_product/components/productWizard/StepAttributes";
 import StepImages from "../../../admin_panel/product/add_product/components/productWizard/StepImages";
+import StepDiscountSeo from "../../../admin_panel/product/add_product/components/productWizard/StepDiscountSeo";
 
 /* ── Custom stepper connector ── */
 const IndConnector = styled(StepConnector)(() => ({
@@ -42,7 +44,7 @@ const IndConnector = styled(StepConnector)(() => ({
   [`& .${stepConnectorClasses.line}`]: { height: 3, border: 0, borderRadius: 2, background: "#e0e0e0" },
 }));
 
-const stepIcons = { 1: <InfoOutlinedIcon />, 2: <TuneIcon />, 3: <CollectionsOutlinedIcon /> };
+const stepIcons = { 1: <InfoOutlinedIcon />, 2: <LocalOfferOutlinedIcon />, 3: <TuneIcon />, 4: <CollectionsOutlinedIcon /> };
 
 function StepIconComponent({ active, completed, icon }) {
   return (
@@ -123,6 +125,18 @@ function AddProductTab() {
 
   unit: "",
   weight: "",
+
+  // Discount
+  discount_type: "flat",
+  discount_value: "",
+  discount_min_qty: "",
+  discount_start_date: "",
+  discount_end_date: "",
+
+  // SEO
+  short_description: "",
+  meta_title: "",
+  meta_description: "",
 });
 
   const [attributes, setAttributes] = useState([]);
@@ -211,9 +225,34 @@ function AddProductTab() {
         nextErrors.category_id = "Sub category is required";
       }
       if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
+      if (!general.unit_price || parseFloat(general.unit_price) <= 0)
+        nextErrors.unit_price = "Unit price is required and must be greater than 0";
+      if (
+        general.current_stock === "" ||
+        general.current_stock === undefined ||
+        isNaN(Number(general.current_stock)) ||
+        Number(general.current_stock) < 0
+      )
+        nextErrors.current_stock = "Stock quantity is required (0 or more)";
     }
 
-    if (s === 2) {
+    if (s === 1) {
+      const discVal = parseFloat(general.discount_value);
+      if (general.discount_value !== "" && general.discount_value !== undefined && !isNaN(discVal)) {
+        if (discVal <= 0) nextErrors.discount_value = "Discount must be greater than 0";
+        if (general.discount_type === "percent" && discVal > 100)
+          nextErrors.discount_value = "Percentage discount cannot exceed 100%";
+        const price = parseFloat(general.unit_price) || 0;
+        if (general.discount_type === "flat" && price > 0 && discVal >= price)
+          nextErrors.discount_value = "Flat discount cannot equal or exceed the unit price";
+      }
+      if (general.discount_start_date && general.discount_end_date) {
+        if (new Date(general.discount_end_date) <= new Date(general.discount_start_date))
+          nextErrors.discount_end_date = "End date must be after start date";
+      }
+    }
+
+    if (s === 3) {
       if (images.length === 0) {
         nextErrors.images = "At least one image is required";
       } else {
@@ -261,6 +300,9 @@ productFormData.append("stock_visibility_state", general.stock_visibility_state 
 
 productFormData.append("unit", general.unit || "");
 productFormData.append("weight", general.weight || "");
+if (general.short_description) productFormData.append("short_description", general.short_description);
+if (general.meta_title) productFormData.append("meta_title", general.meta_title);
+if (general.meta_description) productFormData.append("meta_description", general.meta_description);
 
       // attach media library images as photo ids
       const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
@@ -311,16 +353,18 @@ productFormData.append("weight", general.weight || "");
 
         // Step 4: Add discount if provided
         try {
-          if (general?.discount_value) {
+          if (general.discount_value && parseFloat(general.discount_value) > 0) {
             const dfd = new FormData();
-            dfd.append('product_id', productId);
-            dfd.append('type', general.discount_type || 'flat');
-            dfd.append('value', general.discount_value);
-            const discResp = await addProdductDiscount(dfd);
-            console.debug('Discount response:', discResp);
+            dfd.append("product_id", productId);
+            dfd.append("type", general.discount_type || "flat");
+            dfd.append("value", general.discount_value);
+            if (general.discount_start_date) dfd.append("start_date", general.discount_start_date);
+            if (general.discount_end_date) dfd.append("end_date", general.discount_end_date);
+            if (general.discount_min_qty) dfd.append("min_qty", general.discount_min_qty);
+            await addProdductDiscount(dfd);
           }
         } catch (e) {
-          console.error('Failed to add product discount:', e);
+          console.error("Failed to add product discount:", e);
         }
 
       setSuccessMessage("Product created successfully!");
@@ -359,6 +403,16 @@ productFormData.append("weight", general.weight || "");
     }
 
     if (step === 1) {
+      return (
+        <StepDiscountSeo
+          value={general}
+          onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
+          errors={errors}
+        />
+      );
+    }
+
+    if (step === 2) {
       return (
         <StepAttributes
           value={attributes}
