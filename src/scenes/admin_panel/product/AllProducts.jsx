@@ -54,7 +54,7 @@ import {
 import { getAllShops } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
 
 /* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-const CURRENCY = "à§³";
+const CURRENCY = "";
 
 const fmtPrice = (val) => {
   const n = parseFloat(val);
@@ -78,8 +78,8 @@ const normalizeList = (x) => {
 function ProductImage({ product }) {
   const [imgError, setImgError] = useState(false);
   const url = (() => {
-    if (product?.thumbnail_img) return `${image_file_url}/${product.thumbnail_img}`;
-    if (product?.primary_image?.url) return product.primary_image.url;
+  
+    if (product?.primary_image?.file_name) return `${image_file_url}/${product.primary_image.file_name}`;
     if (product?.images?.length) {
       const pImg = product.images.find((i) => i.is_primary) || product.images[0];
       if (pImg?.upload?.url) return pImg.upload.url;

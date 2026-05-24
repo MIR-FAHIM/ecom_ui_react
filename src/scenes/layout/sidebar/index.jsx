@@ -1,16 +1,12 @@
-import { Box, IconButton, Typography, useTheme, Collapse } from "@mui/material";
-import { useContext, useState } from "react";
-import { tokens } from "../../../theme";
-import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
-import { useNavigate } from "react-router-dom";
-import { appname } from '../../../api/config/index';
-
+import React, { useContext, useState } from "react";
+import { Box, Typography, Collapse, IconButton, Tooltip } from "@mui/material";
+import { Sidebar } from "react-pro-sidebar";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   MenuOutlined,
   DashboardOutlined,
   Inventory2Outlined,
   ShoppingCartOutlined,
-  PeopleAltOutlined,
   ReceiptLongOutlined,
   StorefrontOutlined,
   DeliveryDiningOutlined,
@@ -31,279 +27,347 @@ import {
   LanguageOutlined,
   AccountBalanceWalletOutlined,
   CurrencyExchangeOutlined,
+  PeopleAltOutlined,
+  ExpandLess,
+  ExpandMore,
+  FormatListBulleted,
+  CheckCircleOutline,
 } from "@mui/icons-material";
 import logo from "../../../assets/images/logo.png";
-import Item from "./Item";
 import { ToggledContext } from "../../../App";
+import { appname } from "../../../api/config/index";
 
-const SideBar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const { toggled, setToggled } = useContext(ToggledContext);
-  const theme = useTheme();
-  const navigate = useNavigate();
-  const colors = tokens(theme.palette.mode);
+// Always-dark sidebar palette
+const S = {
+  bg:        "#0f172a",
+  border:    "#1e293b",
+  text:      "#f1f5f9",
+  muted:     "#64748b",
+  accent:    "#6366f1",
+  accentBg:  "rgba(99,102,241,0.15)",
+  hover:     "rgba(255,255,255,0.05)",
+  groupLbl:  "#334155",
+  activeTxt: "#ffffff",
+};
 
-  const sidebarBg = "#1b1b28";
-  const textColor = "#d6d9f0";
-  const mutedText = "#9aa1c7";
-  const accent = "#8b8dfb";
-  const hoverBg = "rgba(255,255,255,0.06)";
-  const activeBg = "rgba(139,92,246,0.18)";
-
-  const iconStyle = {
-    color: mutedText,
-    fontSize: 20,
-    transition: "color 0.2s ease, transform 0.2s ease",
-  };
-
-  const categorySx = (category) => ({
-    m: "10px 12px",
-    px: 1.2,
-    py: 1,
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    cursor: "pointer",
-    color: expandedCategory === category ? textColor : mutedText,
-    background: expandedCategory === category ? activeBg : "transparent",
-    transition: "all 0.2s ease",
-    "&:hover": {
-      color: textColor,
-      background: hoverBg,
-    },
-    "& svg": iconStyle,
-    "&:hover svg": {
-      color: accent,
-      transform: "translateX(2px)",
-    },
-  });
-
-  const menuStyles = {
-    button: {
-      borderRadius: "10px",
-      margin: "4px 12px",
-      padding: "8px 12px",
-      color: textColor,
-      fontWeight: 600,
-      background: "transparent",
-      transition: "all 0.2s ease",
-      ":hover": {
-        background: hoverBg,
-        color: "#ffffff",
+const NAV_GROUPS = [
+  {
+    items: [
+      { title: "Dashboard",      path: "/admin",     icon: <DashboardOutlined   fontSize="small" /> },
+      { title: "POS Management", path: "/admin/pos", icon: <PointOfSaleOutlined fontSize="small" /> },
+    ],
+  },
+  {
+    label: "CATALOG",
+    items: [
+      {
+        title: "Products", key: "product", icon: <Inventory2Outlined fontSize="small" />,
+        children: [
+          { title: "Add Product",    path: "/ecom/product/add",        icon: <AddBoxOutlined       fontSize="small" /> },
+          { title: "All Products",   path: "/ecom/product/all",        icon: <FormatListBulleted   fontSize="small" /> },
+          { title: "Stock Out",      path: "/ecom/product/stock-out",  icon: <WarningAmberOutlined fontSize="small" /> },
+          { title: "Attribute",      path: "/ecom/product/attribute",  icon: <TuneOutlined         fontSize="small" /> },
+        ],
       },
-    },
-  };
+      {
+        title: "Orders", key: "order", icon: <ReceiptLongOutlined fontSize="small" />,
+        children: [
+          { title: "All Orders",  path: "/ecom/order/all",       icon: <ReceiptLongOutlined fontSize="small" /> },
+          { title: "Completed",   path: "/ecom/order/completed", icon: <CheckCircleOutline  fontSize="small" /> },
+        ],
+      },
+    ],
+  },
+  {
+    label: "MANAGEMENT",
+    items: [
+      {
+        title: "Sellers", key: "seller", icon: <StorefrontOutlined fontSize="small" />,
+        children: [
+          { title: "Add Seller",  path: "/ecom/seller/add", icon: <PersonAddAltOutlined fontSize="small" /> },
+          { title: "All Sellers", path: "/ecom/seller/all", icon: <StorefrontOutlined   fontSize="small" /> },
+        ],
+      },
+      {
+        title: "Customers", key: "customer", icon: <PeopleAltOutlined fontSize="small" />,
+        children: [
+          { title: "Add Customer",  path: "/ecom/customer/add", icon: <PersonAddAltOutlined fontSize="small" /> },
+          { title: "All Customers", path: "/ecom/customer/all", icon: <PeopleAltOutlined   fontSize="small" /> },
+        ],
+      },
+      {
+        title: "Delivery", key: "delivery", icon: <LocalShippingOutlined fontSize="small" />,
+        children: [
+          { title: "Add Delivery Man",   path: "/ecom/delivery/add", icon: <PersonAddAltOutlined fontSize="small" /> },
+          { title: "All Delivery Men",   path: "/ecom/delivery/all", icon: <DeliveryDiningOutlined fontSize="small" /> },
+        ],
+      },
+    ],
+  },
+  {
+    label: "ANALYTICS",
+    items: [
+      {
+        title: "Reports", key: "report", icon: <BarChartOutlined fontSize="small" />,
+        children: [
+          { title: "Today Report", path: "/ecom/report/today",      icon: <TodayOutlined         fontSize="small" /> },
+          { title: "Month Wise",   path: "/ecom/report/month-wise", icon: <CalendarMonthOutlined fontSize="small" /> },
+        ],
+      },
+    ],
+  },
+  {
+    label: "SYSTEM",
+    items: [
+      {
+        title: "Media", key: "media", icon: <PermMediaOutlined fontSize="small" />,
+        children: [
+          { title: "Add Banner", path: "/ecom/banner/add",  icon: <ImageOutlined      fontSize="small" /> },
+          { title: "All Media",  path: "/ecom/media/all",   icon: <CollectionsOutlined fontSize="small" /> },
+        ],
+      },
+      {
+        title: "Settings", key: "setting", icon: <SettingsOutlined fontSize="small" />,
+        children: [
+          { title: "Website Logo",  path: "/ecom/setting/website-logo",  icon: <LanguageOutlined       fontSize="small" /> },
+          { title: "Shipping Cost", path: "/ecom/setting/shipping-cost", icon: <LocalShippingOutlined  fontSize="small" /> },
+        ],
+      },
+      {
+        title: "Accounts", key: "accounts", icon: <AccountBalanceOutlined fontSize="small" />,
+        children: [
+          { title: "Ledgers",      path: "/ecom/accounts/transactions", icon: <AccountBalanceWalletOutlined fontSize="small" /> },
+          { title: "Settlements",  path: "/ecom/accounts/settlements",  icon: <CurrencyExchangeOutlined     fontSize="small" /> },
+        ],
+      },
+    ],
+  },
+];
 
-  const toggleCategory = (category) => {
-    setExpandedCategory((prev) => (prev === category ? null : category));
-  };
+// ── Flat nav item (no children)
+function NavItem({ item, collapsed, isActive, onClick }) {
+  return (
+    <Tooltip title={collapsed ? item.title : ""} placement="right" arrow>
+      <Box
+        onClick={onClick}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          px: "14px",
+          py: "8px",
+          mx: "8px",
+          borderRadius: "8px",
+          cursor: "pointer",
+          background: isActive ? S.accentBg : "transparent",
+          border: `1px solid ${isActive ? "rgba(99,102,241,0.25)" : "transparent"}`,
+          color: isActive ? S.activeTxt : S.muted,
+          transition: "all 0.15s ease",
+          "&:hover": { background: isActive ? S.accentBg : S.hover, color: S.text },
+        }}
+      >
+        <Box sx={{ color: isActive ? S.accent : "inherit", display: "flex", flexShrink: 0 }}>
+          {item.icon}
+        </Box>
+        {!collapsed && (
+          <Typography sx={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: "inherit", flex: 1, lineHeight: 1.4 }}>
+            {item.title}
+          </Typography>
+        )}
+        {!collapsed && isActive && (
+          <Box sx={{ width: 5, height: 5, borderRadius: "50%", background: S.accent, flexShrink: 0 }} />
+        )}
+      </Box>
+    </Tooltip>
+  );
+}
+
+// ── Group header that expands/collapses
+function GroupItem({ item, collapsed, isOpen, hasActive, onToggle, children }) {
+  return (
+    <Box>
+      <Tooltip title={collapsed ? item.title : ""} placement="right" arrow>
+        <Box
+          onClick={onToggle}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            px: "14px",
+            py: "8px",
+            mx: "8px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            background: hasActive ? "rgba(99,102,241,0.06)" : "transparent",
+            color: hasActive ? S.text : S.muted,
+            transition: "all 0.15s ease",
+            "&:hover": { background: S.hover, color: S.text },
+          }}
+        >
+          <Box sx={{ color: hasActive ? S.accent : "inherit", display: "flex", flexShrink: 0 }}>
+            {item.icon}
+          </Box>
+          {!collapsed && (
+            <>
+              <Typography sx={{ fontSize: 13, fontWeight: hasActive ? 600 : 500, color: "inherit", flex: 1, lineHeight: 1.4 }}>
+                {item.title}
+              </Typography>
+              <Box sx={{ color: S.groupLbl, display: "flex" }}>
+                {isOpen ? <ExpandLess sx={{ fontSize: 16 }} /> : <ExpandMore sx={{ fontSize: 16 }} />}
+              </Box>
+            </>
+          )}
+        </Box>
+      </Tooltip>
+
+      {!collapsed && (
+        <Collapse in={isOpen} timeout={200}>
+          <Box sx={{ ml: "22px", borderLeft: `1px solid ${S.border}`, pl: "8px", my: "2px" }}>
+            {children}
+          </Box>
+        </Collapse>
+      )}
+    </Box>
+  );
+}
+
+// ── Child item inside group
+function ChildItem({ item, isActive, onClick }) {
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        px: "10px",
+        py: "7px",
+        borderRadius: "6px",
+        cursor: "pointer",
+        background: isActive ? S.accentBg : "transparent",
+        color: isActive ? S.activeTxt : S.muted,
+        transition: "all 0.15s ease",
+        "&:hover": { background: S.hover, color: S.text },
+      }}
+    >
+      <Box sx={{ color: isActive ? S.accent : "inherit", display: "flex", flexShrink: 0 }}>
+        {item.icon}
+      </Box>
+      <Typography sx={{ fontSize: 12.5, fontWeight: isActive ? 600 : 400, color: "inherit", lineHeight: 1.4 }}>
+        {item.title}
+      </Typography>
+    </Box>
+  );
+}
+
+// ── Main Sidebar
+const SideBar = () => {
+  const [collapsed, setCollapsed]  = useState(false);
+  const [openGroup, setOpenGroup]  = useState(null);
+  const { toggled, setToggled }    = useContext(ToggledContext);
+  const location                   = useLocation();
+  const navigate                   = useNavigate();
+
+  const isActive    = (path) => location.pathname === path;
+  const hasActive   = (children) => children?.some((c) => location.pathname === c.path);
+  const toggleGroup = (key) => setOpenGroup((prev) => (prev === key ? null : key));
 
   return (
     <Sidebar
-      backgroundColor={sidebarBg}
-      rootStyles={{ border: 0, height: "100%" }}
+      backgroundColor={S.bg}
+      rootStyles={{ border: 0, height: "100%", borderRight: `1px solid ${S.border}` }}
       collapsed={collapsed}
       onBackdropClick={() => setToggled(false)}
       toggled={toggled}
       breakPoint="md"
     >
-      <Menu
-        menuItemStyles={{
-          button: { ":hover": { background: "transparent" } },
+      {/* ── Logo bar */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "space-between",
+          px: collapsed ? 0 : "16px",
+          py: "16px",
+          borderBottom: `1px solid ${S.border}`,
+          mb: "4px",
         }}
       >
-        <MenuItem
-          rootStyles={{
-            margin: "10px 0 20px 0",
-            color: textColor,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {!collapsed && (
-              <Box display="flex" alignItems="center" gap="12px" sx={{ transition: ".3s ease" }}>
-                <img style={{ width: "30px", height: "30px", borderRadius: "8px" }} src={logo} alt="Logo" />
-                <Typography variant="h6" fontWeight="bold" textTransform="capitalize" color={accent}>
-                  {appname}
-                </Typography>
-              </Box>
-            )}
-            <IconButton onClick={() => setCollapsed(!collapsed)}>
-              <MenuOutlined sx={{ color: textColor }} />
-            </IconButton>
+        {!collapsed && (
+          <Box display="flex" alignItems="center" gap="10px">
+            <Box
+              sx={{
+                width: 32, height: 32,
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <img src={logo} alt="logo" style={{ width: 20, height: 20, objectFit: "contain", filter: "brightness(10)" }} />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: "#f1f5f9", fontSize: 15, letterSpacing: "-0.01em" }}>
+              {appname}
+            </Typography>
           </Box>
-        </MenuItem>
-      </Menu>
-
-      <Box mb={5} pl={collapsed ? undefined : "5%"}>
-        {/* Dashboard */}
-        <Typography
-          variant="h6"
-          sx={categorySx("dashboard")}
-          onClick={() => navigate("/admin")}
+        )}
+        <IconButton
+          onClick={() => setCollapsed(!collapsed)}
+          size="small"
+          sx={{ color: S.muted, "&:hover": { color: S.text, background: S.hover } }}
         >
-          <DashboardOutlined />
-          {!collapsed ? "Dashboard" : ""}
-        </Typography>
+          <MenuOutlined fontSize="small" />
+        </IconButton>
+      </Box>
 
-        {/* Product */}
-        <Typography
-          variant="h6"
-          sx={categorySx("product")}
-          onClick={() => toggleCategory("product")}
-        >
-          <Inventory2Outlined />
-          {!collapsed ? "Product" : ""}
-        </Typography>
+      {/* ── Navigation */}
+      <Box sx={{ overflowY: "auto", overflowX: "hidden", pb: 3 }}>
+        {NAV_GROUPS.map((group, gi) => (
+          <Box key={gi} sx={{ mb: "2px" }}>
+            {!collapsed && group.label && (
+              <Typography
+                sx={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+                  color: S.groupLbl, px: "22px", pt: "18px", pb: "6px",
+                  textTransform: "uppercase",
+                }}
+              >
+                {group.label}
+              </Typography>
+            )}
+            {collapsed && group.label && <Box sx={{ height: 10 }} />}
 
-        <Collapse in={expandedCategory === "product"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Add Product" path="/ecom/product/add" colors={colors} icon={<AddBoxOutlined sx={iconStyle} />} />
-            <Item title="All Products" path="/ecom/product/all" colors={colors} icon={<Inventory2Outlined sx={iconStyle} />} />
-            <Item title="Stock Out Products" path="/ecom/product/stock-out" colors={colors} icon={<WarningAmberOutlined sx={iconStyle} />} />
-       
-            <Item title="Attribute" path="/ecom/product/attribute" colors={colors} icon={<TuneOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Order */}
-        <Typography
-          variant="h6"
-          sx={categorySx("order")}
-          onClick={() => toggleCategory("order")}
-        >
-          <ReceiptLongOutlined />
-          {!collapsed ? "Order" : ""}
-        </Typography>
-
-        <Collapse in={expandedCategory === "order"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="All Orders" path="/ecom/order/all" colors={colors} icon={<ReceiptLongOutlined sx={iconStyle} />} />
-            <Item title="Completed Orders" path="/ecom/order/completed" colors={colors} icon={<ShoppingCartOutlined sx={iconStyle} />} />
-            {/* <Item title="Order Report" path="/ecom/order/report" colors={colors} icon={<BarChartOutlined sx={iconStyle} />} /> */}
-            <Item title="POS Management" path="/admin/pos" colors={colors} icon={<PointOfSaleOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Seller */}
-        <Typography
-          variant="h6"
-          sx={categorySx("seller")}
-          onClick={() => toggleCategory("seller")}
-        >
-          <StorefrontOutlined />
-          {!collapsed ? "Seller" : ""}
-        </Typography>
-
-        <Collapse in={expandedCategory === "seller"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Add Seller" path="/ecom/seller/add" colors={colors} icon={<PersonAddAltOutlined sx={iconStyle} />} />
-            <Item title="All Sellers" path="/ecom/seller/all" colors={colors} icon={<StorefrontOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Customer */}
-        <Typography
-          variant="h6"
-          sx={categorySx("customer")}
-          onClick={() => toggleCategory("customer")}
-        >
-          <PeopleAltOutlined />
-          {!collapsed ? "Customer" : ""}
-        </Typography>
-
-        <Collapse in={expandedCategory === "customer"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Add Customer" path="/ecom/customer/add" colors={colors} icon={<PersonAddAltOutlined sx={iconStyle} />} />
-            <Item title="All Customers" path="/ecom/customer/all" colors={colors} icon={<PeopleAltOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Report */}
-        <Typography
-          variant="h6"
-          sx={categorySx("report")}
-          onClick={() => toggleCategory("report")}
-        >
-          <BarChartOutlined />
-          {!collapsed ? "Report" : ""}
-        </Typography>
-
-        <Collapse in={expandedCategory === "report"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Today Report" path="/ecom/report/today" colors={colors} icon={<TodayOutlined sx={iconStyle} />} />
-            <Item title="Month Wise Report" path="/ecom/report/month-wise" colors={colors} icon={<CalendarMonthOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Delivery */}
-        <Typography
-          variant="h6"
-          sx={categorySx("delivery")}
-          onClick={() => toggleCategory("delivery")}
-        >
-          <LocalShippingOutlined />
-          {!collapsed ? "Delivery" : ""}
-        </Typography>
-
-        <Collapse in={expandedCategory === "delivery"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Add Delivery Man" path="/ecom/delivery/add" colors={colors} icon={<PersonAddAltOutlined sx={iconStyle} />} />
-            <Item title="All Delivery Mans" path="/ecom/delivery/all" colors={colors} icon={<DeliveryDiningOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Media */}
-        <Typography
-          variant="h6"
-          sx={categorySx("media")}
-          onClick={() => toggleCategory("media")}
-        >
-          <PermMediaOutlined />
-          {!collapsed ? "Media" : ""}
-        </Typography>
-
-        <Collapse in={expandedCategory === "media"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Add Banner" path="/ecom/banner/add" colors={colors} icon={<ImageOutlined sx={iconStyle} />} />
-            <Item title="All Media" path="/ecom/media/all" colors={colors} icon={<CollectionsOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-
-        {/* Setting */}
-        <Typography
-          variant="h6"
-          sx={categorySx("setting")}
-          onClick={() => toggleCategory("setting")}
-        >
-          <SettingsOutlined />
-          {!collapsed ? "Setting" : ""}
-        </Typography>
-        <Collapse in={expandedCategory === "setting"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Website Setting" path="/ecom/setting/website-logo" colors={colors} icon={<LanguageOutlined sx={iconStyle} />} />
-            <Item title="Shipping Cost Setting" path="/ecom/setting/shipping-cost" colors={colors} icon={<LocalShippingOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-        {/* Accounts */}
-
-        <Typography
-          variant="h6"
-          sx={categorySx("accounts")}
-          onClick={() => toggleCategory("accounts")}
-        >
-          <AccountBalanceOutlined />
-          {!collapsed ? "Accounts" : ""}
-        </Typography>
-        <Collapse in={expandedCategory === "accounts"}>
-          <Menu menuItemStyles={menuStyles}>
-            <Item title="Ledgers" path="/ecom/accounts/transactions" colors={colors} icon={<AccountBalanceWalletOutlined sx={iconStyle} />} />
-            <Item title="Settlements" path="/ecom/accounts/settlements" colors={colors} icon={<CurrencyExchangeOutlined sx={iconStyle} />} />
-          </Menu>
-        </Collapse>
-      
-
+            {group.items.map((item, ii) =>
+              item.children ? (
+                <GroupItem
+                  key={ii}
+                  item={item}
+                  collapsed={collapsed}
+                  isOpen={openGroup === item.key}
+                  hasActive={hasActive(item.children)}
+                  onToggle={() => toggleGroup(item.key)}
+                >
+                  {item.children.map((child, ci) => (
+                    <ChildItem
+                      key={ci}
+                      item={child}
+                      isActive={isActive(child.path)}
+                      onClick={() => navigate(child.path)}
+                    />
+                  ))}
+                </GroupItem>
+              ) : (
+                <NavItem
+                  key={ii}
+                  item={item}
+                  collapsed={collapsed}
+                  isActive={isActive(item.path)}
+                  onClick={() => navigate(item.path)}
+                />
+              )
+            )}
+          </Box>
+        ))}
       </Box>
     </Sidebar>
   );

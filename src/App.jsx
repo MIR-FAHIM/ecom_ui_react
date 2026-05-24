@@ -3,34 +3,36 @@ import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import { Navbar, SideBar } from "./scenes";
 import { Outlet } from "react-router-dom";
-import { Provider } from 'react-redux'
 import { DataProvider } from "./context/DataContext";
+
 export const ToggledContext = createContext(null);
 
 function App() {
   const [theme, colorMode] = useMode();
   const [toggled, setToggled] = useState(false);
-  const values = { toggled, setToggled };
 
   return (
     <DataProvider>
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <ToggledContext.Provider value={values}>
-            <Box sx={{ display: "flex", height: "100vh", maxWidth: "100%" }}>
+          <ToggledContext.Provider value={{ toggled, setToggled }}>
+            <Box sx={{ display: "flex", height: "100vh", overflow: "hidden", bgcolor: "background.default" }}>
+              {/* Sidebar */}
               <SideBar />
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                  maxWidth: "100%",
-                }}
-              >
+
+              {/* Main content column */}
+              <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
                 <Navbar />
-                <Box sx={{ overflowY: "auto", flex: 1, maxWidth: "100%" }}>
+                <Box
+                  component="main"
+                  sx={{
+                    flexGrow: 1,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    bgcolor: "background.default",
+                  }}
+                >
                   <Outlet />
                 </Box>
               </Box>
@@ -43,3 +45,4 @@ function App() {
 }
 
 export default App;
+
