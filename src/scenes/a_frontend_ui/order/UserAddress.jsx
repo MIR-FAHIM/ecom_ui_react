@@ -42,10 +42,10 @@ const UserAddress = ({
           p: 1.4,
           borderRadius: 3,
           border: `1px solid ${selected ? "transparent" : divider}`,
-          background: selected ? theme.palette.primary[100] : surface,
+          background: selected ? theme.palette.primary[700] : surface,
           boxShadow: "none",
           transition: "transform 140ms ease, box-shadow 200ms ease, filter 200ms ease",
-          color: selected ? colors.primary[800] : ink,
+          color: selected ? "#1f1c1c" : ink,
           "&:hover": { transform: "translateY(-1px)" },
         }}
       >

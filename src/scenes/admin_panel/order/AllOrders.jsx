@@ -376,6 +376,7 @@ const AllOrders = () => {
                 <TableHead>
                   <TableRow sx={{ bgcolor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "#f8fafc" }}>
                     <TableCell sx={headCellSx}>Order</TableCell>
+                    <TableCell sx={headCellSx}>Shop</TableCell>
                     <TableCell sx={headCellSx}>Customer</TableCell>
                     <TableCell sx={headCellSx} align="right">Total</TableCell>
                     <TableCell sx={headCellSx}>Status</TableCell>
@@ -401,6 +402,12 @@ const AllOrders = () => {
                             #{order.order_number}
                           </Typography>
                           <Typography variant="caption" sx={{ color: "text.disabled" }}>ID: {order.id}</Typography>
+                        </Stack>
+                      </TableCell>
+                               <TableCell sx={cellSx}>
+                        <Stack>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{order.shop_name || "—"}</Typography>
+                          <Typography variant="caption" sx={{ color: "text.secondary" }}>ID:{order.shop_id || ""}</Typography>
                         </Stack>
                       </TableCell>
                       <TableCell sx={cellSx}>

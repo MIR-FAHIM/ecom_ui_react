@@ -963,7 +963,7 @@ const Topbar = () => {
             <Button onClick={() => navigate("/seller-register")} startIcon={<StorefrontIcon sx={{ fontSize: 14 }} />} sx={{ textTransform: "none", fontWeight: 500, fontSize: 12, color: colors.gray[300], px: 1, py: 0.4, borderRadius: 1.5, "&:hover": { background: colors.primary[400], color: colors.gray[100] } }}>Seller Register</Button>
             <Button onClick={() => navigate("/about")} startIcon={<InfoOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ textTransform: "none", fontWeight: 500, fontSize: 12, color: colors.gray[300], px: 1, py: 0.4, borderRadius: 1.5, "&:hover": { background: colors.primary[400], color: colors.gray[100] } }}>About</Button>
             <Divider orientation="vertical" flexItem sx={{ opacity: 0.2, mx: 0.5 }} />
-            <Typography variant="caption" sx={{ fontWeight: 700, color: colors.yellowAccent ? colors.yellowAccent[400] : "#f5d000", whiteSpace: "nowrap", fontSize: 11 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: "#000000", whiteSpace: "nowrap", fontSize: 11 }}>
               Helpline: <Box component="span" sx={{ color: colors.gray[100], ml: 0.3 }}>+88 09611-677686</Box>
             </Typography>
           </Box>
