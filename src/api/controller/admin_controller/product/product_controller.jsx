@@ -256,7 +256,6 @@ export const updateProduct = async (id,productData) => {
 
 export const addProdductDiscount = async (data) => {
   try {
-    // productData should contain: shop_id, category_id, brand_id, name, slug, sku, short_description, description
     const response = await axiosInstance.post('/api/product-discounts/create', data, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -266,6 +265,30 @@ export const addProdductDiscount = async (data) => {
     return response.data;
   } catch (error) {
     console.error('Error creating addProdductDiscount:', error);
+    return { status: 'error', message: error.message };
+  }
+};
+
+export const getProductDiscount = async (productId) => {
+  try {
+    const response = await axiosInstance.get(`/api/product-discounts/list?product_id=${productId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem("authToken")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product discount:', error);
+    return null;
+  }
+};
+
+export const updateProductDiscount = async (discountId, data) => {
+  try {
+    const response = await axiosInstance.put(`/api/product-discounts/update/${discountId}`, data, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem("authToken")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating product discount:', error);
     return { status: 'error', message: error.message };
   }
 };

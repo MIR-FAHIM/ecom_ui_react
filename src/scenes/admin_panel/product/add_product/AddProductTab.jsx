@@ -25,7 +25,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TuneIcon from "@mui/icons-material/Tune";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
-import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
+import { createProduct, uploadProductImages, addProductAttribute } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller";
 import { getCategoryChildren } from "../../../../api/controller/admin_controller/product/product_setting_controller.jsx";
@@ -286,7 +286,7 @@ productFormData.append("user_id", general.user_id || localStorage.getItem("userI
 productFormData.append("description", general.description || "");
 
 productFormData.append("unit_price", general.unit_price);
-productFormData.append("purchase_price", general.purchase_price);
+if (general.purchase_price) productFormData.append("purchase_price", general.purchase_price);
 productFormData.append("current_stock", general.current_stock);
 
 productFormData.append("variant_product", general.variant_product ? 1 : 0);
@@ -299,10 +299,18 @@ productFormData.append("cash_on_delivery", general.cash_on_delivery ? 1 : 0);
 productFormData.append("stock_visibility_state", general.stock_visibility_state ? 1 : 0);
 
 productFormData.append("unit", general.unit || "");
-productFormData.append("weight", general.weight || "");
+if (general.weight) productFormData.append("weight", general.weight);
 if (general.short_description) productFormData.append("short_description", general.short_description);
 if (general.meta_title) productFormData.append("meta_title", general.meta_title);
 if (general.meta_description) productFormData.append("meta_description", general.meta_description);
+if (general.discount_value && parseFloat(general.discount_value) > 0) {
+  productFormData.append("discount", general.discount_value);
+  productFormData.append("discount_type", general.discount_type === "flat" ? "amount" : "percent");
+  if (general.discount_start_date)
+    productFormData.append("discount_start_date", Math.floor(new Date(general.discount_start_date).getTime() / 1000));
+  if (general.discount_end_date)
+    productFormData.append("discount_end_date", Math.floor(new Date(general.discount_end_date).getTime() / 1000));
+}
 
       // attach media library images as photo ids
       const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
@@ -351,21 +359,7 @@ if (general.meta_description) productFormData.append("meta_description", general
         }
       }
 
-        // Step 4: Add discount if provided
-        try {
-          if (general.discount_value && parseFloat(general.discount_value) > 0) {
-            const dfd = new FormData();
-            dfd.append("product_id", productId);
-            dfd.append("type", general.discount_type || "flat");
-            dfd.append("value", general.discount_value);
-            if (general.discount_start_date) dfd.append("start_date", general.discount_start_date);
-            if (general.discount_end_date) dfd.append("end_date", general.discount_end_date);
-            if (general.discount_min_qty) dfd.append("min_qty", general.discount_min_qty);
-            await addProdductDiscount(dfd);
-          }
-        } catch (e) {
-          console.error("Failed to add product discount:", e);
-        }
+        // Step 4 removed: discount is now saved with the product in Step 1
 
       setSuccessMessage("Product created successfully!");
       setTimeout(() => {

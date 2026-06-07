@@ -26,6 +26,7 @@ import { getCategory, getBrand } from "../../../../api/controller/admin_controll
 import { getCategoryChildren, getProductCategoryDetails } from "../../../../api/controller/admin_controller/product/product_setting_controller.jsx";
 import { PRODUCT_WIZARD_STEPS } from "../add_product/components/productWizard/steps";
 import StepGeneral from "../add_product/components/productWizard/StepGeneral";
+import StepDiscountSeo from "../add_product/components/productWizard/StepDiscountSeo";
 import StepAttributes from "../add_product/components/productWizard/StepAttributes";
 import StepImages from "../add_product/components/productWizard/StepImages";
 
@@ -38,7 +39,6 @@ const DEFAULT_GENERAL = {
 	added_by: 1,
 	description: "",
 	unit_price: "",
-	discount: "",
 	purchase_price: "",
 	current_stock: "",
 	variant_product: 0,
@@ -51,6 +51,15 @@ const DEFAULT_GENERAL = {
 	stock_visibility_state: 1,
 	unit: "",
 	weight: "",
+	// Discount
+	discount_type: "flat",
+	discount_value: "",
+	discount_start_date: "",
+	discount_end_date: "",
+	// SEO
+	short_description: "",
+	meta_title: "",
+	meta_description: "",
 };
 
 function EditProduct() {
@@ -190,7 +199,6 @@ function EditProduct() {
 				added_by: product?.added_by ?? localStorage.getItem("userId") ?? 1,
 				description: product?.description ?? "",
 				unit_price: product?.unit_price ?? "",
-				discount: product?.discount ?? "",
 				purchase_price: product?.purchase_price ?? "",
 				current_stock: product?.current_stock ?? "",
 				variant_product: product?.variant_product ?? 0,
@@ -204,6 +212,18 @@ function EditProduct() {
 					product?.stock_visibility_state === "quantity" ? 1 : (product?.stock_visibility_state ?? 1),
 				unit: product?.unit ?? "",
 				weight: product?.weight ?? "",
+				short_description: product?.short_description ?? "",
+				meta_title: product?.meta_title ?? "",
+				meta_description: product?.meta_description ?? "",
+				// Discount — loaded directly from product columns
+				discount_type: product?.discount_type === "amount" ? "flat" : (product?.discount_type ?? "flat"),
+				discount_value: product?.discount ?? "",
+				discount_start_date: product?.discount_start_date
+					? new Date(product.discount_start_date * 1000).toISOString().slice(0, 10)
+					: "",
+				discount_end_date: product?.discount_end_date
+					? new Date(product.discount_end_date * 1000).toISOString().slice(0, 10)
+					: "",
 			});
 
 			setImages(buildImageList(product));
@@ -277,12 +297,28 @@ function EditProduct() {
 			if (!general.user_id) nextErrors.user_id = "User ID is required";
 		}
 
-		if (s === 2) {
+		if (s === 1) {
+			const discVal = parseFloat(general.discount_value);
+			if (general.discount_value !== "" && general.discount_value !== undefined && !isNaN(discVal)) {
+				if (discVal <= 0) nextErrors.discount_value = "Discount must be greater than 0";
+				if (general.discount_type === "percent" && discVal > 100)
+					nextErrors.discount_value = "Percentage discount cannot exceed 100%";
+				const price = parseFloat(general.unit_price) || 0;
+				if (general.discount_type === "flat" && price > 0 && discVal >= price)
+					nextErrors.discount_value = "Flat discount cannot equal or exceed the unit price";
+			}
+			if (general.discount_start_date && general.discount_end_date) {
+				if (new Date(general.discount_end_date) <= new Date(general.discount_start_date))
+					nextErrors.discount_end_date = "End date must be after start date";
+			}
+		}
+
+		if (s === 3) {
 			if (images.length === 0) {
 				nextErrors.images = "At least one image is required";
 			} else {
 				const primaryCount = images.filter((i) => i.is_primary).length;
-			
+				if (primaryCount !== 1) nextErrors.images = "Exactly one image must be primary";
 			}
 		}
 
@@ -308,8 +344,7 @@ function EditProduct() {
 			productFormData.append("user_id", general.user_id);
 			productFormData.append("description", general.description || "");
 			productFormData.append("unit_price", general.unit_price);
-			productFormData.append("discount", general.discount);
-			productFormData.append("purchase_price", general.purchase_price);
+			if (general.purchase_price) productFormData.append("purchase_price", general.purchase_price);
 			productFormData.append("current_stock", general.current_stock);
 			productFormData.append("variant_product", general.variant_product ? 1 : 0);
 			productFormData.append("todays_deal", general.todays_deal ? 1 : 0);
@@ -320,7 +355,22 @@ function EditProduct() {
 			productFormData.append("cash_on_delivery", general.cash_on_delivery ? 1 : 0);
 			productFormData.append("stock_visibility_state", general.stock_visibility_state ? 1 : 0);
 			productFormData.append("unit", general.unit || "");
-			productFormData.append("weight", general.weight || "");
+			if (general.weight) productFormData.append("weight", general.weight);
+			if (general.short_description) productFormData.append("short_description", general.short_description);
+			if (general.meta_title) productFormData.append("meta_title", general.meta_title);
+			if (general.meta_description) productFormData.append("meta_description", general.meta_description);
+			// Discount fields sent directly on product
+			if (general.discount_value && parseFloat(general.discount_value) > 0) {
+				productFormData.append("discount", general.discount_value);
+				productFormData.append("discount_type", general.discount_type === "flat" ? "amount" : "percent");
+				if (general.discount_start_date)
+					productFormData.append("discount_start_date", Math.floor(new Date(general.discount_start_date).getTime() / 1000));
+				if (general.discount_end_date)
+					productFormData.append("discount_end_date", Math.floor(new Date(general.discount_end_date).getTime() / 1000));
+			} else {
+				productFormData.append("discount", "");
+				productFormData.append("discount_type", "");
+			}
 
 			const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
 			mediaPhotos.forEach((mid) => productFormData.append("photos[]", mid));
@@ -389,6 +439,16 @@ function EditProduct() {
 		}
 
 		if (step === 1) {
+			return (
+				<StepDiscountSeo
+					value={general}
+					onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
+					errors={errors}
+				/>
+			);
+		}
+
+		if (step === 2) {
 			return (
 				<StepAttributes
 					value={attributes}
