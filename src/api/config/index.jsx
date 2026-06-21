@@ -9,8 +9,8 @@ export const google_map_key = "AIzaSyBgU4tHGpYmeb5KYEB9Ml4qoz1w-JJmKb8";
 // export const companyID = "3";
 
 //jashore bro
-export const base_url = "https://ecomvendor.braintodo.com/public";
-export const image_file_url = "https://ecomvendor.braintodo.com/storage/app/public";
+export const base_url = "https://myzooapi.myzoo.asia/public";
+export const image_file_url = "https://myzooapi.myzoo.asia/storage/app/public";
 export const appname = "Ecommerce Vendor App";
 export const siteName = "Ecommerce Vendor";
 export const companyID = "3";
