@@ -1,22 +1,22 @@
 import React from "react";
 import { Typography, Box, Paper, Container } from "@mui/material";
 
-const Terms = () => (
+const Privacy = () => (
   <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
     <Paper sx={{ p: { xs: 3, md: 5 }, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
-          Home / Terms & Conditions
+          Home / Privacy Policy
         </Typography>
         <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
-          Terms & Conditions
+          Privacy Policy
         </Typography>
         <Typography variant="subtitle2" sx={{ color: "text.secondary", mt: 0.5 }}>
           MYZOO LTD. | MYZOO.ASIA
         </Typography>
       </Box>
 
-      <Typography variant="h6" sx={{ fontWeight: 700, mt: 2 }}>USER TERMS & CONDITIONS</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 700, mt: 2 }}>USER PRIVACY POLICY</Typography>
 
       <Typography variant="body1" sx={{ color: "text.secondary", lineHeight: 1.8, mt: 1.5 }}>
         The following terms and conditions ("UUT&C") govern your access to and use of MYZOO.ASIA (the
@@ -289,4 +289,4 @@ const Terms = () => (
   </Container>
 );
 
-export default Terms;
+export default Privacy;

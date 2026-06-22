@@ -78,9 +78,9 @@ const BottomBar = () => {
         }}
       >
         {[
-          { icon: <Description sx={{ fontSize: 28, color: "#444" }} />, label: "Terms & Conditions", path: "/privacy" },
-          { icon: <Undo sx={{ fontSize: 28, color: "#444" }} />, label: "Return Policy", path: "/privacy" },
-          { icon: <HeadsetMic sx={{ fontSize: 28, color: "#444" }} />, label: "Support Policy", path: "/privacy" },
+          { icon: <Description sx={{ fontSize: 28, color: "#444" }} />, label: "Terms & Conditions", path: "/terms" },
+          { icon: <Undo sx={{ fontSize: 28, color: "#444" }} />, label: "Return Policy", path: "/return-policy" },
+          { icon: <HeadsetMic sx={{ fontSize: 28, color: "#444" }} />, label: "Support Policy", path: "/support-policy" },
           { icon: <Security sx={{ fontSize: 28, color: "#444" }} />, label: "Privacy Policy", path: "/privacy" },
         ].map((item, idx, arr) => (
           <Box
