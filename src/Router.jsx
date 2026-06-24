@@ -48,6 +48,7 @@ import EditProduct from "./scenes/admin_panel/product/edit_product/EditProduct";
 import AllDeliveryMans from "./scenes/admin_panel/delivery/AllDeliveryMans";
 import WebsiteLogoSetting from "./scenes/admin_panel/setting/website_logo_setting";
 import ShippingCostSetting from "./scenes/admin_panel/setting/shipping_cost";
+import ErrorLog from "./scenes/admin_panel/error_log/ErrorLog";
 
 // Public / frontend pages
 import HomeP1 from "./scenes/a_frontend_ui/home/Home";
@@ -198,6 +199,7 @@ const AppRouter = () => {
           <Route path="/ecom/accounts/settlements" element={<Settlement />} />
           <Route path="/ecom/setting/website-logo" element={<WebsiteLogoSetting />} />
           <Route path="/ecom/setting/shipping-cost" element={<ShippingCostSetting />} />
+          <Route path="/ecom/error-log" element={<ErrorLog />} />
 
 
           <Route path="/ecom/banner/add" element={<AddBanner />} />

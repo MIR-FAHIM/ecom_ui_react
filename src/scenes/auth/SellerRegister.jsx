@@ -8,6 +8,7 @@ import {
   Divider,
   Grid,
   InputAdornment,
+  IconButton,
   TextField,
   Typography,
   Alert,
@@ -22,6 +23,9 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import { useNavigate } from "react-router-dom";
 import { registerSeller } from "../../api/controller/admin_controller/user_controller.jsx";
 
 const initialForm = {
@@ -35,11 +39,13 @@ const initialForm = {
 };
 
 const SellerRegister = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,6 +66,7 @@ const SellerRegister = () => {
       if (res?.status === "success") {
         setSuccess("Seller registered successfully!");
         setForm(initialForm);
+        navigate("/seller-login");
       } else {
         setError(res?.message || "Registration failed");
       }
@@ -221,12 +228,24 @@ const SellerRegister = () => {
                     value={form.password}
                     onChange={handleChange}
                     fullWidth
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
                           <LockOutlinedIcon fontSize="small" color="action" />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            onMouseDown={(e) => e.preventDefault()}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOffOutlinedIcon fontSize="small" /> : <VisibilityOutlinedIcon fontSize="small" />}
+                          </IconButton>
                         </InputAdornment>
                       ),
                     }}

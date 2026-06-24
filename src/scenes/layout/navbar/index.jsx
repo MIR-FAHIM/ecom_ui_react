@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import {
   Box,
+  Button,
   IconButton,
   Typography,
   useMediaQuery,
@@ -23,6 +24,7 @@ import {
   PersonOutlined,
   SettingsOutlined,
   PointOfSaleOutlined,
+  LaunchOutlined,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ColorModeContext } from "../../../theme";
@@ -78,6 +80,10 @@ const Navbar = () => {
   const border    = isDark ? "#334155" : "#e2e8f0";
   const inputBg   = isDark ? "rgba(255,255,255,0.05)" : "#f8fafc";
 
+  const handleVisitCustomerSite = () => {
+    window.open("/", "_blank", "noopener,noreferrer");
+  };
+
   return (
     <Box
       sx={{
@@ -117,6 +123,37 @@ const Navbar = () => {
 
       {/* ── Right: actions */}
       <Box display="flex" alignItems="center" gap={0.5}>
+        {!isMobile && (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LaunchOutlined fontSize="small" />}
+            onClick={handleVisitCustomerSite}
+            sx={{
+              textTransform: "none",
+              borderRadius: "8px",
+              borderColor: border,
+              color: "text.primary",
+              fontWeight: 600,
+              mr: 0.5,
+              "&:hover": {
+                borderColor: "#6366f1",
+                background: isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.08)",
+              },
+            }}
+          >
+            See Customer Website
+          </Button>
+        )}
+
+        {isMobile && (
+          <Tooltip title="See Customer Website">
+            <IconButton size="small" onClick={handleVisitCustomerSite} sx={{ color: "text.secondary" }}>
+              <LaunchOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
         {/* Search (desktop) */}
         {!isMobile && (
           <Box

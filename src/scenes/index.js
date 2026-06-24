@@ -38,6 +38,7 @@ import WebsiteLogoSetting from "./admin_panel/setting/website_logo_setting";
 import ShippingCostSetting from "./admin_panel/setting/shipping_cost";
 import PosManagement from "./admin_panel/pos_management/PosManagement";
 import RelatedProductAdd from "./admin_panel/product/add_product/components/RelatedProductAdd";
+import ErrorLog from "./admin_panel/error_log/ErrorLog";
 
 
 
@@ -122,6 +123,7 @@ export {
   PosManagement,
 Privacy,
 RelatedProductAdd,
+ErrorLog,
 SellerRegister,
   // user frontend
   HomeP1,
