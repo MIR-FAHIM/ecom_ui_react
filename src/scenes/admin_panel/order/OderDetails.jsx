@@ -574,7 +574,7 @@ const OderDetails = () => {
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
-                  <InfoRow icon={<SettingsOutlinedIcon sx={{ fontSize: 16 }} />} label="Delivery Status" value={<StatusChip status={assignment?.status ?? "N/A"} config={ORDER_STATUS_CONFIG} />} />
+                  <InfoRow icon={<SettingsOutlinedIcon sx={{ fontSize: 16 }} />} label="Delivery Status" value={<StatusChip status={assignment?.status ?? "N/A"} config={dynamicOrderStatusConfig} />} />
                   <InfoRow icon={<NoteAltOutlinedIcon sx={{ fontSize: 16 }} />} label="Note" value={assignment?.note || "N/A"} />
                   <InfoRow icon={<CalendarTodayOutlinedIcon sx={{ fontSize: 16 }} />} label="Assigned At" value={assignment?.created_at ? formatDate(assignment.created_at) : "N/A"} />
                 </Stack>
