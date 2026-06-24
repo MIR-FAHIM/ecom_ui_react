@@ -29,6 +29,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import NotesIcon from "@mui/icons-material/Notes";
 import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
 import { useNavigate } from "react-router-dom";
 
 import { getUserAddresses, addUserAddress, deleteUserAddress } from "../../../api/controller/admin_controller/order/user_address_controller";
@@ -66,11 +67,14 @@ const ProceedOrder = () => {
 
   const [cart, setCart] = useState(null);
   const [note, setNote] = useState("");
+  const [isOutsideDhaka, setIsOutsideDhaka] = useState(0);
 
   const [processing, setProcessing] = useState({});
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [shippingCost, setShippingCost] = useState(0);
   const [addressDeleting, setAddressDeleting] = useState({});
+
+  const selectedShippingCost = isOutsideDhaka === 1 ? 120 : 60;
 
   // IMPORTANT: this fixes your popup bug
   const [addrLoading, setAddrLoading] = useState(true);
@@ -370,6 +374,7 @@ const ProceedOrder = () => {
         `${addrObj.address}${addrObj.area ? `, ${addrObj.area}` : ""}${addrObj.district ? `, ${addrObj.district}` : ""}`
       );
       form.append("zone", addrObj.district || "");
+      form.append("is_outside_dhaka", String(isOutsideDhaka));
       form.append("note", note || "");
 
       const res = await checkOutOrder(form);
@@ -677,7 +682,7 @@ const ProceedOrder = () => {
                     Shipping Cost
                   </Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 700, color: ink }}>
-                    {money(shippingCost)}
+                    {money(selectedShippingCost)}
                   </Typography>
                 </Stack>
 
@@ -689,9 +694,68 @@ const ProceedOrder = () => {
                     variant="subtitle1"
                     sx={{ fontWeight: 700, color: theme.palette.secondary.main }}
                   >
-                    {money(Number(cart.subtotal || 0) + Number(shippingCost || 0))}
+                    {money(Number(cart.subtotal || 0) + Number(selectedShippingCost || 0))}
                   </Typography>
                 </Stack>
+
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 1.2,
+                    borderRadius: 1,
+                    border: `1px solid ${divider}`,
+                    background: surface2,
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: ink, mb: 1 }}>
+                    Delivery Zone
+                  </Typography>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                    <Button
+                      variant={isOutsideDhaka === 0 ? "contained" : "outlined"}
+                      onClick={() => setIsOutsideDhaka(0)}
+                      startIcon={isOutsideDhaka === 0 ? <CheckIcon /> : null}
+                      sx={{
+                        flex: 1,
+                        borderRadius: 1,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        borderColor: divider,
+                        background: isOutsideDhaka === 0 ? theme.palette.secondary.main : surface,
+                        color: isOutsideDhaka === 0 ? colors.gray[900] : ink,
+                        "&:hover": {
+                          background: isOutsideDhaka === 0 ? theme.palette.secondary.main : surface2,
+                          borderColor: divider,
+                          opacity: 0.92,
+                        },
+                      }}
+                    >
+                      Inside Dhaka
+                    </Button>
+
+                    <Button
+                      variant={isOutsideDhaka === 1 ? "contained" : "outlined"}
+                      onClick={() => setIsOutsideDhaka(1)}
+                      startIcon={isOutsideDhaka === 1 ? <CheckIcon /> : null}
+                      sx={{
+                        flex: 1,
+                        borderRadius: 1,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        borderColor: divider,
+                        background: isOutsideDhaka === 1 ? theme.palette.secondary.main : surface,
+                        color: isOutsideDhaka === 1 ? colors.gray[900] : ink,
+                        "&:hover": {
+                          background: isOutsideDhaka === 1 ? theme.palette.secondary.main : surface2,
+                          borderColor: divider,
+                          opacity: 0.92,
+                        },
+                      }}
+                    >
+                      Outside Dhaka
+                    </Button>
+                  </Stack>
+                </Box>
 
                 <TextField
                   label="Note (optional)"
