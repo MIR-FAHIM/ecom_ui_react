@@ -1,6 +1,7 @@
 import Navbar from "./layout/navbar";
 import SideBar from "./layout/sidebar";
 import Dashboard from "./admin_panel/dashboard";
+import AdminProfile from "./admin_panel/profile";
 import Login from "./auth/login";
 import AdminLogin from "./auth/admin_login";
 import SellerLogin from "./auth/seller_login";
@@ -88,6 +89,7 @@ export {
   Navbar,
   SideBar,
   Dashboard,
+  AdminProfile,
   Login,
   AdminLogin,
   SellerLogin,

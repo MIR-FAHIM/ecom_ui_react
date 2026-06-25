@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -29,9 +29,11 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { ColorModeContext } from "../../../theme";
 import { ToggledContext } from "../../../App";
+import { getUserDetail } from "../../../api/controller/admin_controller/user_controller";
 
 const PAGE_TITLES = {
   "/admin":                          "Dashboard",
+  "/admin/profile":                  "Profile",
   "/admin/pos":                      "POS Management",
   "/ecom/product/add":               "Add Product",
   "/ecom/product/all":               "All Products",
@@ -65,16 +67,40 @@ const Navbar = () => {
   const isDark                     = theme.palette.mode === "dark";
 
   const [anchorEl, setAnchorEl]    = useState(null);
+  const [adminName, setAdminName]  = useState("Admin");
+  const [adminEmail, setAdminEmail] = useState("admin@example.com");
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? "Admin Panel";
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userType");
+    localStorage.removeItem("userId");
     sessionStorage.removeItem("authToken");
     sessionStorage.removeItem("userType");
+    sessionStorage.removeItem("userId");
     navigate("/admin-login");
   };
+
+  useEffect(() => {
+    const loadAdmin = async () => {
+      try {
+        const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+        if (!userId) return;
+        const res = await getUserDetail(userId);
+        const user = res?.data?.data ?? res?.data?.user ?? res?.data ?? null;
+        const name = user?.name || user?.full_name || user?.user_name;
+        const email = user?.email || user?.mail;
+
+        if (name) setAdminName(name);
+        if (email) setAdminEmail(email);
+      } catch (error) {
+        console.error("Failed to load admin details:", error);
+      }
+    };
+
+    loadAdmin();
+  }, []);
 
   const navBg     = isDark ? "#1e293b" : "#ffffff";
   const border    = isDark ? "#334155" : "#e2e8f0";
@@ -224,14 +250,14 @@ const Navbar = () => {
             "&:hover": { background: isDark ? "rgba(255,255,255,0.05)" : "rgba(99,102,241,0.06)" },
           }}
         >
-          <Avatar sx={{ width: 32, height: 32, fontSize: 13 }}>A</Avatar>
+          <Avatar sx={{ width: 32, height: 32, fontSize: 13 }}>{adminName?.charAt(0)?.toUpperCase() || "A"}</Avatar>
           {!isMobile && (
             <Box>
               <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.2 }}>
-                Admin
+                {adminName}
               </Typography>
               <Typography sx={{ fontSize: 11, color: "text.secondary", lineHeight: 1.2 }}>
-                Administrator
+                {adminEmail}
               </Typography>
             </Box>
           )}
@@ -253,11 +279,11 @@ const Navbar = () => {
           }}
         >
           <Box sx={{ px: 2, py: 1.5 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "text.primary" }}>Admin</Typography>
-            <Typography sx={{ fontSize: 12, color: "text.secondary" }}>admin@example.com</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "text.primary" }}>{adminName}</Typography>
+            <Typography sx={{ fontSize: 12, color: "text.secondary" }}>{adminEmail}</Typography>
           </Box>
           <Divider />
-          <MenuItem onClick={() => { navigate("/admin"); setAnchorEl(null); }}>
+          <MenuItem onClick={() => { navigate("/admin/profile"); setAnchorEl(null); }}>
             <PersonOutlined fontSize="small" />  Profile
           </MenuItem>
           <MenuItem onClick={() => { navigate("/ecom/setting/website-logo"); setAnchorEl(null); }}>

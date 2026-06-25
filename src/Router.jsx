@@ -13,6 +13,7 @@ function ScrollToTop() {
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App";
 import Dashboard from "./scenes/admin_panel/dashboard";
+import AdminProfile from "./scenes/admin_panel/profile";
 import Login from "./scenes/auth/login";
 import AdminLogin from "./scenes/auth/admin_login";
 import SellerLogin from "./scenes/auth/seller_login";
@@ -81,6 +82,7 @@ import ShopList from "./scenes/a_frontend_ui/seller/ShopList";
 import SearchedProductList from "./scenes/a_frontend_ui/search_product/SearchedProductList";
 import PosManagement from "./scenes/admin_panel/pos_management/PosManagement";
 import RequireAdmin from "./components/RequireAdmin";
+import RequireSeller from "./components/RequireSeller";
 import Blogs from "./scenes/a_frontend_ui/blogs/Blogs";
 import FlashSale from "./scenes/a_frontend_ui/flash_sale/FlashSale";
 import AllProductsPage from "./scenes/a_frontend_ui/product/all_product/AllProductsPage";
@@ -156,6 +158,7 @@ const AppRouter = () => {
         <Route path="/" element={<RequireAdmin><App /></RequireAdmin>}>
 
           <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/pos" element={<PosManagement />} />
 
           {/* Product Routes */}
@@ -207,7 +210,7 @@ const AppRouter = () => {
 
         </Route>
 
-        <Route path="/seller" element={<SellerLayout />}>
+        <Route path="/seller" element={<RequireSeller><SellerLayout /></RequireSeller>}>
           <Route path="dashboard" element={<SellerDashboard />} />
           <Route path="products" element={<SellerPanelProducts />} />
           <Route path="shops" element={<SellerShopList />} />
@@ -215,7 +218,7 @@ const AppRouter = () => {
           <Route path="shops/products" element={<SellerShopProduct />} />
           <Route path="accounting" element={<SellerBankAccount />} />
           <Route path="add/product" element={<AddProductTabSeller />} />
-          <Route path="edit/product/:id" element={<EditProduct />} />
+          <Route path="edit/product/:id" element={<EditProductSeller />} />
           <Route path="orders" element={<OrderShop />} />
           <Route path="pos" element={<PosManagementSeller />} />
           <Route path="orders/:id" element={<SellerOrderDetails />} />

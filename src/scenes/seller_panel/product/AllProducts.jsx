@@ -167,7 +167,7 @@ const AllProducts = () => {
   const handleEdit = (productId) => {
     console.log("Edit product:", productId);
     // TODO: Navigate to edit product page
-navigate(`/ecom/product/edit/${productId}`);
+navigate(`/seller/edit/product/${productId}`);
   };
 
   const handleDelete = (productId) => {
