@@ -11,6 +11,7 @@ import LoginOtp from "./auth/LoginOtp";
 // Ecommerce imports
 import AddProductTab from "./admin_panel/product/add_product/AddProductTab";
 import AllProducts from "./admin_panel/product/AllProducts";
+import InactiveProducts from "./admin_panel/product/InactiveProducts";
 import StockOutProduct from "./admin_panel/product/StockOutProduct";
 import SellerProducts from "./admin_panel/product/SellerProducts";
 import AllOrdersEcom from "./admin_panel/order/AllOrders";
@@ -96,6 +97,7 @@ export {
   LoginOtp,
   AddProductTab,
   AllProducts,
+  InactiveProducts,
   StockOutProduct,
   SellerProducts,
   AllOrdersEcom,

@@ -37,6 +37,22 @@ export const getStockOutProduct = async (params = {}) => {
   }
 };
 
+export const getInactiveProduct = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/list/inactive`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getInactiveProduct:", error);
+    return { status: 'error', message: error.message, data: null };
+  }
+};
+
 export const getCategoryWiseProduct = async (params = {}) => {
   try {
     const response = await axiosInstance.get(`/api/products/category/wise`, {

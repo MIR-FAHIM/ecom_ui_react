@@ -22,6 +22,7 @@ import Register from "./scenes/auth/Register";
 import SellerRegister from "./scenes/auth/SellerRegister";
 import AddProductTab from "./scenes/admin_panel/product/add_product/AddProductTab";
 import AllProducts from "./scenes/admin_panel/product/AllProducts";
+import InactiveProducts from "./scenes/admin_panel/product/InactiveProducts";
 import StockOutProduct from "./scenes/admin_panel/product/StockOutProduct";
 import SellerProducts from "./scenes/admin_panel/product/SellerProducts";
 import AllOrdersEcom from "./scenes/admin_panel/order/AllOrders";
@@ -164,6 +165,7 @@ const AppRouter = () => {
           {/* Product Routes */}
           <Route path="/ecom/product/add" element={<AddProductTab />} />
           <Route path="/ecom/product/all" element={<AllProducts />} />
+          <Route path="/ecom/product/inactive" element={<InactiveProducts />} />
           <Route path="/ecom/product/stock-out" element={<StockOutProduct />} />
           <Route path="/ecom/product/seller" element={<SellerProducts />} />
           <Route path="/ecom/product/attribute" element={<Attribute />} />

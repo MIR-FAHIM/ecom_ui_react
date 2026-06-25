@@ -37,6 +37,7 @@ const PAGE_TITLES = {
   "/admin/pos":                      "POS Management",
   "/ecom/product/add":               "Add Product",
   "/ecom/product/all":               "All Products",
+  "/ecom/product/inactive":          "Inactive Products",
   "/ecom/product/stock-out":         "Stock Out Products",
   "/ecom/product/attribute":         "Attributes",
   "/ecom/order/all":                 "All Orders",

@@ -57,7 +57,7 @@ function StepGeneral({
   onParentCategoryChange,
   onSubCategoryChange,
 }) {
-	const localUserId = useMemo(() => localStorage.getItem("userId") || "", []);
+  const localUserId = useMemo(() => localStorage.getItem("userId") || "", []);
 	const shopOptions = Array.isArray(shops) ? shops : [];
 
   // Auto-slug: generate from name unless user has manually customised the slug
@@ -166,14 +166,28 @@ function StepGeneral({
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small" error={!!errors.user_id}>
+              <FormControl fullWidth size="small" error={!!errors.shop_id || !!errors.user_id}>
                 <InputLabel>Shop</InputLabel>
-                <Select value={value.user_id || ""} label="Shop" onOpen={onOpenDropdown} onChange={(e) => { const next = e.target.value; onChange({ user_id: next || localUserId }); }} sx={selectSx}>
-                  <MenuItem value={localUserId}>My account</MenuItem>
+                <Select
+                  value={value.shop_id || ""}
+                  label="Shop"
+                  onOpen={onOpenDropdown}
+                  onChange={(e) => {
+                    const nextShopId = e.target.value;
+                    const selectedShop = shopOptions.find((shop) => String(shop.id) === String(nextShopId));
+                    onChange({
+                      shop_id: nextShopId || "",
+                      user_id: selectedShop?.user_id ?? localUserId,
+                    });
+                  }}
+                  sx={selectSx}
+                >
+                  <MenuItem value=""><em>Select shop</em></MenuItem>
                   {shopOptions.map((shop) => (
-                    <MenuItem key={shop.id} value={shop.user_id ?? shop.id}>{shop.name || `Shop #${shop.id}`}</MenuItem>
+                    <MenuItem key={shop.id} value={shop.id}>{shop.shop_name || shop.name || `Shop #${shop.id}`}</MenuItem>
                   ))}
                 </Select>
+                {(errors.shop_id || errors.user_id) ? <FormHelperText>{errors.shop_id || errors.user_id}</FormHelperText> : null}
               </FormControl>
             </Grid>
           </Grid>

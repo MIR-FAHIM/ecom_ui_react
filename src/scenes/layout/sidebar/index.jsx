@@ -66,6 +66,7 @@ const NAV_GROUPS = [
         children: [
           { title: "Add Product",    path: "/ecom/product/add",        icon: <AddBoxOutlined       fontSize="small" /> },
           { title: "All Products",   path: "/ecom/product/all",        icon: <FormatListBulleted   fontSize="small" /> },
+          { title: "Inactive",       path: "/ecom/product/inactive",   icon: <WarningAmberOutlined fontSize="small" /> },
           { title: "Stock Out",      path: "/ecom/product/stock-out",  icon: <WarningAmberOutlined fontSize="small" /> },
           { title: "Attribute",      path: "/ecom/product/attribute",  icon: <TuneOutlined         fontSize="small" /> },
         ],

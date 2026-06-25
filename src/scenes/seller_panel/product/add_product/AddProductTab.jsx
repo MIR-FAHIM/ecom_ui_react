@@ -15,13 +15,14 @@ import {
   Alert,
 } from "@mui/material";
 import { tokens } from "../../../../theme";
-import { createProduct, uploadProductImages, addProductAttribute, addProdductDiscount } from "../../../../api/controller/admin_controller/product/product_controller";
+import { createProduct, uploadProductImages, addProductAttribute } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getAllShops } from "../../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import { getCategory, getBrand } from "../../../../api/controller/admin_controller/product/setting_controller";
 import { getCategoryChildren } from "../../../../api/controller/admin_controller/product/product_setting_controller.jsx";
 
 import { PRODUCT_WIZARD_STEPS } from "../../../admin_panel/product/add_product/components/productWizard/steps";
 import StepGeneral from "../../../admin_panel/product/add_product/components/productWizard/StepGeneral";
+import StepDiscountSeo from "../../../admin_panel/product/add_product/components/productWizard/StepDiscountSeo";
 import StepAttributes from "../../../admin_panel/product/add_product/components/productWizard/StepAttributes";
 import StepImages from "../../../admin_panel/product/add_product/components/productWizard/StepImages";
 
@@ -87,6 +88,18 @@ function AddProductTabSeller() {
 
     unit: "",
     weight: "",
+
+    // Discount
+    discount_type: "flat",
+    discount_value: "",
+    discount_min_qty: "",
+    discount_start_date: "",
+    discount_end_date: "",
+
+    // SEO
+    short_description: "",
+    meta_title: "",
+    meta_description: "",
   });
 
   const [attributes, setAttributes] = useState([]);
@@ -177,7 +190,23 @@ function AddProductTabSeller() {
       if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
     }
 
-    if (s === 2) {
+    if (s === 1) {
+      const discVal = parseFloat(general.discount_value);
+      if (general.discount_value !== "" && general.discount_value !== undefined && !isNaN(discVal)) {
+        if (discVal <= 0) nextErrors.discount_value = "Discount must be greater than 0";
+        if (general.discount_type === "percent" && discVal > 100)
+          nextErrors.discount_value = "Percentage discount cannot exceed 100%";
+        const price = parseFloat(general.unit_price) || 0;
+        if (general.discount_type === "flat" && price > 0 && discVal >= price)
+          nextErrors.discount_value = "Flat discount cannot equal or exceed the unit price";
+      }
+      if (general.discount_start_date && general.discount_end_date) {
+        if (new Date(general.discount_end_date) <= new Date(general.discount_start_date))
+          nextErrors.discount_end_date = "End date must be after start date";
+      }
+    }
+
+    if (s === 3) {
       if (images.length === 0) {
         nextErrors.images = "At least one image is required";
       } else {
@@ -225,7 +254,18 @@ function AddProductTabSeller() {
       productFormData.append("stock_visibility_state", general.stock_visibility_state ? 1 : 0);
 
       productFormData.append("unit", general.unit || "");
-      productFormData.append("weight", general.weight || "");
+      if (general.weight) productFormData.append("weight", general.weight);
+      if (general.short_description) productFormData.append("short_description", general.short_description);
+      if (general.meta_title) productFormData.append("meta_title", general.meta_title);
+      if (general.meta_description) productFormData.append("meta_description", general.meta_description);
+      if (general.discount_value && parseFloat(general.discount_value) > 0) {
+        productFormData.append("discount", general.discount_value);
+        productFormData.append("discount_type", general.discount_type === "flat" ? "amount" : "percent");
+        if (general.discount_start_date)
+          productFormData.append("discount_start_date", Math.floor(new Date(general.discount_start_date).getTime() / 1000));
+        if (general.discount_end_date)
+          productFormData.append("discount_end_date", Math.floor(new Date(general.discount_end_date).getTime() / 1000));
+      }
 
       // attach media library images as photo ids
       const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
@@ -274,19 +314,7 @@ function AddProductTabSeller() {
         }
       }
 
-      // Step 4: Add discount if provided
-      try {
-        if (general?.discount_value) {
-          const dfd = new FormData();
-          dfd.append('product_id', productId);
-          dfd.append('type', general.discount_type || 'flat');
-          dfd.append('value', general.discount_value);
-          const discResp = await addProdductDiscount(dfd);
-          console.debug('Discount response:', discResp);
-        }
-      } catch (e) {
-        console.error('Failed to add product discount:', e);
-      }
+      // Discount is saved directly with product payload
 
       setSuccessMessage("Product created successfully!");
       setTimeout(() => {
@@ -325,6 +353,16 @@ function AddProductTabSeller() {
     }
 
     if (step === 1) {
+      return (
+        <StepDiscountSeo
+          value={general}
+          onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
+          errors={errors}
+        />
+      );
+    }
+
+    if (step === 2) {
       return (
         <StepAttributes
           value={attributes}

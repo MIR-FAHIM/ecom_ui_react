@@ -192,7 +192,7 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
             </Box>
           </Stack>
 
-          <Box
+          {/* <Box
             onClick={() => fileInputRef.current?.click()}
             sx={{
               border: "2px dashed",
@@ -209,7 +209,7 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
             <CloudUploadOutlinedIcon sx={{ fontSize: 44, color: "text.disabled", mb: 1 }} />
             <Typography variant="body1" sx={{ fontWeight: 700, mb: 0.5 }}>Click to upload or drag and drop</Typography>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>PNG, JPG, GIF up to 10MB</Typography>
-          </Box>
+          </Box> */}
 
           <Button
             variant="outlined"

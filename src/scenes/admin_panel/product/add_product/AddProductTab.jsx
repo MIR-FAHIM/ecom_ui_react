@@ -105,8 +105,9 @@ function AddProductTab() {
   slug: "",
   category_id: "",
   brand_id: "",
-  user_id: localStorage.getItem("userId") || "",
-  added_by: 1,
+  shop_id: "",
+  user_id: localStorage.getItem("userId"),
+  added_by: localStorage.getItem("userId") || "",
 
   description: "",
 
@@ -225,6 +226,7 @@ function AddProductTab() {
         nextErrors.category_id = "Sub category is required";
       }
       if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
+      if (!general.shop_id) nextErrors.shop_id = "Shop is required";
       if (!general.unit_price || parseFloat(general.unit_price) <= 0)
         nextErrors.unit_price = "Unit price is required and must be greater than 0";
       if (
@@ -275,13 +277,20 @@ function AddProductTab() {
 
       // Step 1: Create product
       const productFormData = new FormData();
+const selectedShop = shops.find((shop) => String(shop.id) === String(general.shop_id));
+if (!selectedShop?.id || !selectedShop?.user_id) {
+  setErrorMessage("Please select a valid shop before creating product");
+  setLoading(false);
+  return;
+}
 productFormData.append("name", general.name);
 productFormData.append("slug", general.slug);
 productFormData.append("category_id", general.category_id);
 if (general.brand_id) productFormData.append("brand_id", general.brand_id);
+productFormData.append("shop_id", selectedShop.id);
 
 productFormData.append("added_by", localStorage.getItem("userId") );
-productFormData.append("user_id", general.user_id || localStorage.getItem("userId") );
+productFormData.append("user_id", selectedShop.user_id );
 
 productFormData.append("description", general.description || "");
 
