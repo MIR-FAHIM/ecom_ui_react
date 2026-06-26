@@ -217,7 +217,7 @@ function EditProduct() {
 				meta_description: product?.meta_description ?? "",
 				// Discount — loaded directly from product columns
 				discount_type: product?.discount_type === "amount" ? "flat" : (product?.discount_type ?? "flat"),
-				discount_value: product?.discount ?? "",
+				discount_value: product?.discount ? product.discount : "",
 				discount_start_date: product?.discount_start_date
 					? new Date(product.discount_start_date * 1000).toISOString().slice(0, 10)
 					: "",
@@ -299,8 +299,7 @@ function EditProduct() {
 
 		if (s === 1) {
 			const discVal = parseFloat(general.discount_value);
-			if (general.discount_value !== "" && general.discount_value !== undefined && !isNaN(discVal)) {
-				if (discVal <= 0) nextErrors.discount_value = "Discount must be greater than 0";
+			if (!isNaN(discVal) && discVal > 0) {
 				if (general.discount_type === "percent" && discVal > 100)
 					nextErrors.discount_value = "Percentage discount cannot exceed 100%";
 				const price = parseFloat(general.unit_price) || 0;

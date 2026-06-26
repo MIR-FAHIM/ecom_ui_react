@@ -365,6 +365,7 @@ const InactiveProducts = () => {
                     <TableCell sx={{ ...headSx, width: 60 }}>Image</TableCell>
                     <TableCell sx={headSx}>Product</TableCell>
                     <TableCell sx={headSx}>Category / Brand</TableCell>
+                     <TableCell sx={headSx}>Shop</TableCell>
                     <TableCell sx={{ ...headSx, textAlign: "right" }}>Price</TableCell>
                     <TableCell sx={{ ...headSx, textAlign: "center" }}>Stock</TableCell>
                     <TableCell sx={headSx}>Status</TableCell>
@@ -396,6 +397,9 @@ const InactiveProducts = () => {
                       <TableCell sx={cellSx}>
                         <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.4 }}>{product.category?.name || "-"}</Typography>
                         {product.brand?.name && <Typography variant="caption" color="text.secondary">{product.brand.name}</Typography>}
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        {product.shop?.shop_name && <Typography variant="caption" color="text.secondary">{product.shop.shop_name}</Typography>}
                       </TableCell>
                       <TableCell sx={{ ...cellSx, textAlign: "right" }}>
                         <Typography variant="body2" fontWeight={800} sx={{ color: "#6366f1", lineHeight: 1.4 }}>{fmtPrice(product.unit_price)}</Typography>
