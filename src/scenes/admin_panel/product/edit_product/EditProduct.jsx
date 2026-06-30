@@ -83,8 +83,12 @@ function EditProduct() {
 	const [brands, setBrands] = useState([]);
 	const [shops, setShops] = useState([]);
 	const [parentCategoryId, setParentCategoryId] = useState("");
+	const [subCategoryId, setSubCategoryId] = useState("");
+	const [childCategoryId, setChildCategoryId] = useState("");
 	const [subCategories, setSubCategories] = useState([]);
+	const [childCategories, setChildCategories] = useState([]);
 	const [loadingSubCategories, setLoadingSubCategories] = useState(false);
+	const [loadingChildCategories, setLoadingChildCategories] = useState(false);
 
 	const normalizeList = (x) => {
 		if (!x) return [];
@@ -233,8 +237,28 @@ function EditProduct() {
 				try {
 					const categoryRes = await getProductCategoryDetails(categoryId);
 					const category = categoryRes?.data ?? categoryRes;
-					const parentId = category?.parent_id ? String(category.parent_id) : String(categoryId);
-					setParentCategoryId(parentId);
+					const selectedLevel = Number(category?.level ?? 0);
+					const selectedParentId = category?.parent_id ? String(category.parent_id) : "";
+
+					if (selectedLevel === 2 && selectedParentId) {
+						const subCategoryRes = await getProductCategoryDetails(selectedParentId);
+						const subCategory = subCategoryRes?.data ?? subCategoryRes;
+						setParentCategoryId(subCategory?.parent_id ? String(subCategory.parent_id) : "");
+						setSubCategoryId(selectedParentId);
+						setChildCategoryId(String(categoryId));
+					} else if (selectedLevel === 1 && selectedParentId) {
+						setParentCategoryId(selectedParentId);
+						setSubCategoryId(String(categoryId));
+						setChildCategoryId("");
+					} else if (selectedParentId) {
+						setParentCategoryId(selectedParentId);
+						setSubCategoryId(String(categoryId));
+						setChildCategoryId("");
+					} else {
+						setParentCategoryId(String(categoryId));
+						setSubCategoryId("");
+						setChildCategoryId("");
+					}
 				} catch (e) {
 					console.error("Failed to load category details:", e);
 					setParentCategoryId(String(categoryId));
@@ -260,6 +284,9 @@ function EditProduct() {
 		const loadSubCategories = async () => {
 			if (!parentCategoryId) {
 				setSubCategories([]);
+				setSubCategoryId("");
+				setChildCategories([]);
+				setChildCategoryId("");
 				return;
 			}
 
@@ -270,7 +297,7 @@ function EditProduct() {
 				setSubCategories(list);
 				setGeneral((prev) => {
 					if (list.length === 0) return { ...prev, category_id: parentCategoryId };
-					const exists = list.some((c) => String(c?.id ?? c?._id) === String(prev.category_id));
+					const exists = list.some((c) => String(c?.id ?? c?._id) === String(subCategoryId));
 					return exists ? prev : { ...prev, category_id: "" };
 				});
 			} catch (e) {
@@ -284,6 +311,35 @@ function EditProduct() {
 		loadSubCategories();
 	}, [parentCategoryId]);
 
+	useEffect(() => {
+		const loadChildCategories = async () => {
+			if (!subCategoryId) {
+				setChildCategories([]);
+				setChildCategoryId("");
+				return;
+			}
+
+			setLoadingChildCategories(true);
+			try {
+				const res = await getCategoryChildren(subCategoryId);
+				const list = normalizeList(res);
+				setChildCategories(list);
+				setGeneral((prev) => {
+					if (list.length === 0) return { ...prev, category_id: subCategoryId };
+					const exists = list.some((c) => String(c?.id ?? c?._id) === String(childCategoryId));
+					return exists ? prev : { ...prev, category_id: "" };
+				});
+			} catch (e) {
+				console.error("Error loading child categories:", e);
+				setChildCategories([]);
+			} finally {
+				setLoadingChildCategories(false);
+			}
+		};
+
+		loadChildCategories();
+	}, [subCategoryId]);
+
 	const canGoBack = step > 0;
 	const canGoNext = step < PRODUCT_WIZARD_STEPS.length - 1;
 
@@ -294,6 +350,12 @@ function EditProduct() {
 			if (!general.name || !general.name.trim()) nextErrors.name = "Product name is required";
 			if (!general.slug || !general.slug.trim()) nextErrors.slug = "Slug is required";
 			if (!general.category_id) nextErrors.category_id = "Category is required";
+			if (parentCategoryId && subCategories.length > 0 && !subCategoryId) {
+				nextErrors.category_id = "Sub category is required";
+			}
+			if (subCategoryId && childCategories.length > 0 && !childCategoryId) {
+				nextErrors.category_id = "Child category is required";
+			}
 			if (!general.user_id) nextErrors.user_id = "User ID is required";
 		}
 
@@ -422,13 +484,29 @@ function EditProduct() {
 					value={general}
 					onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
 					parentCategoryId={parentCategoryId}
+					subCategoryId={subCategoryId}
 					subCategories={subCategories}
 					loadingSubCategories={loadingSubCategories}
+					childCategoryId={childCategoryId}
+					childCategories={childCategories}
+					loadingChildCategories={loadingChildCategories}
 					onParentCategoryChange={(nextId) => {
 						setParentCategoryId(nextId);
+						setSubCategoryId("");
+						setChildCategoryId("");
+						setChildCategories([]);
 						setGeneral((prev) => ({ ...prev, category_id: "" }));
 					}}
-					onSubCategoryChange={(nextId) => setGeneral((prev) => ({ ...prev, category_id: nextId }))}
+					onSubCategoryChange={(nextId) => {
+						setSubCategoryId(nextId);
+						setChildCategoryId("");
+						setChildCategories([]);
+						setGeneral((prev) => ({ ...prev, category_id: nextId }));
+					}}
+					onChildCategoryChange={(nextId) => {
+						setChildCategoryId(nextId);
+						setGeneral((prev) => ({ ...prev, category_id: nextId }));
+					}}
 					onOpenDropdown={loadDropdowns}
 					errors={errors}
 					categories={categories}
@@ -475,7 +553,23 @@ function EditProduct() {
 				}}
 			/>
 		);
-	}, [step, general, attributes, images, errors, categories, brands, shops]);
+	}, [
+		step,
+		general,
+		attributes,
+		images,
+		errors,
+		categories,
+		brands,
+		shops,
+		parentCategoryId,
+		subCategoryId,
+		childCategoryId,
+		subCategories,
+		childCategories,
+		loadingSubCategories,
+		loadingChildCategories,
+	]);
 
 	return (
 		<Box sx={{ p: 3 }}>

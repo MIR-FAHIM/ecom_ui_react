@@ -54,8 +54,13 @@ function StepGeneral({
   parentCategoryId = "",
   subCategories = [],
   loadingSubCategories = false,
+  subCategoryId = "",
+  childCategories = [],
+  loadingChildCategories = false,
+  childCategoryId = "",
   onParentCategoryChange,
   onSubCategoryChange,
+  onChildCategoryChange,
 }) {
   const localUserId = useMemo(() => localStorage.getItem("userId") || "", []);
 	const shopOptions = Array.isArray(shops) ? shops : [];
@@ -125,7 +130,7 @@ function StepGeneral({
         <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
           <SectionHeader icon={<CategoryOutlinedIcon sx={{ fontSize: 18 }} />} title="Category & Brand" color="#16a34a" bg="#f0fdf4" />
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} md={4}>
               <FormControl fullWidth size="small" error={!!errors.category_id}>
                 <InputLabel>Category</InputLabel>
                 <Select value={parentCategoryId} label="Category" onChange={(e) => onParentCategoryChange?.(e.target.value)} sx={selectSx}>
@@ -137,10 +142,10 @@ function StepGeneral({
                 {errors.category_id ? <FormHelperText>{errors.category_id}</FormHelperText> : null}
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} md={4}>
               <FormControl fullWidth size="small" error={!!errors.category_id}>
                 <InputLabel>Sub Category</InputLabel>
-                <Select value={subCategories.length > 0 ? (value.category_id || "") : ""} label="Sub Category" onChange={(e) => onSubCategoryChange?.(e.target.value)} disabled={!parentCategoryId || loadingSubCategories || subCategories.length === 0} sx={selectSx}>
+                <Select value={subCategories.length > 0 ? (subCategoryId || "") : ""} label="Sub Category" onChange={(e) => onSubCategoryChange?.(e.target.value)} disabled={!parentCategoryId || loadingSubCategories || subCategories.length === 0} sx={selectSx}>
                   <MenuItem value="">{loadingSubCategories ? "Loading..." : "Select sub category"}</MenuItem>
                   {subCategories.map((cat) => (
                     <MenuItem key={cat.id || cat._id} value={cat.id ?? cat._id}>{cat.name}</MenuItem>
@@ -150,6 +155,23 @@ function StepGeneral({
                   <FormHelperText>No sub categories found. Parent category will be used.</FormHelperText>
                 ) : null}
                 {subCategories.length > 0 && errors.category_id ? (
+                  <FormHelperText>{errors.category_id}</FormHelperText>
+                ) : null}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size="small" error={!!errors.category_id}>
+                <InputLabel>Child Category</InputLabel>
+                <Select value={childCategories.length > 0 ? (childCategoryId || "") : ""} label="Child Category" onChange={(e) => onChildCategoryChange?.(e.target.value)} disabled={!subCategoryId || loadingChildCategories || childCategories.length === 0} sx={selectSx}>
+                  <MenuItem value="">{loadingChildCategories ? "Loading..." : "Select child category"}</MenuItem>
+                  {childCategories.map((cat) => (
+                    <MenuItem key={cat.id || cat._id} value={cat.id ?? cat._id}>{cat.name}</MenuItem>
+                  ))}
+                </Select>
+                {subCategoryId && !loadingChildCategories && childCategories.length === 0 ? (
+                  <FormHelperText>No child categories found. Sub category will be used.</FormHelperText>
+                ) : null}
+                {childCategories.length > 0 && errors.category_id ? (
                   <FormHelperText>{errors.category_id}</FormHelperText>
                 ) : null}
               </FormControl>

@@ -5,6 +5,7 @@ import {
   Typography,
   Grid,
   Button,
+  Checkbox,
   TextField,
   CircularProgress,
   Snackbar,
@@ -30,10 +31,12 @@ import AddIcon from "@mui/icons-material/Add";
 import NotesIcon from "@mui/icons-material/Notes";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import PaymentsIcon from "@mui/icons-material/Payments";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 import { useNavigate } from "react-router-dom";
 
 import { getUserAddresses, addUserAddress, deleteUserAddress } from "../../../api/controller/admin_controller/order/user_address_controller";
-import { checkOutOrder } from "../../../api/controller/admin_controller/order/order_controller";
+import { checkOutOrder, initiateAamarPayPayment } from "../../../api/controller/admin_controller/order/order_controller";
 import { getShippingCosts , getDivisions, getDistricts} from "../../../api/controller/admin_controller/delivery/delivery_controller";
 import { getCartByUser, updateQuantity, deleteItem } from "../../../api/controller/admin_controller/order/cart_controller";
 import { tokens } from "../../../theme";
@@ -68,6 +71,7 @@ const ProceedOrder = () => {
   const [cart, setCart] = useState(null);
   const [note, setNote] = useState("");
   const [isOutsideDhaka, setIsOutsideDhaka] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
   const [processing, setProcessing] = useState({});
   const [openAddressModal, setOpenAddressModal] = useState(false);
@@ -92,6 +96,39 @@ const ProceedOrder = () => {
   const [districts, setDistricts] = useState([]);
   const [loadingDivisions, setLoadingDivisions] = useState(false);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  const getPaymentRedirectUrl = (payload) => {
+    const data = payload?.data ?? payload;
+
+    return (
+      data?.payment_url ||
+      data?.redirect_url ||
+      data?.gateway_url ||
+      data?.url ||
+      data?.data?.payment_url ||
+      data?.data?.redirect_url ||
+      data?.data?.gateway_url ||
+      data?.data?.url ||
+      null
+    );
+  };
+
+  const getOrderPaymentReference = (payload) => {
+    const data = payload?.data ?? payload;
+    const body = data?.data ?? data;
+    const order = body?.order ?? body;
+
+    return {
+      orderId: body?.order_id || order?.order_id || order?.id || data?.order_id || null,
+      paymentGroupId:
+        body?.payment_group_id ||
+        body?.paymentGroupId ||
+        order?.payment_group_id ||
+        order?.paymentGroupId ||
+        data?.payment_group_id ||
+        null,
+    };
+  };
 
   const resetNewAddress = () => {
     setNewName("");
@@ -365,6 +402,7 @@ const ProceedOrder = () => {
 
     setLoadingCheckout(true);
     try {
+      const checkoutTotal = Number(cart.subtotal || 0) + Number(selectedShippingCost || 0);
       const form = new FormData();
       form.append("user_id", userId);
       form.append("customer_name", addrObj.name || "");
@@ -375,7 +413,61 @@ const ProceedOrder = () => {
       );
       form.append("zone", addrObj.district || "");
       form.append("is_outside_dhaka", String(isOutsideDhaka));
+      form.append("shipping_cost", String(selectedShippingCost));
+      form.append("amount", String(checkoutTotal));
+      form.append("total_amount", String(checkoutTotal));
+      form.append("payment_method", paymentMethod === "online" ? "online" : "cod");
       form.append("note", note || "");
+      form.append("platform", "web");
+
+      if (paymentMethod === "online") {
+        const orderRes = await checkOutOrder(form);
+        const orderOk = orderRes?.data?.status === "success" || orderRes?.status === 200 || orderRes?.data?.success === true;
+        const { orderId, paymentGroupId } = getOrderPaymentReference(orderRes);
+
+        if (!orderOk) {
+          setMsg(orderRes?.data?.message || "Failed to create order for online payment");
+          return;
+        }
+
+        if (!orderId && !paymentGroupId) {
+          setMsg("Order created, but payment reference was missing.");
+          return;
+        }
+
+        const paymentForm = new FormData();
+        if (orderId) paymentForm.append("order_id", String(orderId));
+        if (paymentGroupId) paymentForm.append("payment_group_id", String(paymentGroupId));
+
+        const paymentRes = await initiateAamarPayPayment(paymentForm);
+        const paymentOk =
+          paymentRes?.data?.status === "success" ||
+          paymentRes?.status === 200 ||
+          paymentRes?.data?.success === true;
+        const redirectUrl = getPaymentRedirectUrl(paymentRes);
+
+        if (paymentOk && redirectUrl) {
+          sessionStorage.setItem(
+            "aamarpay_pending_payment",
+            JSON.stringify({
+              orderId,
+              paymentGroupId,
+              amount: checkoutTotal,
+              transactionId:
+                paymentRes?.data?.merchant_transaction_id ||
+                paymentRes?.data?.data?.merchant_transaction_id ||
+                paymentRes?.data?.tran_id ||
+                "",
+            })
+          );
+          setMsg(paymentRes?.data?.message || "Redirecting to online payment...");
+          window.location.href = redirectUrl;
+          return;
+        }
+
+        setMsg(paymentRes?.data?.message || "Failed to start online payment");
+        return;
+      }
 
       const res = await checkOutOrder(form);
       const ok = res?.data?.status === "success" || res?.status === 200;
@@ -390,7 +482,7 @@ const ProceedOrder = () => {
       }
     } catch (e) {
       console.error("Checkout error", e);
-      setMsg("Error placing order");
+      setMsg(paymentMethod === "online" ? "Error starting online payment" : "Error placing order");
     } finally {
       setLoadingCheckout(false);
     }
@@ -757,6 +849,73 @@ const ProceedOrder = () => {
                   </Stack>
                 </Box>
 
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 1.2,
+                    borderRadius: 1,
+                    border: `1px solid ${divider}`,
+                    background: surface2,
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: ink, mb: 1 }}>
+                    Payment Method
+                  </Typography>
+                  <Stack spacing={1}>
+                    {[
+                      { value: "cod", label: "Cash on Delivery", icon: <PaymentsIcon fontSize="small" /> },
+                      { value: "online", label: "Online Payment", icon: <CreditCardIcon fontSize="small" /> },
+                    ].map((method) => {
+                      const selected = paymentMethod === method.value;
+
+                      return (
+                        <Box
+                          key={method.value}
+                          onClick={() => setPaymentMethod(method.value)}
+                          sx={{
+                            p: 1,
+                            borderRadius: 1,
+                            border: `1px solid ${selected ? theme.palette.secondary.main : divider}`,
+                            background: selected ? theme.palette.secondary.main : surface,
+                            color: selected ? colors.gray[900] : ink,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 1,
+                            transition: "all 160ms ease",
+                            "&:hover": {
+                              background: selected ? theme.palette.secondary.main : surface2,
+                              borderColor: selected ? theme.palette.secondary.main : divider,
+                              opacity: 0.94,
+                            },
+                          }}
+                        >
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                            <Box sx={{ display: "grid", placeItems: "center", flex: "0 0 auto" }}>
+                              {method.icon}
+                            </Box>
+                            <Typography sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                              {method.label}
+                            </Typography>
+                          </Stack>
+
+                          <Checkbox
+                            checked={selected}
+                            onChange={() => setPaymentMethod(method.value)}
+                            sx={{
+                              p: 0,
+                              color: selected ? colors.gray[900] : subInk,
+                              "&.Mui-checked": { color: colors.gray[900] },
+                            }}
+                            inputProps={{ "aria-label": method.label }}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                </Box>
+
                 <TextField
                   label="Note (optional)"
                   value={note}
@@ -803,7 +962,7 @@ const ProceedOrder = () => {
                     variant="contained"
                     onClick={handleCheckout}
                     disabled={loadingCheckout}
-                    startIcon={loadingCheckout ? null : <LockCheckoutIcon />}
+                    startIcon={loadingCheckout ? null : paymentMethod === "online" ? <CreditCardIcon /> : <LockCheckoutIcon />}
                     sx={{
                       ml: "auto",
                       borderRadius: 1,
@@ -817,7 +976,7 @@ const ProceedOrder = () => {
                       "&.Mui-disabled": { opacity: 0.55 },
                     }}
                   >
-                    {loadingCheckout ? <CircularProgress size={18} /> : "Place Order"}
+                    {loadingCheckout ? <CircularProgress size={18} /> : paymentMethod === "online" ? "Continue to Payment" : "Place Order"}
                   </Button>
                 </Stack>
               </Box>

@@ -118,6 +118,51 @@ export const checkOutOrder = async (data) => {
   }
 
 }
+
+export const initiateAamarPayPayment = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/payments/aamarpay/initiate`, data, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error initiateAamarPayPayment data:", error);
+    throw error;
+  }
+}
+
+export const aamarPaySuccess = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/payments/aamarpay/success`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error aamarPaySuccess data:", error);
+    throw error;
+  }
+}
+
+export const aamarPayFail = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/payments/aamarpay/fail`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error aamarPayFail data:", error);
+    throw error;
+  }
+}
+
+export const aamarPayCancel = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/payments/aamarpay/cancel`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error aamarPayCancel data:", error);
+    throw error;
+  }
+}
+
 export const assignDeliveryBoy = async (data) => {
   try {
     const payload = data instanceof FormData ? data : (() => {

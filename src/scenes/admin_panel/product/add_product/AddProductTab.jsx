@@ -148,8 +148,12 @@ function AddProductTab() {
   const [brands, setBrands] = useState([]);
   const [shops, setShops] = useState([]);
   const [parentCategoryId, setParentCategoryId] = useState("");
+  const [subCategoryId, setSubCategoryId] = useState("");
+  const [childCategoryId, setChildCategoryId] = useState("");
   const [subCategories, setSubCategories] = useState([]);
+  const [childCategories, setChildCategories] = useState([]);
   const [loadingSubCategories, setLoadingSubCategories] = useState(false);
+  const [loadingChildCategories, setLoadingChildCategories] = useState(false);
 
   const loadDropdowns = async () => {
     try {
@@ -187,6 +191,9 @@ function AddProductTab() {
     const loadSubCategories = async () => {
       if (!parentCategoryId) {
         setSubCategories([]);
+        setSubCategoryId("");
+        setChildCategories([]);
+        setChildCategoryId("");
         setGeneral((prev) => ({ ...prev, category_id: "" }));
         return;
       }
@@ -198,7 +205,7 @@ function AddProductTab() {
         setSubCategories(list);
         setGeneral((prev) => {
           if (list.length === 0) return { ...prev, category_id: parentCategoryId };
-          const exists = list.some((c) => String(c?.id ?? c?._id) === String(prev.category_id));
+          const exists = list.some((c) => String(c?.id ?? c?._id) === String(subCategoryId));
           return exists ? prev : { ...prev, category_id: "" };
         });
       } catch (e) {
@@ -212,6 +219,35 @@ function AddProductTab() {
     loadSubCategories();
   }, [parentCategoryId]);
 
+  useEffect(() => {
+    const loadChildCategories = async () => {
+      if (!subCategoryId) {
+        setChildCategories([]);
+        setChildCategoryId("");
+        return;
+      }
+
+      setLoadingChildCategories(true);
+      try {
+        const res = await getCategoryChildren(subCategoryId);
+        const list = normalizeList(res);
+        setChildCategories(list);
+        setGeneral((prev) => {
+          if (list.length === 0) return { ...prev, category_id: subCategoryId };
+          const exists = list.some((c) => String(c?.id ?? c?._id) === String(childCategoryId));
+          return exists ? prev : { ...prev, category_id: "" };
+        });
+      } catch (e) {
+        console.error("Error loading child categories:", e);
+        setChildCategories([]);
+      } finally {
+        setLoadingChildCategories(false);
+      }
+    };
+
+    loadChildCategories();
+  }, [subCategoryId]);
+
   const canGoBack = step > 0;
   const canGoNext = step < PRODUCT_WIZARD_STEPS.length - 1;
 
@@ -222,8 +258,11 @@ function AddProductTab() {
       if (!general.name || !general.name.trim()) nextErrors.name = "Product name is required";
       if (!general.slug || !general.slug.trim()) nextErrors.slug = "Slug is required";
       if (!general.category_id) nextErrors.category_id = "Category is required";
-      if (parentCategoryId && subCategories.length > 0 && !general.category_id) {
+      if (parentCategoryId && subCategories.length > 0 && !subCategoryId) {
         nextErrors.category_id = "Sub category is required";
+      }
+      if (subCategoryId && childCategories.length > 0 && !childCategoryId) {
+        nextErrors.category_id = "Child category is required";
       }
       if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
       if (!general.shop_id) nextErrors.shop_id = "Shop is required";
@@ -389,13 +428,29 @@ if (general.discount_value && parseFloat(general.discount_value) > 0) {
           value={general}
           onChange={(patch) => setGeneral((prev) => ({ ...prev, ...patch }))}
           parentCategoryId={parentCategoryId}
+          subCategoryId={subCategoryId}
           subCategories={subCategories}
           loadingSubCategories={loadingSubCategories}
+          childCategoryId={childCategoryId}
+          childCategories={childCategories}
+          loadingChildCategories={loadingChildCategories}
           onParentCategoryChange={(id) => {
             setParentCategoryId(id);
+            setSubCategoryId("");
+            setChildCategoryId("");
+            setChildCategories([]);
             setGeneral((prev) => ({ ...prev, category_id: "" }));
           }}
-          onSubCategoryChange={(id) => setGeneral((prev) => ({ ...prev, category_id: id }))}
+          onSubCategoryChange={(id) => {
+            setSubCategoryId(id);
+            setChildCategoryId("");
+            setChildCategories([]);
+            setGeneral((prev) => ({ ...prev, category_id: id }));
+          }}
+          onChildCategoryChange={(id) => {
+            setChildCategoryId(id);
+            setGeneral((prev) => ({ ...prev, category_id: id }));
+          }}
           onOpenDropdown={loadDropdowns}
           errors={errors}
           categories={categories}
@@ -440,7 +495,23 @@ if (general.discount_value && parseFloat(general.discount_value) > 0) {
         }}
       />
     );
-  }, [step, general, attributes, images, errors]);
+  }, [
+    step,
+    general,
+    attributes,
+    images,
+    errors,
+    categories,
+    brands,
+    shops,
+    parentCategoryId,
+    subCategoryId,
+    childCategoryId,
+    subCategories,
+    childCategories,
+    loadingSubCategories,
+    loadingChildCategories,
+  ]);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", p: { xs: 2, md: 3 } }}>

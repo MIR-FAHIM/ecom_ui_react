@@ -70,6 +70,9 @@ import About from "./scenes/a_frontend_ui/pages/About";
 import Contact from "./scenes/a_frontend_ui/pages/Contact";
 import ProceedOrder from "./scenes/a_frontend_ui/order/ProceedOrder";
 import OrderSuccessPage from "./scenes/a_frontend_ui/order/order_success_page";
+import PaymentSuccessPage from "./scenes/a_frontend_ui/order/PaymentSuccessPage";
+import PaymentFailedPage from "./scenes/a_frontend_ui/order/PaymentFailedPage";
+import PaymentCancelledPage from "./scenes/a_frontend_ui/order/PaymentCancelledPage";
 import Profile from "./scenes/a_frontend_ui/profile/Profile";
 import UserOrder from "./scenes/a_frontend_ui/order/UserOrder";
 import UserOrderDetails from "./scenes/a_frontend_ui/order/UserOrderDetails";
@@ -134,6 +137,12 @@ const AppRouter = () => {
           <Route path="order/:id" element={<UserOrderDetails />} />
           <Route path="checkout" element={<ProceedOrder />} />
           <Route path="order-success" element={<OrderSuccessPage />} />
+          <Route path="payment-success" element={<PaymentSuccessPage />} />
+          <Route path="payment-failed" element={<PaymentFailedPage />} />
+          <Route path="payment-cancelled" element={<PaymentCancelledPage />} />
+          <Route path="payments/aamarpay/success" element={<PaymentSuccessPage />} />
+          <Route path="payments/aamarpay/fail" element={<PaymentFailedPage />} />
+          <Route path="payments/aamarpay/cancel" element={<PaymentCancelledPage />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="terms" element={<Terms />} />
           <Route path="blogs" element={<Blogs />} />
