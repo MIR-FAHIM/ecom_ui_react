@@ -22,9 +22,12 @@ import {
   InputAdornment,
   Tooltip,
   Divider,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import { Visibility, Edit, Delete, Refresh, Search } from "@mui/icons-material";
-import { getAllShops } from "../../../api/controller/admin_controller/user_controller.jsx";
+import { deleteSeller, getAllShops } from "../../../api/controller/admin_controller/user_controller.jsx";
 import { tokens } from "../../../theme";
 
 const AllSellers = () => {
@@ -38,6 +41,8 @@ const AllSellers = () => {
   const [page, setPage] = useState(0); // MUI is 0-based
   const [rowsPerPage, setRowsPerPage] = useState(20); // API default is 20
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
 
   // client-side search (within current page)
   const [searchQuery, setSearchQuery] = useState("");
@@ -122,10 +127,32 @@ const AllSellers = () => {
   const handleViewProfile = (sellerId) => navigate(`/ecom/admin/seller/${sellerId}`);
   const handleEdit = (sellerId) => navigate(`/ecom/admin/seller/edit/${sellerId}`);
 
-  const handleDelete = (sellerId) => {
-    if (window.confirm("Are you sure you want to delete this seller?")) {
-      console.log("Delete seller:", sellerId);
-      // add delete API later
+  const handleDelete = async (seller) => {
+    const sellerId = seller?.user?.id;
+    if (!sellerId) return;
+
+    const label = seller?.name ? `"${seller.name}"` : `seller #${sellerId}`;
+    if (!window.confirm(`Are you sure you want to delete ${label}?`)) return;
+
+    setDeletingId(sellerId);
+    try {
+      const response = await deleteSeller(sellerId);
+      const ok = response?.status === "success" || response?.success === true || response?.status === 200;
+
+      if (ok) {
+        setSnack({ open: true, msg: response?.message || "Seller deleted successfully.", severity: "success" });
+        await fetchSellers(page, rowsPerPage);
+      } else {
+        setSnack({ open: true, msg: response?.message || "Failed to delete seller.", severity: "error" });
+      }
+    } catch (err) {
+      setSnack({
+        open: true,
+        msg: err?.response?.data?.message || err?.message || "Failed to delete seller.",
+        severity: "error",
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -329,10 +356,11 @@ const AllSellers = () => {
                         <Tooltip title="Delete">
                           <IconButton
                             size="small"
-                            onClick={() => handleDelete(seller.id)}
+                            onClick={() => handleDelete(seller)}
+                            disabled={deletingId === seller?.id}
                             sx={{ color: theme.palette.error.main }}
                           >
-                            <Delete fontSize="small" />
+                            {deletingId === seller?.id ? <CircularProgress size={16} color="inherit" /> : <Delete fontSize="small" />}
                           </IconButton>
                         </Tooltip>
                       </TableCell>
@@ -361,6 +389,21 @@ const AllSellers = () => {
           />
         </CardContent>
       </Card>
+
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={3000}
+        onClose={() => setSnack((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          severity={snack.severity}
+          onClose={() => setSnack((prev) => ({ ...prev, open: false }))}
+          sx={{ width: "100%" }}
+        >
+          {snack.msg}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

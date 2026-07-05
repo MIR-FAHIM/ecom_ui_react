@@ -68,6 +68,7 @@ function AddProductTabSeller() {
     slug: "",
     category_id: "",
     brand_id: "",
+    shop_id: shopId,
     user_id: localStorage.getItem("userId") || "",
     added_by: 1,
 
@@ -188,6 +189,7 @@ function AddProductTabSeller() {
         nextErrors.category_id = "Sub category is required";
       }
       if (!general.user_id && !localStorage.getItem("userId")) nextErrors.user_id = "User ID is required";
+      if (!general.shop_id) nextErrors.shop_id = "Shop is required";
     }
 
     if (s === 1) {
@@ -236,7 +238,7 @@ function AddProductTabSeller() {
 
       productFormData.append("added_by", localStorage.getItem("userId"));
       productFormData.append("user_id", general.user_id || localStorage.getItem("userId"));
-      if (shopId) productFormData.append("shop_id", shopId);
+      if (general.shop_id) productFormData.append("shop_id", general.shop_id);
 
       productFormData.append("description", general.description || "");
 

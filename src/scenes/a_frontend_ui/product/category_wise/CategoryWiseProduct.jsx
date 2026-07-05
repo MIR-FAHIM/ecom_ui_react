@@ -17,7 +17,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getCategoryWiseProduct } from "../../../../api/controller/admin_controller/product/product_controller";
-import { getProductCategoryDetails, getCategoryChildren,  } from "../../../../api/controller/admin_controller/product/product_setting_controller";
+import { getProductCategoryDetails, getCategoryChildren} from "../../../../api/controller/admin_controller/product/product_setting_controller";
 import SmartProductCard from "../../home/components/ProductCard";
 import { tokens } from "../../../../theme";
 
@@ -36,6 +36,7 @@ const CategoryWiseProduct = () => {
 	const [error, setError] = useState("");
 	const [category, setCategory] = useState(null);
 	const [children, setChildren] = useState([]);
+	const [childrenByParent, setChildrenByParent] = useState({});
 	const [selectedSubId, setSelectedSubId] = useState("");
 	const [page, setPage] = useState(1);
 	const [pagination, setPagination] = useState({
@@ -98,15 +99,33 @@ const CategoryWiseProduct = () => {
 			if (!id) return;
 			try {
 				const res = await getCategoryChildren(id);
-				setChildren(safeArray(res?.data));
+				const list = safeArray(res?.data);
+				setChildren(list);
+
+				const nestedEntries = await Promise.all(
+					list.map(async (child) => {
+						if (!child?.id) return [child?.id, []];
+						try {
+							const childRes = await getCategoryChildren(child.id);
+							return [child.id, safeArray(childRes?.data)];
+						} catch (e) {
+							console.error("Nested category children error:", e);
+							return [child.id, []];
+						}
+					})
+				);
+
+				setChildrenByParent(Object.fromEntries(nestedEntries.filter(([key]) => key)));
 			} catch (e) {
 				console.error("Category children error:", e);
 				setChildren([]);
+				setChildrenByParent({});
 			}
 		};
 
 		setSelectedSubId("");
 		setPage(1);
+		setChildrenByParent({});
 		loadCategory();
 		loadChildren();
 	}, [id]);
@@ -114,6 +133,7 @@ const CategoryWiseProduct = () => {
 	const handleSelectSubCategory = (value) => {
 		setSelectedSubId(value);
 		setPage(1);
+		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
 	const handlePageChange = (_, value) => {
@@ -161,21 +181,136 @@ const CategoryWiseProduct = () => {
 								<ListItemButton
 									selected={!selectedSubId}
 									onClick={() => handleSelectSubCategory("")}
-									sx={{ borderRadius: 2, mb: 0.5 }}
+									sx={{
+										borderRadius: 2,
+										mb: 1,
+										border: `1px solid ${!selectedSubId ? theme.palette.primary.main : theme.palette.divider || colors.primary[200]}`,
+										background: !selectedSubId ? theme.palette.primary.main : colors.primary[300],
+										color: !selectedSubId ? theme.palette.primary.contrastText : "inherit",
+										"&:hover": {
+											background: !selectedSubId ? theme.palette.primary.dark : theme.palette.action.hover,
+										},
+										"&.Mui-selected": {
+											background: theme.palette.primary.main,
+											color: theme.palette.primary.contrastText,
+										},
+										"&.Mui-selected:hover": {
+											background: theme.palette.primary.dark,
+										},
+									}}
 								>
-									<ListItemText primary="All" />
+									<ListItemText primary="All" primaryTypographyProps={{ fontWeight: 800 }} />
 								</ListItemButton>
 
-								{children.map((child) => (
-									<ListItemButton
-										key={child?.id}
-										selected={String(selectedSubId) === String(child?.id)}
-										onClick={() => handleSelectSubCategory(String(child?.id))}
-										sx={{ borderRadius: 2, mb: 0.5 }}
-									>
-										<ListItemText primary={child?.name || "Unnamed"} />
-									</ListItemButton>
-								))}
+								{children.map((child) => {
+									const nestedChildren = safeArray(childrenByParent?.[child?.id]);
+									const parentActive =
+										String(selectedSubId) === String(child?.id) ||
+										nestedChildren.some((nestedChild) => String(selectedSubId) === String(nestedChild?.id));
+
+									return (
+										<Box
+											key={child?.id}
+											sx={{
+												p: 1,
+												mb: 1.25,
+												borderRadius: 2,
+												border: `1px solid ${
+													parentActive ? theme.palette.primary.main : theme.palette.divider || colors.primary[200]
+												}`,
+												background: parentActive ? theme.palette.action.selected : colors.primary[300],
+												boxShadow: parentActive ? `0 8px 18px ${theme.palette.primary.main}22` : "none",
+											}}
+										>
+											<ListItemButton
+												selected={parentActive}
+												onClick={() => handleSelectSubCategory(String(child?.id))}
+												sx={{
+													borderRadius: 1.5,
+													mb: nestedChildren.length > 0 ? 1 : 0,
+													background: parentActive ? theme.palette.primary.main : colors.primary[400],
+													color: parentActive ? theme.palette.primary.contrastText : "inherit",
+													"&:hover": {
+														background: parentActive ? theme.palette.primary.dark : theme.palette.action.hover,
+													},
+													"&.Mui-selected": {
+														background: theme.palette.primary.main,
+														color: theme.palette.primary.contrastText,
+													},
+													"&.Mui-selected:hover": {
+														background: theme.palette.primary.dark,
+													},
+												}}
+											>
+												<ListItemText
+													primary={child?.name || "Unnamed"}
+													primaryTypographyProps={{ fontWeight: 800 }}
+												/>
+											</ListItemButton>
+
+											{nestedChildren.length > 0 && (
+												<Box
+													sx={{
+														display: "grid",
+														gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+														gap: 0.75,
+													}}
+												>
+													{nestedChildren.map((nestedChild) => (
+														<Box
+															key={nestedChild?.id}
+															component="button"
+															type="button"
+															onClick={() => handleSelectSubCategory(String(nestedChild?.id))}
+															sx={{
+																border: `1px solid ${
+																	String(selectedSubId) === String(nestedChild?.id)
+																		? theme.palette.primary.main
+																		: theme.palette.divider || colors.primary[200]
+																}`,
+																borderRadius: 1.5,
+																background:
+																	String(selectedSubId) === String(nestedChild?.id)
+																		? theme.palette.primary.main
+																		: colors.primary[400],
+																color:
+																	String(selectedSubId) === String(nestedChild?.id)
+																		? theme.palette.primary.contrastText
+																		: "inherit",
+																cursor: "pointer",
+																font: "inherit",
+																minHeight: 34,
+																px: 1,
+																py: 0.7,
+																textAlign: "left",
+																width: "100%",
+																"&:hover": {
+																	background:
+																		String(selectedSubId) === String(nestedChild?.id)
+																			? theme.palette.primary.dark
+																			: theme.palette.action.hover,
+																},
+															}}
+														>
+															<Typography
+																variant="body2"
+																sx={{
+																	fontWeight: 400,
+																	lineHeight: 1.2,
+																	overflow: "hidden",
+																	textOverflow: "ellipsis",
+																	whiteSpace: "nowrap",
+																}}
+															>
+																{nestedChild?.name || "Unnamed"}
+															</Typography>
+														</Box>
+													))}
+												</Box>
+											)}
+										</Box>
+									);
+								})}
 							</List>
 						</Box>
 					</Grid>

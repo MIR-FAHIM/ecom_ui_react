@@ -128,6 +128,22 @@ export const getAllShops = async (params = {}) => {
     return { status: 'error', data: [] };
   }
 };
+export const deleteSeller = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/api/users/delete-seller/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting seller:", error);
+    return {
+      status: 'error',
+      message: error?.response?.data?.message || error.message || "Failed to delete seller",
+    };
+  }
+};
 export const getUserDetail = async (id) => {
   try {
     const response = await axiosInstance.get(`/api/users/details/${id}`, { 

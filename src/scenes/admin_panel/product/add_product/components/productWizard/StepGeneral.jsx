@@ -234,7 +234,7 @@ function StepGeneral({
               <TextField fullWidth size="small" label="Unit" value={value.unit} onChange={(e) => onChange({ unit: e.target.value })} placeholder="e.g. pcs" helperText="Unit of measurement" sx={fieldSx} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <TextField fullWidth size="small" label="Weight" value={value.weight} onChange={(e) => onChange({ weight: e.target.value })} placeholder="e.g. 0.5 kg" helperText="Used for shipping cost" sx={fieldSx} />
+              <TextField fullWidth size="small" label="Weight" type="number" value={value.weight} onChange={(e) => onChange({ weight: e.target.value })} placeholder="e.g. 0.5" helperText="Used for shipping cost" inputProps={{ min: 0, step: 0.01 }} sx={fieldSx} />
             </Grid>
           </Grid>
         </CardContent>
