@@ -74,32 +74,42 @@ const ShopCard = ({ shop, onView }) => {
 		>
 			<Box
 				sx={{
-					height: 90,
-					borderRadius: "12px 12px 0 0",
+					height: 104,
+					borderRadius: "4px 4px 0 0",
 					background: bannerUrl
 						? `url(${bannerUrl}) center/cover no-repeat`
 						: `linear-gradient(120deg, ${colors.blueAccent[700]}, ${colors.blueAccent[400]})`,
 				}}
 			/>
-			<CardContent sx={{ pt: 0 }}>
-				<Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: -4 }}>
+			<CardContent sx={{ p: 1.5 }}>
+				<Stack direction="row" spacing={1.5} alignItems="center">
 					<Avatar
 						src={logoUrl || undefined}
 						sx={{
 							width: 56,
 							height: 56,
-							border: `2px solid ${colors.primary[400]}`,
 							background: colors.primary[300],
 							fontWeight: 600,
+							flexShrink: 0,
 						}}
 					>
 						{initialsFromName(shop?.shop_name)}
 					</Avatar>
 					<Box sx={{ minWidth: 0 }}>
-						<Typography variant="subtitle1" sx={{ fontWeight: 600 }} noWrap>
+						<Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>
 							{shop?.shop_name || "Shop"}
 						</Typography>
-						<Typography variant="body2" sx={{ color: colors.gray[300] }} noWrap>
+						<Typography
+							variant="body2"
+							sx={{
+								color: colors.gray[300],
+								display: "-webkit-box",
+								WebkitLineClamp: 2,
+								WebkitBoxOrient: "vertical",
+								overflow: "hidden",
+								lineHeight: 1.35,
+							}}
+						>
 							{shop?.description || "No description"}
 						</Typography>
 					</Box>
