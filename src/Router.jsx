@@ -37,6 +37,7 @@ import AddCustomer from "./scenes/admin_panel/customer/AddCustomer";
 import AllCustomers from "./scenes/admin_panel/customer/AllCustomers";
 import TodayReport from "./scenes/admin_panel/report/TodayReport";
 import MonthWiseReport from "./scenes/admin_panel/report/MonthWiseReport";
+import LoginSuccessLogs from "./scenes/admin_panel/report/LoginSuccessLogs";
 import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
 import DeliveryManDetail from "./scenes/admin_panel/delivery/DeliveryManDetail";
 import RelatedProductAdd from "./scenes/admin_panel/product/add_product/components/RelatedProductAdd";
@@ -200,6 +201,7 @@ const AppRouter = () => {
           {/* Report Routes */}
           <Route path="/ecom/report/today" element={<TodayReport />} />
           <Route path="/ecom/report/month-wise" element={<MonthWiseReport />} />
+          <Route path="/ecom/report/login-success" element={<LoginSuccessLogs />} />
 
           {/* Delivery Routes */}
           <Route path="/ecom/delivery/add" element={<AddDeliveryMan />} />

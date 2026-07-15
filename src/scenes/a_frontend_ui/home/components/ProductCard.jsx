@@ -122,12 +122,17 @@ export default function SmartProductCard({
   inWish: inWishProp,
   onView,
   onEdit,
+  onAddToCart,
+  addToCartLabel,
+  showWishlist = true,
+  syncUserState = true,
   fromSeller = false,
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
 
   const [userId, setUserId] = useState(() => {
+    if (!syncUserState) return null;
     const id = localStorage.getItem("userId");
     return id ? String(id) : null;
   });
@@ -263,8 +268,9 @@ export default function SmartProductCard({
   }, [product?.id]);
 
   useEffect(() => {
+    if (!syncUserState) return;
     refreshLocalStates();
-  }, [refreshLocalStates]);
+  }, [refreshLocalStates, syncUserState]);
 
   useEffect(() => {
     if (typeof inWishProp === "boolean") setInWish(inWishProp);
@@ -275,6 +281,7 @@ export default function SmartProductCard({
   }, [inCartProp]);
 
   useEffect(() => {
+    if (!syncUserState) return undefined;
     const onAuth = () => {
       const id = localStorage.getItem("userId");
       setUserId(id ? String(id) : null);
@@ -291,13 +298,14 @@ export default function SmartProductCard({
       window.removeEventListener("wishlist-updated", onWish);
       window.removeEventListener("cart-updated", onCart);
     };
-  }, [refreshLocalStates]);
+  }, [refreshLocalStates, syncUserState]);
 
   useEffect(() => {
+    if (!syncUserState) return;
     if (!userId) return;
     syncWishlist(userId).catch(() => null);
     syncCart(userId).catch(() => null);
-  }, [userId]);
+  }, [syncUserState, userId]);
 
   const handleToggleWish = useCallback(async (e) => {
     e.stopPropagation();
@@ -353,6 +361,14 @@ export default function SmartProductCard({
     e.stopPropagation();
     const pid = product?.id;
     if (!pid) return;
+    if (onAddToCart) {
+      try {
+        await onAddToCart(product);
+      } catch (err) {
+        console.error("custom add to cart error:", err);
+      }
+      return;
+    }
     if (!userId) {
       alert("Please login to add to cart.");
       return;
@@ -376,7 +392,7 @@ export default function SmartProductCard({
       console.error("add to cart error:", err);
       alert("Error adding to cart");
     }
-  }, [product?.id, userId]);
+  }, [onAddToCart, product, product?.id, userId]);
 
   return (
     <Card
@@ -386,7 +402,7 @@ export default function SmartProductCard({
         overflow: "hidden",
         border: `1px solid ${divider}`,
         background: surface,
-        cursor: "pointer",
+        cursor: onView ? "pointer" : "default",
         transition: "transform 220ms ease, box-shadow 260ms ease, border-color 260ms ease",
         position: "relative",
         "&:hover": {
@@ -474,18 +490,22 @@ export default function SmartProductCard({
             </>
           ) : (
             <>
-              <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
-                <IconButton onClick={handleToggleWish} sx={iconBtnSx}>
-                  {inWish
-                    ? <Favorite sx={{ fontSize: 17, color: "#ef4444" }} />
-                    : <FavoriteBorder sx={{ fontSize: 17 }} />}
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Quick view">
-                <IconButton onClick={(e) => { e.stopPropagation(); onView?.(product); }} sx={iconBtnSx}>
-                  <VisibilityOutlined sx={{ fontSize: 17 }} />
-                </IconButton>
-              </Tooltip>
+              {showWishlist ? (
+                <Tooltip title={inWish ? "Remove from wishlist" : "Add to wishlist"}>
+                  <IconButton onClick={handleToggleWish} sx={iconBtnSx}>
+                    {inWish
+                      ? <Favorite sx={{ fontSize: 17, color: "#ef4444" }} />
+                      : <FavoriteBorder sx={{ fontSize: 17 }} />}
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+              {onView ? (
+                <Tooltip title="Quick view">
+                  <IconButton onClick={(e) => { e.stopPropagation(); onView?.(product); }} sx={iconBtnSx}>
+                    <VisibilityOutlined sx={{ fontSize: 17 }} />
+                  </IconButton>
+                </Tooltip>
+              ) : null}
             </>
           )}
         </Stack>
@@ -520,14 +540,14 @@ export default function SmartProductCard({
                 fontWeight: 700,
                 fontSize: 13,
                 letterSpacing: 0,
-                bgcolor: inCart ? "#16a34a" : "#6366f1",
+                bgcolor: !addToCartLabel && inCart ? "#16a34a" : "#6366f1",
                 color: "#fff",
                 boxShadow: "none",
-                "&:hover": { bgcolor: inCart ? "#15803d" : "#4f46e5", boxShadow: "none" },
+                "&:hover": { bgcolor: !addToCartLabel && inCart ? "#15803d" : "#4f46e5", boxShadow: "none" },
                 "&.Mui-disabled": { bgcolor: surface2, color: subInk, opacity: 1 },
               }}
             >
-              {outOfStock ? "Out of Stock" : inCart ? "Added to Cart" : "Add to Cart"}
+              {outOfStock ? "Out of Stock" : addToCartLabel || (inCart ? "Added to Cart" : "Add to Cart")}
             </Button>
           </Box>
         )}
@@ -592,7 +612,7 @@ export default function SmartProductCard({
             </Typography>
             <Chip
               size="small"
-              label={`Sold: ${product?.total_sales ?? product?.sales_count ?? 0}`}
+              label={`Sold: ${product?.num_of_sale ??  0}`}
               sx={{
                 ml: "auto",
                 borderRadius: 1,

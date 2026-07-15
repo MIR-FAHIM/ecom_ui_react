@@ -3,6 +3,15 @@ import { companyID } from '../../config'
 
 // Fetch posts from API
 
+const withWebPlatform = (data) => {
+  if (data instanceof FormData) {
+    if (!data.has("platform")) data.append("platform", "web");
+    return data;
+  }
+
+  return { ...(data || {}), platform: "web" };
+};
+
 export const registerEmployee = async (data) => {
   try {
     const response = await axiosInstance.post(`/api/users/create`, data,
@@ -48,7 +57,7 @@ export const uploadProfileImage = async (data) => {
 }
 export const loginController = async (data) => {
   try {
-    const response = await axiosInstance.post(`/api/auth/login`, data,
+    const response = await axiosInstance.post(`/api/auth/login`, withWebPlatform(data),
 
     );
     return response.data; // Return the response from the API
@@ -60,7 +69,7 @@ export const loginController = async (data) => {
 }
 export const loginWithOtpController = async (data) => {
   try {
-    const response = await axiosInstance.post(`/api/auth/login-otp`, data,
+    const response = await axiosInstance.post(`/api/auth/login-otp`, withWebPlatform(data),
 
     );
     return response.data; // Return the response from the API
@@ -70,10 +79,11 @@ export const loginWithOtpController = async (data) => {
   }
 
 }
-export const getAllCustomers = async () => {
+export const getAllCustomers = async (params = {}) => {
   try {
     const response = await axiosInstance.get(`/api/users/customers`,
       {
+        params,
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
         },

@@ -108,6 +108,44 @@ const SectionHeader = ({ icon, title, color = "#6366f1", bg = "#eef2ff", right }
   </Stack>
 );
 
+const cleanText = (value, fallback = "—") => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "object") {
+    return value.name || value.bn_name || fallback;
+  }
+
+  const text = String(value)
+    .replace(/\[object Object\]/g, "")
+    .replace(/\s*,\s*,/g, ", ")
+    .replace(/,\s*$/g, "")
+    .trim();
+
+  return text || fallback;
+};
+
+const getOrderAddressInfo = (order) => {
+  const userAddress = order?.user_address || {};
+  const districtName = cleanText(userAddress?.district?.name || userAddress?.district || order?.district, "");
+  const districtBnName = cleanText(userAddress?.district?.bn_name, "");
+  const area = cleanText(userAddress?.area || order?.area, "");
+  const addressLine =
+    [
+      cleanText(userAddress?.address || order?.shipping_address, ""),
+      area,
+      districtName,
+    ].filter(Boolean).join(", ") || cleanText(order?.shipping_address);
+
+  return {
+    id: userAddress?.id ?? order?.user_address_id ?? "",
+    name: cleanText(userAddress?.name || order?.customer_name),
+    phone: cleanText(userAddress?.mobile || order?.customer_phone),
+    addressLine,
+    zone: cleanText(order?.zone),
+    district: districtBnName && districtBnName !== districtName ? `${districtName} (${districtBnName})` : cleanText(districtName),
+    area: cleanText(area),
+  };
+};
+
 
 
 
@@ -231,6 +269,7 @@ const OderDetails = () => {
   const generateReceiptPdf = async () => {
     if (!order) return;
     const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const addressInfo = getOrderAddressInfo(order);
 
     // Load Bangla-supporting font
     try {
@@ -263,11 +302,11 @@ const OderDetails = () => {
     doc.text(`Date: ${formatDate(order.created_at)}`, pageWidth - margin - 160, y);
     y += 18;
     doc.setFontSize(11);
-    doc.text(`Customer: ${order.customer_name || "N/A"}`, margin, y);
+    doc.text(`Customer: ${addressInfo.name}`, margin, y);
     y += 14;
-    doc.text(`Phone: ${order.customer_phone || "N/A"}`, margin, y);
+    doc.text(`Phone: ${addressInfo.phone}`, margin, y);
     y += 14;
-    doc.text(`Address: ${order.shipping_address || "N/A"}`, margin, y);
+    doc.text(`Address: ${addressInfo.addressLine}`, margin, y);
     y += 20;
 
     const columns = [
@@ -364,6 +403,7 @@ const OderDetails = () => {
   }
 
   const itemsArr = Array.isArray(order.items) ? order.items : [];
+  const addressInfo = getOrderAddressInfo(order);
   const currentStatusKey = (order.status || "").toLowerCase();
   const currentIdx = orderStatusList.findIndex((s) => s.name.toLowerCase() === currentStatusKey);
 
@@ -507,9 +547,10 @@ const OderDetails = () => {
             <CardContent>
               <SectionHeader icon={<PersonOutlineIcon sx={{ fontSize: 18 }} />} title="Customer" color="#6366f1" bg="#eef2ff" />
               <Stack spacing={2}>
-                <InfoRow icon={<BadgeOutlinedIcon sx={{ fontSize: 16 }} />} label="Name" value={order.customer_name} />
-                <InfoRow icon={<PhoneOutlinedIcon sx={{ fontSize: 16 }} />} label="Phone" value={order.customer_phone} />
+                <InfoRow icon={<BadgeOutlinedIcon sx={{ fontSize: 16 }} />} label="Name" value={addressInfo.name} />
+                <InfoRow icon={<PhoneOutlinedIcon sx={{ fontSize: 16 }} />} label="Phone" value={addressInfo.phone} />
                 <InfoRow icon={<BadgeOutlinedIcon sx={{ fontSize: 16 }} />} label="User ID" value={order.user_id} />
+                <InfoRow icon={<HomeOutlinedIcon sx={{ fontSize: 16 }} />} label="User Address ID" value={addressInfo.id} />
               </Stack>
             </CardContent>
           </Card>
@@ -520,11 +561,11 @@ const OderDetails = () => {
             <CardContent>
               <SectionHeader icon={<LocationOnOutlinedIcon sx={{ fontSize: 18 }} />} title="Shipping" color="#10b981" bg="#ecfdf5" />
               <Stack spacing={2}>
-                <InfoRow icon={<HomeOutlinedIcon sx={{ fontSize: 16 }} />} label="Address" value={order.shipping_address} />
+                <InfoRow icon={<HomeOutlinedIcon sx={{ fontSize: 16 }} />} label="Address" value={addressInfo.addressLine} />
                 <Grid container spacing={1}>
-                  <Grid item xs={4}><InfoRow icon={<LocationOnOutlinedIcon sx={{ fontSize: 16 }} />} label="Zone" value={order.zone || "N/A"} /></Grid>
-                  <Grid item xs={4}><InfoRow icon={<LocationOnOutlinedIcon sx={{ fontSize: 16 }} />} label="District" value={order.district || "N/A"} /></Grid>
-                  <Grid item xs={4}><InfoRow icon={<LocationOnOutlinedIcon sx={{ fontSize: 16 }} />} label="Area" value={order.area || "N/A"} /></Grid>
+                  <Grid item xs={12} sm={4}><InfoRow icon={<LocationOnOutlinedIcon sx={{ fontSize: 16 }} />} label="Zone" value={addressInfo.zone} /></Grid>
+                  <Grid item xs={12} sm={4}><InfoRow icon={<LocationOnOutlinedIcon sx={{ fontSize: 16 }} />} label="District" value={addressInfo.district} /></Grid>
+                  <Grid item xs={12} sm={4}><InfoRow icon={<LocationOnOutlinedIcon sx={{ fontSize: 16 }} />} label="Area" value={addressInfo.area} /></Grid>
                 </Grid>
                 {order.note && <InfoRow icon={<NoteAltOutlinedIcon sx={{ fontSize: 16 }} />} label="Note" value={order.note} />}
               </Stack>

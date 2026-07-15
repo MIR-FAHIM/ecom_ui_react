@@ -27,26 +27,22 @@ import {
   Search,
   ShoppingCartOutlined,
   Close,
+  Check,
+  Inventory2Outlined,
+  LocationOnOutlined,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
-import { image_file_url } from "../../../api/config/index.jsx";
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller.jsx";
 import { getCategory } from "../../../api/controller/admin_controller/product/setting_controller.jsx";
 import { getBrand } from "../../../api/controller/admin_controller/brand/brand_controller.jsx";
-import { getAllCustomers, registerEmployee } from "../../../api/controller/admin_controller/user_controller.jsx";
+import { getAllCustomers, getAllShops, registerEmployee } from "../../../api/controller/admin_controller/user_controller.jsx";
 import { addCart, deleteItem, getCartByUser, updateQuantity } from "../../../api/controller/admin_controller/order/cart_controller.jsx";
 import { checkOutOrder, getOrderDetails } from "../../../api/controller/admin_controller/order/order_controller.jsx";
+import { getUserAddresses, addUserAddress } from "../../../api/controller/admin_controller/order/user_address_controller.jsx";
+import { getDivisions, getDistricts } from "../../../api/controller/admin_controller/delivery/delivery_controller.jsx";
+import SmartProductCard from "../../a_frontend_ui/home/components/ProductCard.jsx";
 
 const moneyBDT = (n) => new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
-
-const buildImageUrl = (fileOrUrl) => {
-  if (!fileOrUrl) return "/assets/images/placeholder.png";
-  const raw = String(fileOrUrl).replaceAll("\\/", "/");
-  if (/^https?:\/\//i.test(raw)) return raw;
-  const base = String(image_file_url || "").replace(/\/+$/, "");
-  const path = raw.replace(/^\/+/, "");
-  return `${base}/${path}`;
-};
 
 const normalizeList = (payload) => {
   if (Array.isArray(payload)) return payload;
@@ -56,78 +52,33 @@ const normalizeList = (payload) => {
   return [];
 };
 
-const ProductCard = ({ product, onAdd }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const img = product?.primary_image?.file_name || product?.primary_image?.url || product?.thumbnail || product?.image;
-  const stock = Number(product?.current_stock ?? product?.stock_qty ?? 0);
-  const inStock = stock > 0;
+const mergeById = (current, incoming) => {
+  const map = new Map();
+  [...current, ...incoming].forEach((item) => {
+    const key = item?.id ?? item?.user_id ?? item?.email ?? item?.phone ?? item?.mobile;
+    if (key != null) map.set(String(key), item);
+  });
+  return Array.from(map.values());
+};
 
-  return (
-    <Card
-      sx={{
-        borderRadius: 3,
-        border: `1px solid ${theme.palette.divider}`,
-        background: colors.primary[400],
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-      }}
-    >
-      <Box
-        sx={{
-          position: "relative",
-          height: 160,
-          backgroundImage: `url("${buildImageUrl(img)}")`,
-          backgroundSize: "contain",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          backgroundColor: colors.primary[500],
-        }}
-      >
-        <Chip
-          size="small"
-          label={`${inStock ? "In stock" : "Out of Stock"}: ${stock}`}
-          sx={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            fontWeight: 900,
-            background: inStock ? "#24c56b" : "#ef476f",
-            color: "#fff",
-          }}
-        />
-      </Box>
-      <CardContent sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 0.6, flex: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 800 }} noWrap>
-          {product?.name || "Unnamed product"}
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 800, color: colors.gray[200] }}>
-          {moneyBDT(product?.unit_price || product?.price || 0)}
-        </Typography>
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<ShoppingCartOutlined />}
-          onClick={() => onAdd?.(product)}
-          disabled={!inStock}
-          sx={{
-            mt: "auto",
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 800,
-            background: theme.palette.secondary.main,
-            color: colors.gray[900],
-            boxShadow: "none",
-            "&:hover": { opacity: 0.92, boxShadow: "none" },
-          }}
-        >
-          Add
-        </Button>
-      </CardContent>
-    </Card>
-  );
+const cleanText = (value, fallback = "") => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "object") return value.name || value.bn_name || fallback;
+  const text = String(value)
+    .replace(/\[object Object\]/g, "")
+    .replace(/\s*,\s*,/g, ", ")
+    .replace(/,\s*$/g, "")
+    .trim();
+  return text || fallback;
+};
+
+const formatAddressLine = (address) => {
+  if (!address) return "";
+  return [
+    cleanText(address.address),
+    cleanText(address.area),
+    cleanText(address.district?.name || address.district),
+  ].filter(Boolean).join(", ");
 };
 
 export default function PosManagement() {
@@ -140,11 +91,17 @@ export default function PosManagement() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [shops, setShops] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customerPage, setCustomerPage] = useState(1);
+  const [customerLastPage, setCustomerLastPage] = useState(1);
+  const [customerSearch, setCustomerSearch] = useState("");
 
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const [brandId, setBrandId] = useState("all");
+  const [shopId, setShopId] = useState("all");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -152,10 +109,28 @@ export default function PosManagement() {
 
   const [tab, setTab] = useState(0);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerAddresses, setCustomerAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressSaving, setAddressSaving] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    name: "",
+    mobile: "",
+    division: "",
+    district: "",
+    area: "",
+    address: "",
+  });
+  const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [loadingDivisions, setLoadingDivisions] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
   const [serverCart, setServerCart] = useState(null);
   const [localCart, setLocalCart] = useState([]);
   const [msg, setMsg] = useState("");
   const [placing, setPlacing] = useState(false);
+  const [isOutsideDhaka, setIsOutsideDhaka] = useState(0);
 
   const [walkIn, setWalkIn] = useState({ name: "", phone: "", email: "", address: "", note: "" });
   const [shipping, setShipping] = useState({ address: "", zone: "" });
@@ -163,21 +138,15 @@ export default function PosManagement() {
   const loadMeta = async () => {
     setLoading(true);
     try {
-      const [catRes, brandRes, customerRes] = await Promise.all([
+      const [catRes, brandRes, shopRes] = await Promise.all([
         getCategory(),
         getBrand(),
-        getAllCustomers({ page: 1, per_page: 200 }),
+        getAllShops({ page: 1, per_page: 200 }),
       ]);
 
       setCategories(normalizeList(catRes?.data?.data ?? catRes));
       setBrands(normalizeList(brandRes?.data?.data ?? brandRes));
-
-      const cPayload = customerRes?.data ?? customerRes;
-      if (cPayload?.status === "success" && Array.isArray(cPayload?.data?.data)) {
-        setCustomers(cPayload.data?.data);
-      } else {
-        setCustomers(normalizeList(cPayload));
-      }
+      setShops(normalizeList(shopRes?.data ?? shopRes));
     } catch (e) {
       console.error("POS load error:", e);
       setMsg("Failed to load POS data");
@@ -186,10 +155,36 @@ export default function PosManagement() {
     }
   };
 
+  const loadCustomers = async ({ page: nextPage = 1, searchTerm = customerSearch, append = false } = {}) => {
+    setCustomersLoading(true);
+    try {
+      const res = await getAllCustomers({
+        page: nextPage,
+        per_page: 20,
+        search: searchTerm ? searchTerm.trim() : undefined,
+      });
+      const payload = res?.data ?? res;
+      const paginator = payload?.data && !Array.isArray(payload?.data) ? payload.data : payload;
+      const list = normalizeList(payload);
+      const current = Number(paginator?.current_page ?? nextPage);
+      const last = Number(paginator?.last_page ?? Math.max(1, current));
+
+      setCustomers((prev) => (append ? mergeById(prev, list) : list));
+      setCustomerPage(current);
+      setCustomerLastPage(last);
+    } catch (e) {
+      console.error("POS customers error:", e);
+      if (!append) setCustomers([]);
+    } finally {
+      setCustomersLoading(false);
+    }
+  };
+
   const loadProducts = async (opts = {}) => {
     const nextSearch = typeof opts.search === "string" ? opts.search : search;
     const nextCategory = opts.categoryId ?? categoryId;
     const nextBrand = opts.brandId ?? brandId;
+    const nextShop = opts.shopId ?? shopId;
     const nextPage = opts.page ?? page;
     const nextPerPage = opts.perPage ?? perPage;
 
@@ -200,7 +195,7 @@ export default function PosManagement() {
         per_page: nextPerPage,
         category_id: nextCategory !== "all" ? nextCategory : undefined,
         brand_id: nextBrand !== "all" ? nextBrand : undefined,
-        shop_id: opts.shopId ?? undefined,
+        shop_id: nextShop !== "all" ? nextShop : undefined,
         user_id: opts.userId ?? undefined,
         search: nextSearch ? nextSearch.trim() : undefined,
       };
@@ -229,20 +224,27 @@ export default function PosManagement() {
 
   useEffect(() => {
     loadMeta();
-    loadProducts({ search, categoryId, brandId, page: 1, perPage });
+    loadProducts({ search, categoryId, brandId, shopId, page: 1, perPage });
   }, []);
 
   useEffect(() => {
     const handle = setTimeout(() => {
-      setPage(1);
-      loadProducts({ search, categoryId, brandId, page: 1, perPage });
+      loadCustomers({ page: 1, searchTerm: customerSearch, append: false });
     }, 300);
     return () => clearTimeout(handle);
-  }, [search, categoryId, brandId]);
+  }, [customerSearch]);
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setPage(1);
+      loadProducts({ search, categoryId, brandId, shopId, page: 1, perPage });
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [search, categoryId, brandId, shopId]);
 
   const handlePageChange = (_event, value) => {
     setPage(value);
-    loadProducts({ search, categoryId, brandId, page: value, perPage });
+    loadProducts({ search, categoryId, brandId, shopId, page: value, perPage });
   };
 
   const loadServerCart = async (customerId) => {
@@ -265,6 +267,53 @@ export default function PosManagement() {
       loadServerCart(selectedCustomer.id);
     }
   }, [selectedCustomer, tab]);
+
+  useEffect(() => {
+    if (tab !== 0) return;
+    const customerId = selectedCustomer?.id;
+    setNewAddress((prev) => ({
+      ...prev,
+      name: selectedCustomer?.name || "",
+      mobile: selectedCustomer?.mobile || selectedCustomer?.phone || "",
+    }));
+    loadCustomerAddresses(customerId);
+  }, [selectedCustomer?.id, tab]);
+
+  useEffect(() => {
+    const loadDivisions = async () => {
+      setLoadingDivisions(true);
+      try {
+        const res = await getDivisions();
+        setDivisions(normalizeList(res?.data ?? res));
+      } catch (e) {
+        console.error("POS divisions error:", e);
+        setDivisions([]);
+      } finally {
+        setLoadingDivisions(false);
+      }
+    };
+    loadDivisions();
+  }, []);
+
+  useEffect(() => {
+    if (!newAddress.division) {
+      setDistricts([]);
+      return;
+    }
+    const loadDistrictList = async () => {
+      setLoadingDistricts(true);
+      try {
+        const res = await getDistricts(newAddress.division);
+        setDistricts(normalizeList(res?.data ?? res));
+      } catch (e) {
+        console.error("POS districts error:", e);
+        setDistricts([]);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+    loadDistrictList();
+  }, [newAddress.division]);
 
   const handleAddProduct = async (product) => {
     if (tab === 0) {
@@ -324,6 +373,92 @@ export default function PosManagement() {
 
   const serverSubtotal = Number(serverCart?.subtotal || 0);
   const total = tab === 0 ? serverSubtotal : localSubtotal;
+  const selectedShippingCost = isOutsideDhaka === 1 ? 120 : 60;
+  const checkoutTotal = Number(total || 0) + Number(selectedShippingCost || 0);
+  const selectedAddress = useMemo(
+    () => customerAddresses.find((address) => String(address.id) === String(selectedAddressId)) || null,
+    [customerAddresses, selectedAddressId]
+  );
+
+  const resetNewAddress = () => {
+    setNewAddress({
+      name: selectedCustomer?.name || "",
+      mobile: selectedCustomer?.mobile || selectedCustomer?.phone || "",
+      division: "",
+      district: "",
+      area: "",
+      address: "",
+    });
+  };
+
+  const loadCustomerAddresses = async (customerId) => {
+    if (!customerId) {
+      setCustomerAddresses([]);
+      setSelectedAddressId("");
+      setShowAddressForm(false);
+      return;
+    }
+
+    setAddressLoading(true);
+    try {
+      const res = await getUserAddresses(customerId);
+      const list = normalizeList(res?.data ?? res);
+      setCustomerAddresses(list);
+      setSelectedAddressId((prev) => {
+        if (prev && list.some((address) => String(address.id) === String(prev))) return prev;
+        return list[0]?.id ? String(list[0].id) : "";
+      });
+      setShowAddressForm(list.length === 0);
+    } catch (e) {
+      console.error("POS customer addresses error:", e);
+      setCustomerAddresses([]);
+      setSelectedAddressId("");
+      setShowAddressForm(true);
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  const handleAddCustomerAddress = async () => {
+    if (!selectedCustomer?.id) {
+      setMsg("Select a customer first");
+      return;
+    }
+
+    if (!newAddress.name || !newAddress.mobile || !newAddress.address || !newAddress.division || !newAddress.district) {
+      setMsg("Please fill name, mobile, division, district and address");
+      return;
+    }
+
+    setAddressSaving(true);
+    try {
+      const form = new FormData();
+      form.append("user_id", selectedCustomer.id);
+      form.append("name", newAddress.name);
+      form.append("mobile", newAddress.mobile);
+      form.append("division", newAddress.division);
+      form.append("district", newAddress.district);
+      form.append("area", newAddress.area);
+      form.append("address", newAddress.address);
+
+      const res = await addUserAddress(form);
+      const ok = res?.data?.status === "success" || res?.status === 200 || res?.status === "success";
+      if (!ok) {
+        setMsg(res?.data?.message || res?.message || "Failed to add address");
+        return;
+      }
+
+      setMsg(res?.data?.message || "Address added");
+      setShowAddressForm(false);
+      resetNewAddress();
+      await loadCustomerAddresses(selectedCustomer.id);
+    } catch (e) {
+      console.error("POS add address error:", e);
+      setMsg(e?.response?.data?.message || "Failed to add address");
+    } finally {
+      setAddressSaving(false);
+    }
+  };
 
   const handleCreateWalkInCustomer = async () => {
     if (!walkIn.name || !walkIn.phone) {
@@ -400,13 +535,41 @@ export default function PosManagement() {
         return;
       }
 
+      if (tab === 0 && !selectedAddress) {
+        setShowAddressForm(true);
+        setMsg("Select or add a customer address first");
+        setPlacing(false);
+        return;
+      }
+
+      if (tab === 0 && selectedAddress) {
+        customerName = selectedAddress.name || customerName;
+        customerPhone = selectedAddress.mobile || customerPhone;
+      }
+
+      const shippingAddress = tab === 0 && selectedAddress
+        ? formatAddressLine(selectedAddress)
+        : shipping.address || walkIn.address || "POS Counter";
+      const shippingZone = tab === 0 && selectedAddress
+        ? cleanText(selectedAddress.district?.name || selectedAddress.district)
+        : shipping.zone || "";
+
       const form = new FormData();
       form.append("user_id", customerId);
+      if (tab === 0 && selectedAddress?.id) {
+        form.append("user_address_id", String(selectedAddress.id));
+      }
       form.append("customer_name", customerName || "Walk-in");
       form.append("customer_phone", customerPhone || "");
-      form.append("shipping_address", shipping.address || walkIn.address || "POS Counter");
-      form.append("zone", shipping.zone || "");
+      form.append("shipping_address", shippingAddress);
+      form.append("zone", shippingZone);
+      form.append("is_outside_dhaka", String(isOutsideDhaka));
+      form.append("shipping_cost", String(selectedShippingCost));
+      form.append("amount", String(checkoutTotal));
+      form.append("total_amount", String(checkoutTotal));
+      form.append("payment_method", "cod");
       form.append("note", walkIn.note || "POS order");
+      form.append("platform", "web");
 
       const res = await checkOutOrder(form);
       const ok = res?.data?.status === "success" || res?.status === 200;
@@ -449,27 +612,46 @@ export default function PosManagement() {
   return (
     <Box
       sx={{
-        p: 2,
+        p: { xs: 1.5, md: 2.5 },
+        minHeight: "100vh",
+        background: theme.palette.mode === "dark" ? colors.primary[500] : "#f6f7fb",
         "& .MuiButton-root": { color: "#000" },
         "& .MuiButton-contained": { color: "#000" },
         "& .MuiButton-outlined": { color: "#000" },
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Box
+            sx={{
+              width: 46,
+              height: 46,
+              borderRadius: 2,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: "#eef2ff",
+              color: "#4f46e5",
+            }}
+          >
+            <ShoppingCartOutlined />
+          </Box>
+          <Box>
+          <Typography variant="h5" sx={{ fontWeight: 900, lineHeight: 1.15 }}>
             POS Management
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
             Sell products quickly for customers or walk-ins
           </Typography>
-        </Box>
+          </Box>
+        </Stack>
         <IconButton
           onClick={() => {
             loadMeta();
-            loadProducts({ search, categoryId, brandId, page, perPage });
+            loadCustomers({ page: 1, searchTerm: customerSearch, append: false });
+            loadProducts({ search, categoryId, brandId, shopId, page, perPage });
           }}
           disabled={loading || loadingProducts}
+          sx={{ border: `1px solid ${theme.palette.divider}`, bgcolor: colors.primary[400], borderRadius: 2 }}
         >
           <Refresh />
         </IconButton>
@@ -477,12 +659,26 @@ export default function PosManagement() {
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "2.2fr 1fr" }, gap: 2 }}>
         {/* Left panel: Products */}
-        <Card sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+        <Card sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 30px rgba(15,23,42,0.06)" }}>
           <CardContent sx={{ p: 2 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1} sx={{ mb: 2 }}>
+              <Box>
+                <Typography sx={{ fontWeight: 900 }}>Products</Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                  {totalProducts} item{totalProducts === 1 ? "" : "s"} found
+                </Typography>
+              </Box>
+              <Chip
+                size="small"
+                label={`Page ${page} of ${lastPage}`}
+                variant="outlined"
+                sx={{ alignSelf: { xs: "flex-start", sm: "center" }, fontWeight: 800 }}
+              />
+            </Stack>
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "2fr 1fr 1fr" },
+                gridTemplateColumns: { xs: "1fr", md: "2fr 1fr 1fr 1fr" },
                 gap: 1.5,
                 alignItems: "center",
                 mb: 2,
@@ -516,6 +712,14 @@ export default function PosManagement() {
                   </MenuItem>
                 ))}
               </TextField>
+              <TextField size="small" select value={shopId} onChange={(e) => setShopId(e.target.value)}>
+                <MenuItem value="all">All Shops</MenuItem>
+                {shops.map((shop) => (
+                  <MenuItem key={shop.id} value={String(shop.id)}>
+                    {shop.shop_name || shop.name || shop.email || `Shop #${shop.id}`}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Box>
 
             {loadingProducts ? (
@@ -535,9 +739,36 @@ export default function PosManagement() {
                   },
                 }}
               >
-                {products.map((p) => (
-                  <ProductCard key={p.id} product={p} onAdd={handleAddProduct} />
-                ))}
+                {products.length === 0 ? (
+                  <Box
+                    sx={{
+                      gridColumn: "1 / -1",
+                      py: 7,
+                      textAlign: "center",
+                      border: `1px dashed ${theme.palette.divider}`,
+                      borderRadius: 2,
+                      bgcolor: theme.palette.mode === "dark" ? colors.primary[500] : "#f8fafc",
+                    }}
+                  >
+                    <Inventory2Outlined sx={{ fontSize: 42, color: "text.disabled", mb: 1 }} />
+                    <Typography sx={{ fontWeight: 900 }}>No products found</Typography>
+                    <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                      Try changing search, category, brand, or shop filters.
+                    </Typography>
+                  </Box>
+                ) : (
+                  products.map((p) => (
+                    <SmartProductCard
+                      key={p.id}
+                      product={p}
+                      inCart={false}
+                      showWishlist={false}
+                      syncUserState={false}
+                      addToCartLabel="Add"
+                      onAddToCart={handleAddProduct}
+                    />
+                  ))
+                )}
               </Box>
             )}
 
@@ -556,7 +787,7 @@ export default function PosManagement() {
         </Card>
 
         {/* Right panel: Customer + Cart */}
-        <Card sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+        <Card sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}`, boxShadow: theme.palette.mode === "dark" ? "none" : "0 12px 30px rgba(15,23,42,0.06)" }}>
           <CardContent sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
             <Tabs
               value={tab}
@@ -577,8 +808,61 @@ export default function PosManagement() {
                   options={customers}
                   value={selectedCustomer}
                   onChange={(_e, v) => setSelectedCustomer(v)}
-                  getOptionLabel={(o) => `${o?.name || "Customer"} (${o?.mobile || o?.phone || ""})`}
-                  renderInput={(params) => <TextField {...params} size="small" label="Select customer" />}
+                  onInputChange={(_event, value, reason) => {
+                    if (reason === "input" || reason === "clear") {
+                      setCustomerSearch(value);
+                    }
+                  }}
+                  loading={customersLoading}
+                  filterOptions={(options) => options}
+                  getOptionLabel={(o) => {
+                    if (typeof o === "string") return o;
+                    return `${o?.name || "Customer"} (${o?.mobile || o?.phone || ""})`;
+                  }}
+                  isOptionEqualToValue={(option, value) => String(option?.id) === String(value?.id)}
+                  ListboxProps={{
+                    onScroll: (event) => {
+                      const listbox = event.currentTarget;
+                      const nearBottom = listbox.scrollTop + listbox.clientHeight >= listbox.scrollHeight - 24;
+                      if (nearBottom && !customersLoading && customerPage < customerLastPage) {
+                        loadCustomers({ page: customerPage + 1, searchTerm: customerSearch, append: true });
+                      }
+                    },
+                  }}
+                  loadingText="Loading customers..."
+                  noOptionsText={customerSearch ? "No customers match this search" : "No customers found"}
+                  renderOption={(props, option) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <Box component="li" {...optionProps} key={key || option?.id}>
+                        <Stack sx={{ minWidth: 0 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 800 }} noWrap>
+                            {option?.name || "Customer"}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: "text.secondary" }} noWrap>
+                            {option?.mobile || option?.phone || "No phone"} {option?.email ? `- ${option.email}` : ""}
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Select customer"
+                      helperText={`Loaded ${customers.length} customer${customers.length === 1 ? "" : "s"}${customerPage < customerLastPage ? " - scroll for more" : ""}`}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {customersLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
                 />
                 {selectedCustomer ? (
                   <Typography variant="caption" color="text.secondary">
@@ -623,19 +907,216 @@ export default function PosManagement() {
 
             <Divider />
 
-            <Box sx={{ display: "grid", gap: 1.2 }}>
-              <TextField
-                size="small"
-                label="Shipping address"
-                value={shipping.address}
-                onChange={(e) => setShipping((prev) => ({ ...prev, address: e.target.value }))}
-              />
-              <TextField
-                size="small"
-                label="Zone"
-                value={shipping.zone}
-                onChange={(e) => setShipping((prev) => ({ ...prev, zone: e.target.value }))}
-              />
+            {tab === 0 ? (
+              <Box sx={{ display: "grid", gap: 1.2 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <LocationOnOutlined sx={{ fontSize: 18, color: "text.secondary" }} />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+                      Customer Address
+                    </Typography>
+                  </Stack>
+                  {selectedCustomer ? (
+                    <Button
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={() => {
+                        resetNewAddress();
+                        setShowAddressForm((prev) => !prev);
+                      }}
+                      sx={{ textTransform: "none", fontWeight: 800 }}
+                    >
+                      {showAddressForm ? "Close" : "Add Address"}
+                    </Button>
+                  ) : null}
+                </Stack>
+
+                {!selectedCustomer ? (
+                  <Box sx={{ p: 1.5, borderRadius: 2, border: `1px dashed ${theme.palette.divider}`, color: "text.secondary" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      Select a customer to see saved addresses.
+                    </Typography>
+                  </Box>
+                ) : addressLoading ? (
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ p: 1.5 }}>
+                    <CircularProgress size={18} />
+                    <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                      Loading addresses...
+                    </Typography>
+                  </Stack>
+                ) : customerAddresses.length > 0 ? (
+                  <Stack spacing={1}>
+                    {customerAddresses.map((address) => {
+                      const selected = String(selectedAddressId) === String(address.id);
+                      return (
+                        <Box
+                          key={address.id}
+                          onClick={() => setSelectedAddressId(String(address.id))}
+                          sx={{
+                            p: 1.2,
+                            borderRadius: 2,
+                            cursor: "pointer",
+                            border: `1px solid ${selected ? theme.palette.primary.main : theme.palette.divider}`,
+                            bgcolor: selected ? "rgba(99,102,241,0.08)" : colors.primary[400],
+                            transition: "border-color 150ms ease, background 150ms ease",
+                          }}
+                        >
+                          <Stack direction="row" spacing={1} alignItems="flex-start">
+                            <LocationOnOutlined sx={{ fontSize: 18, color: selected ? theme.palette.primary.main : "text.secondary", mt: 0.2 }} />
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 900 }} noWrap>
+                                {address.name || selectedCustomer?.name || "Customer"} {address.mobile ? `- ${address.mobile}` : ""}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                                {formatAddressLine(address) || "Address not available"}
+                              </Typography>
+                            </Box>
+                            <Chip
+                              size="small"
+                              label={selected ? "Selected" : "Use"}
+                              color={selected ? "primary" : "default"}
+                              variant={selected ? "filled" : "outlined"}
+                              sx={{ fontWeight: 800 }}
+                            />
+                          </Stack>
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                ) : (
+                  <Box sx={{ p: 1.5, borderRadius: 2, border: `1px dashed ${theme.palette.divider}`, bgcolor: colors.primary[400] }}>
+                    <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                      No saved address found
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                      Add an address for this customer before checkout.
+                    </Typography>
+                  </Box>
+                )}
+
+                {selectedCustomer && showAddressForm ? (
+                  <Box sx={{ display: "grid", gap: 1.1, p: 1.3, borderRadius: 2, border: `1px solid ${theme.palette.divider}`, bgcolor: theme.palette.mode === "dark" ? colors.primary[500] : "#f8fafc" }}>
+                    <TextField
+                      size="small"
+                      label="Name"
+                      value={newAddress.name}
+                      onChange={(e) => setNewAddress((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                    <TextField
+                      size="small"
+                      label="Mobile"
+                      value={newAddress.mobile}
+                      onChange={(e) => setNewAddress((prev) => ({ ...prev, mobile: e.target.value }))}
+                    />
+                    <TextField
+                      size="small"
+                      select
+                      label="Division"
+                      value={newAddress.division}
+                      onChange={(e) => setNewAddress((prev) => ({ ...prev, division: e.target.value, district: "" }))}
+                      disabled={loadingDivisions}
+                    >
+                      <MenuItem value="">{loadingDivisions ? "Loading..." : "Select division"}</MenuItem>
+                      {divisions.map((division) => (
+                        <MenuItem key={division.id} value={String(division.id)}>
+                          {division.name || division.bn_name || `Division #${division.id}`}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      size="small"
+                      select
+                      label="District"
+                      value={newAddress.district}
+                      onChange={(e) => setNewAddress((prev) => ({ ...prev, district: e.target.value }))}
+                      disabled={!newAddress.division || loadingDistricts}
+                    >
+                      <MenuItem value="">
+                        {loadingDistricts ? "Loading..." : newAddress.division ? "Select district" : "Select division first"}
+                      </MenuItem>
+                      {districts.map((district) => (
+                        <MenuItem key={district.id} value={String(district.id)}>
+                          {district.name || district.bn_name || `District #${district.id}`}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      size="small"
+                      label="Area"
+                      value={newAddress.area}
+                      onChange={(e) => setNewAddress((prev) => ({ ...prev, area: e.target.value }))}
+                    />
+                    <TextField
+                      size="small"
+                      label="Address"
+                      multiline
+                      minRows={2}
+                      value={newAddress.address}
+                      onChange={(e) => setNewAddress((prev) => ({ ...prev, address: e.target.value }))}
+                    />
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Button size="small" variant="outlined" onClick={resetNewAddress} disabled={addressSaving}>
+                        Reset
+                      </Button>
+                      <Button size="small" variant="contained" onClick={handleAddCustomerAddress} disabled={addressSaving}>
+                        {addressSaving ? <CircularProgress size={16} color="inherit" /> : "Save Address"}
+                      </Button>
+                    </Stack>
+                  </Box>
+                ) : null}
+              </Box>
+            ) : (
+              <Box sx={{ display: "grid", gap: 1.2 }}>
+                <TextField
+                  size="small"
+                  label="Shipping address"
+                  value={shipping.address}
+                  onChange={(e) => setShipping((prev) => ({ ...prev, address: e.target.value }))}
+                />
+                <TextField
+                  size="small"
+                  label="Zone"
+                  value={shipping.zone}
+                  onChange={(e) => setShipping((prev) => ({ ...prev, zone: e.target.value }))}
+                />
+              </Box>
+            )}
+
+            <Divider />
+
+            <Box sx={{ display: "grid", gap: 1 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+                  Delivery Zone
+                </Typography>
+                <Chip
+                  size="small"
+                  label={moneyBDT(selectedShippingCost)}
+                  sx={{ fontWeight: 900 }}
+                  color={isOutsideDhaka === 1 ? "warning" : "success"}
+                  variant="outlined"
+                />
+              </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                <Button
+                  fullWidth
+                  variant={isOutsideDhaka === 0 ? "contained" : "outlined"}
+                  startIcon={isOutsideDhaka === 0 ? <Check /> : null}
+                  onClick={() => setIsOutsideDhaka(0)}
+                  sx={{ textTransform: "none", fontWeight: 900, borderRadius: 2 }}
+                >
+                  Inside Dhaka
+                </Button>
+                <Button
+                  fullWidth
+                  variant={isOutsideDhaka === 1 ? "contained" : "outlined"}
+                  startIcon={isOutsideDhaka === 1 ? <Check /> : null}
+                  onClick={() => setIsOutsideDhaka(1)}
+                  sx={{ textTransform: "none", fontWeight: 900, borderRadius: 2 }}
+                >
+                  Outside Dhaka
+                </Button>
+              </Stack>
             </Box>
 
             <Divider />
@@ -729,7 +1210,7 @@ export default function PosManagement() {
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">Shipping</Typography>
-                <Typography variant="body2" color="text.secondary">{moneyBDT(0)}</Typography>
+                <Typography variant="body2" color="text.secondary">{moneyBDT(selectedShippingCost)}</Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">Discount</Typography>
@@ -738,7 +1219,7 @@ export default function PosManagement() {
               <Divider />
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>Total</Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>{moneyBDT(total)}</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>{moneyBDT(checkoutTotal)}</Typography>
               </Stack>
             </Box>
 

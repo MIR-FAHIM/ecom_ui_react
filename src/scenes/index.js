@@ -24,6 +24,7 @@ import AddCustomer from "./admin_panel/customer/AddCustomer";
 import AllCustomers from "./admin_panel/customer/AllCustomers";
 import TodayReport from "./admin_panel/report/TodayReport";
 import MonthWiseReport from "./admin_panel/report/MonthWiseReport";
+import LoginSuccessLogs from "./admin_panel/report/LoginSuccessLogs";
 import AddDeliveryMan from "./admin_panel/delivery/AddDeliveryMan";
 import AllDeliveryMans from "./admin_panel/delivery/AllDeliveryMans";
 import EcommerceSetting from "./admin_panel/setting/EcommerceSetting";
@@ -110,6 +111,7 @@ export {
   AllCustomers,
   TodayReport,
   MonthWiseReport,
+  LoginSuccessLogs,
   AddDeliveryMan,
   AllDeliveryMans,
   EcommerceSetting,

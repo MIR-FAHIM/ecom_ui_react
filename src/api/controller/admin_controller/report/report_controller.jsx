@@ -208,3 +208,22 @@ export const fetchNotices = async () => {
     return [];
   }
 }
+
+export const getLoginSuccessLogs = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/reports/login-success`, {
+      params,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching login success logs:", error);
+    return {
+      status: "error",
+      message: error?.response?.data?.message || error.message || "Failed to fetch login success logs",
+      data: null,
+    };
+  }
+}

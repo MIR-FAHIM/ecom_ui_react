@@ -33,6 +33,7 @@ import {
   ExpandMore,
   FormatListBulleted,
   CheckCircleOutline,
+  LoginOutlined,
 } from "@mui/icons-material";
 import logo from "../../../assets/images/logo.png";
 import { ToggledContext } from "../../../App";
@@ -114,6 +115,7 @@ const NAV_GROUPS = [
         children: [
           { title: "Today Report", path: "/ecom/report/today",      icon: <TodayOutlined         fontSize="small" /> },
           { title: "Month Wise",   path: "/ecom/report/month-wise", icon: <CalendarMonthOutlined fontSize="small" /> },
+          { title: "Login Success", path: "/ecom/report/login-success", icon: <LoginOutlined fontSize="small" /> },
         ],
       },
     ],
