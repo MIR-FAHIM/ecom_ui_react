@@ -243,6 +243,23 @@ export const deleteOrder = async (id) => {
   }
 }
 
+export const inactiveOrder = async (id) => {
+  try {
+    const response = await axiosInstance.patch(`/api/orders/inactive/${id}`, null, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error inactivating order:", error);
+    return {
+      status: 'error',
+      message: error?.response?.data?.message || error.message || "Failed to delete order",
+    };
+  }
+}
+
 export const getUserOrder = async (id, params = {}) => {
   try {
     // Backend endpoint: /api/orders/list/{userId} or similar; using /api/orders/list/{id}

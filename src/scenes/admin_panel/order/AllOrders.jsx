@@ -45,7 +45,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { getAllOrder, deleteOrder, updateOrderStatus, getOrderStatusList } from "../../../api/controller/admin_controller/order/order_controller";
+import { getAllOrder, inactiveOrder, updateOrderStatus, getOrderStatusList } from "../../../api/controller/admin_controller/order/order_controller";
 
 
 const PAYMENT_STATUS_CONFIG = {
@@ -89,6 +89,27 @@ const StatusChip = ({ status, config, onClick }) => {
   );
 };
 
+const getOrderPlatform = (order) =>
+  order?.platform_name ||
+  order?.platform ||
+  order?.order_platform ||
+  order?.from_platform ||
+  order?.order_from ||
+  order?.created_from ||
+  order?.source ||
+  order?.order_source ||
+  order?.channel ||
+  order?.from ||
+  "";
+
+const formatPlatform = (value) => {
+  const platform = String(value || "").trim();
+  if (!platform) return "N/A";
+  return platform
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 const AllOrders = () => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -107,6 +128,7 @@ const AllOrders = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [orderStatusList, setOrderStatusList] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Fetch orders from API
   const fetchOrders = async (pageZeroBased = 0, perPage = 10) => {
@@ -168,7 +190,8 @@ const AllOrders = () => {
         (order) =>
           String(order.order_number || "").toLowerCase().includes(term) ||
           String(order.customer_name || "").toLowerCase().includes(term) ||
-          String(order.customer_phone || "").toLowerCase().includes(term)
+          String(order.customer_phone || "").toLowerCase().includes(term) ||
+          formatPlatform(getOrderPlatform(order)).toLowerCase().includes(term)
       );
     }
     return result;
@@ -247,13 +270,16 @@ const AllOrders = () => {
   const handleDelete = async (orderId) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
-        const res = await deleteOrder(orderId);
+        setDeletingId(orderId);
+        const res = await inactiveOrder(orderId);
         if (res?.status === "success") {
           setOrders((prev) => prev.filter((o) => o.id !== orderId));
           setTotalOrders((prev) => Math.max(0, prev - 1));
         }
       } catch (err) {
         console.error("Error deleting order:", err);
+      } finally {
+        setDeletingId(null);
       }
     }
   };
@@ -377,6 +403,7 @@ const AllOrders = () => {
                   <TableRow sx={{ bgcolor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "#f8fafc" }}>
                     <TableCell sx={headCellSx}>Order</TableCell>
                     <TableCell sx={headCellSx}>Shop</TableCell>
+                    <TableCell sx={headCellSx}>From</TableCell>
                     <TableCell sx={headCellSx}>Customer</TableCell>
                     <TableCell sx={headCellSx} align="right">Total</TableCell>
                     <TableCell sx={headCellSx}>Status</TableCell>
@@ -409,6 +436,21 @@ const AllOrders = () => {
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>{order.shop_name || "—"}</Typography>
                           <Typography variant="caption" sx={{ color: "text.secondary" }}>ID:{order.shop_id || ""}</Typography>
                         </Stack>
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        <Chip
+                          label={formatPlatform(getOrderPlatform(order))}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            height: 24,
+                            borderRadius: 1.5,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: "text.secondary",
+                            borderColor: "divider",
+                          }}
+                        />
                       </TableCell>
                       <TableCell sx={cellSx}>
                         <Stack>
@@ -446,10 +488,15 @@ const AllOrders = () => {
                           <Tooltip title="Delete">
                             <IconButton
                               size="small"
+                              disabled={deletingId === order.id}
                               onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }}
                               sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, width: 32, height: 32, "&:hover": { bgcolor: "#fef2f2", borderColor: "#ef4444" } }}
                             >
-                              <DeleteOutlineIcon sx={{ fontSize: 16, color: "#ef4444" }} />
+                              {deletingId === order.id ? (
+                                <CircularProgress size={16} sx={{ color: "#ef4444" }} />
+                              ) : (
+                                <DeleteOutlineIcon sx={{ fontSize: 16, color: "#ef4444" }} />
+                              )}
                             </IconButton>
                           </Tooltip>
                         </Stack>

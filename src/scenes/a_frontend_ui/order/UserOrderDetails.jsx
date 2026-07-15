@@ -129,11 +129,11 @@ const UserOrderDetails = () => {
   const colors = tokens(theme.palette.mode);
   const isDark = theme.palette.mode === "dark";
   const border = theme.palette.divider || colors.primary[200];
-  const pageBg = isDark ? colors.primary[500] : "#f5f3ff";
+  const pageBg = isDark ? colors.primary[500] : "#f6f7fb";
   const surface = isDark ? colors.primary[400] : "#ffffff";
-  const surface2 = isDark ? colors.primary[300] : "#f3efff";
-  const accentGradient = "linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)";
-  const cardShadow = isDark ? "none" : "0 4px 24px rgba(124,58,237,0.08)";
+  const surface2 = isDark ? colors.primary[300] : "#f8fafc";
+  const accentGradient = "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)";
+  const cardShadow = isDark ? "none" : "0 12px 32px rgba(15,23,42,0.08)";
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -227,9 +227,43 @@ const UserOrderDetails = () => {
     return (a + b).toUpperCase();
   };
 
+  const cleanText = (value, fallback = "N/A") => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === "object") {
+      return value.name || value.bn_name || fallback;
+    }
+    const text = String(value)
+      .replace(/\[object Object\]/g, "")
+      .replace(/\s*,\s*,/g, ", ")
+      .replace(/,\s*$/g, "")
+      .trim();
+    if (!text) return fallback;
+    return text;
+  };
+
+  const formatLabel = (value, fallback = "N/A") => {
+    const text = cleanText(value, "");
+    if (!text) return fallback;
+    return text
+      .replace(/[_-]+/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   const orderItems = order?.items || [];
   const itemsCount = orderItems.reduce((sum, i) => sum + Number(i.qty || 0), 0);
   const isOrderCompleted = normalizeStatus(order?.status) === "completed";
+  const address = order?.user_address || {};
+  const customerName = cleanText(address.name || order?.customer_name);
+  const customerPhone = cleanText(address.mobile || order?.customer_phone);
+  const districtName = cleanText(address.district?.name || address.district || order?.district);
+  const areaName = cleanText(address.area || order?.area);
+  const zoneName = cleanText(order?.zone);
+  const platformName = formatLabel(order?.platform);
+  const shippingAddress = [
+    cleanText(address.address || order?.shipping_address, ""),
+    cleanText(address.area, ""),
+    cleanText(address.district?.name || address.district, ""),
+  ].filter(Boolean).join(", ") || cleanText(order?.shipping_address);
 
   const openReview = (item) => {
     const pid = item?.product_id ?? item?.id ?? "";
@@ -339,9 +373,9 @@ const UserOrderDetails = () => {
                 <Typography
                   variant="h5"
                   fontWeight={900}
-                  sx={{ lineHeight: 1.1, letterSpacing: "-0.02em" }}
+                  sx={{ lineHeight: 1.12, letterSpacing: 0, fontSize: 22 }}
                 >
-                  Order Details
+                  Order #{order.order_number}
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5, flexWrap: "wrap" }}>
                   <Typography
@@ -353,8 +387,14 @@ const UserOrderDetails = () => {
                       fontSize: 12,
                     }}
                   >
-                    #{order.order_number}
+                    {order.payment_group_id || `ID ${order.id}`}
                   </Typography>
+                  <Chip
+                    label={platformName}
+                    variant="outlined"
+                    size="small"
+                    sx={{ borderRadius: 1, fontWeight: 700, fontSize: 11 }}
+                  />
                   <Chip
                     icon={statusMeta.icon}
                     label={statusMeta.label}
@@ -464,6 +504,12 @@ const UserOrderDetails = () => {
             gradient: "linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)",
           },
           {
+            icon: <InfoOutlined sx={{ fontSize: 20 }} />,
+            label: "FROM",
+            value: platformName,
+            gradient: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)",
+          },
+          {
             icon: <Payments sx={{ fontSize: 20 }} />,
             label: "ORDER TOTAL",
             value: formatCurrency(order.total),
@@ -471,7 +517,7 @@ const UserOrderDetails = () => {
             highlight: true,
           },
         ].map((stat) => (
-          <Grid item xs={12} sm={4} key={stat.label}>
+          <Grid item xs={12} sm={6} md={3} key={stat.label}>
             <Card
               sx={{
                 borderRadius: 1,
@@ -559,24 +605,30 @@ const UserOrderDetails = () => {
                       boxShadow: "0 4px 10px rgba(124,58,237,0.3)",
                     }}
                   >
-                    {getInitials(order.customer_name)}
+                    {getInitials(customerName)}
                   </Avatar>
                   <Box>
                     <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.8, color: "text.secondary" }}>
                       FULL NAME
                     </Typography>
                     <Typography fontWeight={800} sx={{ mt: 0.1 }}>
-                      {order.customer_name || "N/A"}
+                      {customerName}
                     </Typography>
                   </Box>
                 </Stack>
 
                 <Grid container spacing={1.5}>
                   <Grid item xs={6}>
-                    <InfoBlock label="PHONE" value={order.customer_phone || "N/A"} surface2={surface2} />
+                    <InfoBlock label="PHONE" value={customerPhone} surface2={surface2} />
                   </Grid>
                   <Grid item xs={6}>
                     <InfoBlock label="USER ID" value={String(order.user_id ?? "N/A")} surface2={surface2} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <InfoBlock label="ADDRESS ID" value={String(order.user_address_id ?? address.id ?? "N/A")} surface2={surface2} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <InfoBlock label="PAYMENT" value={paymentMeta.label} surface2={surface2} />
                   </Grid>
                 </Grid>
               </Stack>
@@ -615,20 +667,23 @@ const UserOrderDetails = () => {
                   <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.8, color: "text.secondary" }}>
                     ADDRESS
                   </Typography>
-                  <Typography fontWeight={700} sx={{ mt: 0.3 }}>
-                    {order.shipping_address || "N/A"}
+                  <Typography fontWeight={750} sx={{ mt: 0.3, fontSize: 14, lineHeight: 1.55 }}>
+                    {shippingAddress}
                   </Typography>
                 </Box>
 
                 <Grid container spacing={1.5}>
-                  <Grid item xs={4}>
-                    <InfoBlock label="ZONE" value={order.zone || "N/A"} surface2={surface2} />
+                  <Grid item xs={6} sm={3}>
+                    <InfoBlock label="ZONE" value={zoneName} surface2={surface2} />
                   </Grid>
-                  <Grid item xs={4}>
-                    <InfoBlock label="DISTRICT" value={order.district || "N/A"} surface2={surface2} />
+                  <Grid item xs={6} sm={3}>
+                    <InfoBlock label="DISTRICT" value={districtName} surface2={surface2} />
                   </Grid>
-                  <Grid item xs={4}>
-                    <InfoBlock label="AREA" value={order.area || "N/A"} surface2={surface2} />
+                  <Grid item xs={6} sm={3}>
+                    <InfoBlock label="AREA" value={areaName} surface2={surface2} />
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <InfoBlock label="PLATFORM" value={platformName} surface2={surface2} />
                   </Grid>
                 </Grid>
 
@@ -733,9 +788,9 @@ const UserOrderDetails = () => {
                           <Typography fontWeight={800} fontSize={13} sx={{ lineHeight: 1.2 }}>
                             {item.product_name}
                           </Typography>
-                          {item.variant ? (
+                          {item.shop?.shop_name || item.shop?.name || item.variant ? (
                             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                              {item.variant}
+                              {item.shop?.shop_name || item.shop?.name || item.variant}
                             </Typography>
                           ) : null}
                         </Box>
@@ -921,6 +976,24 @@ const UserOrderDetails = () => {
                     border={border}
                     accentGradient={accentGradient}
                   />
+                  <MiniMeta
+                    icon={<InfoOutlined fontSize="small" />}
+                    label="Platform"
+                    value={platformName}
+                    surface2={surface2}
+                    border={border}
+                    accentGradient={accentGradient}
+                  />
+                  {order.payment_group_id ? (
+                    <MiniMeta
+                      icon={<Payments fontSize="small" />}
+                      label="Payment Group"
+                      value={order.payment_group_id}
+                      surface2={surface2}
+                      border={border}
+                      accentGradient={accentGradient}
+                    />
+                  ) : null}
                 </Stack>
               </Box>
             </Grid>

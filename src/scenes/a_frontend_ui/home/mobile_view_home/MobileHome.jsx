@@ -3,7 +3,6 @@ import { Box, Divider, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getCategory } from "../../../../api/controller/admin_controller/product/setting_controller";
 
-import MobileSearchBar from "./MobileSearchBar";
 import MobileHero from "./MobileHero";
 import MobileCategoryStrip from "./MobileCategoryStrip";
 import MobileDealsStrip from "./MobileDealsStrip";
@@ -47,9 +46,6 @@ export default function MobileHome() {
         pb: 8,
       }}
     >
-      {/* Sticky top bar */}
-      <MobileSearchBar />
-
       {/* Main scrollable content */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
 

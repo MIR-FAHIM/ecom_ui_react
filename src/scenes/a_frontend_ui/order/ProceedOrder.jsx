@@ -405,6 +405,7 @@ const ProceedOrder = () => {
       const checkoutTotal = Number(cart.subtotal || 0) + Number(selectedShippingCost || 0);
       const form = new FormData();
       form.append("user_id", userId);
+      form.append("user_address_id", String(addrObj.id || selectedAddress));
       form.append("customer_name", addrObj.name || "");
       form.append("customer_phone", addrObj.mobile || "");
       form.append(

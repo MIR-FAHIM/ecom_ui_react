@@ -15,7 +15,6 @@ import {
 	useTheme,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-
 import { getCategoryWiseProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import { getProductCategoryDetails, getCategoryChildren} from "../../../../api/controller/admin_controller/product/product_setting_controller";
 import SmartProductCard from "../../home/components/ProductCard";
