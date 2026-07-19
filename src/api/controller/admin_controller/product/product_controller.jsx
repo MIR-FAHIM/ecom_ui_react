@@ -269,6 +269,21 @@ export const updateProduct = async (id,productData) => {
   }
 };
 
+export const duplicateProduct = async (id, data = {}) => {
+  try {
+    const response = await axiosInstance.post(`/api/products/duplicate/${id}`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error duplicating product:', error);
+    throw error;
+  }
+};
+
 
 export const addProdductDiscount = async (data) => {
   try {

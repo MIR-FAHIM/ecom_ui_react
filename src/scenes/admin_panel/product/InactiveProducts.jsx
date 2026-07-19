@@ -28,10 +28,15 @@ import {
   InputLabel,
   Select,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
 import LinkIcon from "@mui/icons-material/Link";
@@ -46,6 +51,7 @@ import { image_file_url } from "../../../api/config/index.jsx";
 import {
   getInactiveProduct,
   deleteProduct,
+  duplicateProduct,
 } from "../../../api/controller/admin_controller/product/product_controller.jsx";
 import {
   getCategory,
@@ -72,6 +78,14 @@ const normalizeList = (x) => {
   if (Array.isArray(x?.data?.data)) return x.data.data;
   if (Array.isArray(x?.data?.data?.data)) return x.data.data.data;
   return [];
+};
+
+const DUPLICATE_PRODUCT_PAYLOAD = {
+  published: false,
+  approved: false,
+  copy_images: true,
+  copy_attributes: true,
+  copy_discount: true,
 };
 
 function ProductImage({ product }) {
@@ -153,6 +167,8 @@ const InactiveProducts = () => {
   const [shopId, setShopId] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [deletingId, setDeletingId] = useState(null);
+  const [duplicatingId, setDuplicatingId] = useState(null);
+  const [duplicateTarget, setDuplicateTarget] = useState(null);
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
 
   const searchTimer = useRef(null);
@@ -226,6 +242,28 @@ const InactiveProducts = () => {
       setSnack({ open: true, msg: err.message || "Failed to delete product", severity: "error" });
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleConfirmDuplicate = async () => {
+    if (!duplicateTarget?.id || duplicatingId) return;
+    try {
+      setDuplicatingId(duplicateTarget.id);
+      const res = await duplicateProduct(duplicateTarget.id, DUPLICATE_PRODUCT_PAYLOAD);
+      if (res?.status && res.status !== "success") {
+        throw new Error(res.message || "Product duplicate failed");
+      }
+      setSnack({ open: true, msg: "Product duplicated successfully", severity: "success" });
+      setDuplicateTarget(null);
+      await fetchProducts(page, rowsPerPage);
+    } catch (err) {
+      setSnack({
+        open: true,
+        msg: err?.response?.data?.message || err?.message || "Product duplicate failed",
+        severity: "error",
+      });
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -374,7 +412,7 @@ const InactiveProducts = () => {
                 </TableHead>
                 <TableBody>
                   {products.map((product) => (
-                    <TableRow key={product.id} sx={{ "&:hover": { bgcolor: "action.hover" }, transition: "background-color 140ms", opacity: deletingId === product.id ? 0.45 : 1 }}>
+                    <TableRow key={product.id} sx={{ "&:hover": { bgcolor: "action.hover" }, transition: "background-color 140ms", opacity: deletingId === product.id || duplicatingId === product.id ? 0.45 : 1 }}>
                       <TableCell sx={{ ...cellSx, pl: 2 }}>
                         <Typography variant="caption" color="text.disabled" fontWeight={700}>#{product.id}</Typography>
                       </TableCell>
@@ -421,6 +459,13 @@ const InactiveProducts = () => {
                               <LinkIcon sx={{ fontSize: 18 }} />
                             </IconButton>
                           </Tooltip>
+                          <Tooltip title="Duplicate product">
+                            <IconButton size="small" disabled={duplicatingId === product.id} onClick={() => setDuplicateTarget(product)} sx={{ color: "#7c3aed", "&:hover": { bgcolor: "#f5f3ff" }, borderRadius: 1.5 }}>
+                              {duplicatingId === product.id
+                                ? <CircularProgress size={16} sx={{ color: "#7c3aed" }} />
+                                : <ContentCopyOutlinedIcon sx={{ fontSize: 18 }} />}
+                            </IconButton>
+                          </Tooltip>
                           <Tooltip title="Delete product">
                             <IconButton size="small" disabled={deletingId === product.id} onClick={() => handleDelete(product)} sx={{ color: "#dc2626", "&:hover": { bgcolor: "#fef2f2" }, borderRadius: 1.5 }}>
                               {deletingId === product.id
@@ -449,6 +494,36 @@ const InactiveProducts = () => {
           </>
         )}
       </Card>
+
+      <Dialog
+        open={!!duplicateTarget}
+        onClose={() => {
+          if (!duplicatingId) setDuplicateTarget(null);
+        }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 800 }}>Duplicate this product?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            A draft copy of {duplicateTarget?.name ? `"${duplicateTarget.name}"` : "this product"} will be created with images, attributes, and discount copied.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDuplicateTarget(null)} disabled={!!duplicatingId} sx={{ textTransform: "none", fontWeight: 700 }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleConfirmDuplicate}
+            disabled={!!duplicatingId}
+            startIcon={duplicatingId ? <CircularProgress size={16} color="inherit" /> : <ContentCopyOutlinedIcon />}
+            sx={{ textTransform: "none", fontWeight: 800, bgcolor: "#6366f1", "&:hover": { bgcolor: "#4f46e5" } }}
+          >
+            Duplicate
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snack.severity} onClose={() => setSnack((s) => ({ ...s, open: false }))} sx={{ borderRadius: 2, fontWeight: 600 }}>{snack.msg}</Alert>
