@@ -129,27 +129,23 @@ function EditProduct() {
 	const buildImageList = (product) => {
 		const list = [];
 		const primary = product?.primary_image || null;
-
-		if (primary?.file_name || primary?.url) {
-			list.push({
-				file: null,
-				media_id: primary?.id ?? primary?.media_id,
-				file_name: primary?.file_name || primary?.url || "",
-				filename: primary?.file_original_name || primary?.file_name || "",
-				url: primary?.url || null,
-				is_primary: true,
-			});
-		}
+		const primaryUpload = primary?.upload || null;
+		const primaryUploadId = primaryUpload?.id ?? primary?.media_id ?? primary?.upload_id ?? product?.thumbnail_img ?? null;
 
 		const extra = Array.isArray(product?.images) ? product.images : [];
 		extra.forEach((img) => {
 			const upload = img?.upload || null;
-			const mediaId = upload?.id ?? img?.id ?? img?.media_id;
-			if (!mediaId) return;
-			if (list.some((x) => String(x.media_id) === String(mediaId))) return;
+			const productImageId = img?.id ?? img?.product_image_id ?? null;
+			const uploadId = upload?.id ?? img?.media_id ?? img?.upload_id ?? null;
+			if (!productImageId && !uploadId && !img?.file_name && !img?.image && !img?.url) return;
+			if (productImageId && list.some((x) => String(x.product_image_id) === String(productImageId))) return;
+			if (!productImageId && uploadId && list.some((x) => String(x.upload_id ?? x.media_id) === String(uploadId))) return;
 			list.push({
 				file: null,
-				media_id: mediaId,
+				id: productImageId,
+				product_image_id: productImageId,
+				upload_id: uploadId,
+				media_id: uploadId,
 				file_name: upload?.file_name || upload?.url || img?.file_name || img?.image || "",
 				filename:
 					upload?.file_original_name ||
@@ -159,18 +155,47 @@ function EditProduct() {
 					img?.image ||
 					"",
 				url: upload?.url || img?.url || null,
-				is_primary: !!img?.is_primary,
+				is_primary:
+					Boolean(img?.is_primary ?? img?.is_primary_image ?? img?.primary) ||
+					(Boolean(primaryUploadId) && Boolean(uploadId) && String(uploadId) === String(primaryUploadId)),
+				existing: Boolean(productImageId),
 			});
 		});
+
+		if (primaryUpload?.file_name || primary?.file_name || primaryUpload?.url || primary?.url) {
+			const duplicatePrimary = list.some((x) => {
+				if (primaryUploadId && x.upload_id) return String(x.upload_id) === String(primaryUploadId);
+				return x.file_name && x.file_name === (primaryUpload?.file_name || primary?.file_name);
+			});
+			const primaryProductImageId = primary?.product_image_id ?? primary?.productImageId ?? null;
+			if (!duplicatePrimary) {
+				list.unshift({
+					file: null,
+					id: primaryProductImageId,
+					product_image_id: primaryProductImageId,
+					upload_id: primaryUploadId,
+					media_id: primaryUploadId,
+					file_name: primaryUpload?.file_name || primary?.file_name || "",
+					filename: primaryUpload?.file_original_name || primary?.file_original_name || primaryUpload?.file_name || primary?.file_name || "",
+					url: primaryUpload?.url || primary?.url || null,
+					is_primary: true,
+					existing: Boolean(primaryProductImageId),
+				});
+			}
+		}
 
 		if (!list.length && product?.thumbnail_img) {
 			list.push({
 				file: null,
+				id: null,
+				product_image_id: null,
+				upload_id: product.thumbnail_img,
 				media_id: product.thumbnail_img,
 				file_name: "",
 				filename: `media-${product.thumbnail_img}`,
 				url: null,
 				is_primary: true,
+				existing: false,
 			});
 		}
 
@@ -387,6 +412,67 @@ function EditProduct() {
 		return Object.keys(nextErrors).length === 0;
 	};
 
+	const apiFieldStep = {
+		name: 0,
+		slug: 0,
+		category_id: 0,
+		brand_id: 0,
+		user_id: 0,
+		added_by: 0,
+		unit_price: 0,
+		purchase_price: 0,
+		current_stock: 0,
+		unit: 0,
+		weight: 0,
+		discount: 1,
+		discount_type: 1,
+		discount_value: 1,
+		discount_start_date: 1,
+		discount_end_date: 1,
+		short_description: 1,
+		meta_title: 1,
+		meta_description: 1,
+		photos: 3,
+		thumbnail_img: 3,
+		images: 3,
+	};
+
+	const getErrorText = (value) => {
+		if (Array.isArray(value)) return value.filter(Boolean).join(" ");
+		if (value && typeof value === "object") return Object.values(value).flat().filter(Boolean).join(" ");
+		return value ? String(value) : "";
+	};
+
+	const normalizeApiErrors = (apiErrors = {}) => {
+		return Object.entries(apiErrors).reduce((acc, [field, value]) => {
+			const key = String(field).split(".").pop();
+			const message = getErrorText(value);
+			if (key && message) acc[key] = message;
+			return acc;
+		}, {});
+	};
+
+	const isFailedResponse = (res) => {
+		const status = String(res?.status || "").toLowerCase();
+		return status === "failed" || status === "error" || res?.success === false || !!res?.errors;
+	};
+
+	const showApiFailure = (payload, fallback = "Failed to update product") => {
+		const fieldErrors = normalizeApiErrors(payload?.errors);
+		const firstField = Object.keys(fieldErrors)[0];
+		const firstFieldMessage = firstField ? fieldErrors[firstField] : "";
+
+		if (Object.keys(fieldErrors).length > 0) {
+			setErrors((prev) => ({ ...prev, ...fieldErrors }));
+			if (firstField && apiFieldStep[firstField] !== undefined) {
+				setStep(apiFieldStep[firstField]);
+			}
+		}
+
+		setSuccessMessage("");
+		setErrorMessage(payload?.message || firstFieldMessage || fallback);
+	};
+
 	const handleFinish = async () => {
 		if (!validateStep(step)) return;
 		if (!id) return;
@@ -439,7 +525,11 @@ function EditProduct() {
 			const primaryMedia = images.find((i) => i.is_primary && i.media_id);
 			if (primaryMedia) productFormData.append("thumbnail_img", primaryMedia.media_id);
 
-			await updateProduct(id, productFormData);
+			const updateRes = await updateProduct(id, productFormData);
+			if (isFailedResponse(updateRes)) {
+				showApiFailure(updateRes);
+				return;
+			}
 
 			const imagesToUpload = images
 				.filter((img) => img.file)
@@ -470,7 +560,11 @@ function EditProduct() {
 			}, 1500);
 		} catch (error) {
 			console.error("Product update error:", error);
-			setErrorMessage(error.response?.data?.message || error.message || "Failed to update product");
+			if (error?.response?.data && isFailedResponse(error.response.data)) {
+				showApiFailure(error.response.data);
+			} else {
+				setErrorMessage(error.response?.data?.message || error.message || "Failed to update product");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -540,6 +634,8 @@ function EditProduct() {
 			<StepImages
 				value={images}
 				error={errors.images}
+				productId={id}
+				deleteProductImagesOnRemove
 				onAdd={(img) => setImages((prev) => [...prev, img])}
 				onChange={setImages}
 				onPrimary={(idx) => {

@@ -47,12 +47,14 @@ export const getCategoryChildren = async (id) => {
 }
 export const deleteProductImage = async (id) => {
   try {
-    const response = await axiosInstance.delete(`/api/products/images/delete/${id}`,
-       
-    );
+    const response = await axiosInstance.delete(`/api/products/images/delete/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error deleting product image:", error);
-    return [];
+    throw error;
   }
 }

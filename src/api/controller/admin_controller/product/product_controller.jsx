@@ -265,7 +265,7 @@ export const updateProduct = async (id,productData) => {
     return response.data;
   } catch (error) {
     console.error('Error creating product:', error);
-    return { status: 'error', message: error.message };
+    return error?.response?.data || { status: 'error', message: error.message };
   }
 };
 

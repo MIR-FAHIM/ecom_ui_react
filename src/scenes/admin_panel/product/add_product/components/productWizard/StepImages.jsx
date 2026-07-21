@@ -9,6 +9,9 @@ import {
   FormHelperText,
   Grid,
   IconButton,
+  CircularProgress,
+  Alert,
+  Snackbar,
   Stack,
   Tooltip,
 } from "@mui/material";
@@ -20,6 +23,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import AllMedia from "../../../../media/AllMedia";
@@ -29,11 +33,13 @@ import {
   getProductImages,
 } from "../../../../../../api/controller/admin_controller/product/product_setting_controller";
 
-function StepImages({ value = [], onChange, onPrimary, error = "", productId }) {
+function StepImages({ value = [], onChange, onPrimary, error = "", productId, deleteProductImagesOnRemove = false }) {
   const fileInputRef = useRef(null);
   const [mediaOpen, setMediaOpen] = useState(false);
   const [removingId, setRemovingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [loadingImages, setLoadingImages] = useState(false);
+  const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
 
   const ensurePrimary = (list) => {
     if (list.length === 0) return list;
@@ -43,23 +49,46 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
     return next;
   };
 
-  const updateImages = (next) => {
+  const updateImages = (next, options = {}) => {
     if (!onChange) return;
-    onChange(ensurePrimary(next));
+    const shouldEnsurePrimary = options.ensurePrimary !== false;
+    onChange(shouldEnsurePrimary ? ensurePrimary(next) : next);
   };
 
-  const removeAtIndex = (idx) => {
-    updateImages(value.filter((_, i) => i !== idx));
+  const removeAtIndex = (idx, options = {}) => {
+    const removed = value[idx];
+    const next = value.filter((_, i) => i !== idx);
+    if (removed?.is_primary) {
+      updateImages(next.map((img) => ({ ...img, is_primary: false })), { ensurePrimary: false });
+      return;
+    }
+    updateImages(next, options);
   };
 
-  const getImageKey = (img) => String(img?.media_id ?? img?.id ?? img?.file_name ?? img?.filename ?? "");
+  const getProductImageId = (img) => img?.product_image_id ?? img?.productImageId ?? (img?.existing ? img?.id : null) ?? null;
+  const getUploadId = (img) => img?.upload?.id ?? img?.upload_id ?? img?.media_id ?? null;
+  const getImageKey = (img) => String(getProductImageId(img) ?? getUploadId(img) ?? img?.file_name ?? img?.filename ?? "");
+
+  const getImageSrc = (img) => {
+    if (img?.file) return URL.createObjectURL(img.file);
+    const url = img?.url || "";
+    if (url && /^https?:\/\//i.test(String(url))) return String(url);
+    const fileName = img?.file_name || "";
+    if (!fileName) return "";
+    if (/^https?:\/\//i.test(String(fileName))) return String(fileName);
+    return `${image_file_url}/${String(fileName).replace(/^\/+/, "")}`;
+  };
 
   const mapServerImage = (img) => {
     const upload = img?.upload || null;
-    const mediaId = img?.media_id ?? upload?.id ?? img?.id ?? null;
+    const productImageId = img?.id ?? img?.product_image_id ?? null;
+    const uploadId = upload?.id ?? img?.media_id ?? img?.upload_id ?? null;
     return {
       file: null,
-      media_id: mediaId,
+      id: productImageId,
+      product_image_id: productImageId,
+      upload_id: uploadId,
+      media_id: uploadId,
       file_name: upload?.file_name || img?.file_name || img?.image || "",
       filename:
         upload?.file_original_name ||
@@ -70,6 +99,7 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
         "",
       url: upload?.url || img?.url || null,
       is_primary: Boolean(img?.is_primary ?? img?.is_primary_image ?? img?.primary),
+      existing: true,
     };
   };
 
@@ -89,7 +119,7 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
       try {
         const res = await getProductImages(productId);
         const list = normalizeList(res?.data ?? res);
-        const serverImages = list.map(mapServerImage).filter((img) => img.media_id || img.file_name);
+        const serverImages = list.map(mapServerImage).filter((img) => img.product_image_id || img.media_id || img.file_name);
         const existingKeys = new Set(value.map(getImageKey));
         const merged = [...value];
         serverImages.forEach((img) => {
@@ -146,32 +176,51 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
         {
           file: null,
           media_id: it.id,
+          upload_id: it.id,
           filename: it.file_original_name || it.file_name,
+          file_name: it.file_name || "",
+          url: it.url || null,
           is_primary: value.length === 0 || !value.some((v) => v.is_primary),
+          existing: false,
         },
       ];
       updateImages(next);
     });
   };
 
-  const handleRemove = async (img, idx) => {
+  const handleRemoveClick = (img, idx) => {
     if (!img || !onChange) return;
-    const mediaId = img?.media_id ?? img?.id ?? null;
-    if (!mediaId || img?.file) {
+    const productImageId = getProductImageId(img);
+    if (!deleteProductImagesOnRemove || !img?.existing || img?.file) {
       removeAtIndex(idx);
       return;
     }
+    if (!productImageId) {
+      setSnack({ open: true, msg: "Product image delete failed", severity: "error" });
+      return;
+    }
+    setDeleteTarget({ img, idx, imageId: productImageId });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget?.imageId || deleteTarget.idx == null) return;
 
     try {
-      setRemovingId(mediaId);
-      const res = await deleteProductImage(mediaId);
-      if (res?.status && res.status !== "success") {
-        console.error("Failed to delete product image", res);
-        return;
+      setRemovingId(deleteTarget.imageId);
+      const res = await deleteProductImage(deleteTarget.imageId);
+      if (res?.status && res.status !== "success" && res?.success !== true) {
+        throw new Error(res.message || "Product image delete failed");
       }
-      removeAtIndex(idx);
+      removeAtIndex(deleteTarget.idx);
+      setDeleteTarget(null);
+      setSnack({ open: true, msg: "Product image deleted successfully", severity: "success" });
     } catch (err) {
       console.error("Failed to delete product image", err);
+      setSnack({
+        open: true,
+        msg: err?.response?.data?.message || err?.message || "Product image delete failed",
+        severity: "error",
+      });
     } finally {
       setRemovingId(null);
     }
@@ -250,11 +299,9 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
           ) : (
             <Grid container spacing={2}>
               {value.map((img, idx) => {
-                const src = img.file
-                  ? URL.createObjectURL(img.file)
-                  : img.file_name
-                  ? `${image_file_url}/${img.file_name}`
-                  : img.url || "";
+                const productImageId = getProductImageId(img);
+                const isRemoving = removingId != null && String(removingId) === String(productImageId);
+                const src = getImageSrc(img);
                 return (
                   <Grid item xs={6} sm={4} md={3} key={idx}>
                     <Box
@@ -303,6 +350,7 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
                             <IconButton
                               size="small"
                               onClick={() => onPrimary(idx)}
+                              disabled={isRemoving}
                               sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "#eef2ff" } }}
                             >
                               <StarOutlineIcon sx={{ fontSize: 16, color: "#6366f1" }} />
@@ -312,11 +360,11 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
                         <Tooltip title="Remove">
                           <IconButton
                             size="small"
-                            onClick={() => handleRemove(img, idx)}
-                            disabled={removingId != null}
+                            onClick={() => handleRemoveClick(img, idx)}
+                            disabled={isRemoving}
                             sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "#fef2f2", color: "#ef4444" } }}
                           >
-                            <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                            {isRemoving ? <CircularProgress size={16} /> : <DeleteOutlineIcon sx={{ fontSize: 16 }} />}
                           </IconButton>
                         </Tooltip>
                       </Stack>
@@ -349,6 +397,44 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId }) 
           <AllMedia onSelect={(it) => { handleMediaSelect(it); setMediaOpen(false); }} single={false} />
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => {
+          if (!removingId) setDeleteTarget(null);
+        }}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 2.5 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800 }}>Delete this product image?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            This will delete the image record from this product.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteTarget(null)} disabled={!!removingId} sx={{ textTransform: "none", fontWeight: 700 }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmDelete}
+            disabled={!!removingId}
+            startIcon={removingId ? <CircularProgress size={16} color="inherit" /> : <DeleteOutlineIcon />}
+            sx={{ textTransform: "none", fontWeight: 800 }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snack.open} autoHideDuration={3500} onClose={() => setSnack((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        <Alert severity={snack.severity} onClose={() => setSnack((s) => ({ ...s, open: false }))} sx={{ borderRadius: 2, fontWeight: 600 }}>
+          {snack.msg}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }
