@@ -21,6 +21,7 @@ import PercentIcon from "@mui/icons-material/Percent";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
 import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -302,12 +303,26 @@ function StepDiscountSeo({ value, onChange, errors = {} }) {
               />
             </Grid>
 
-            {/* Meta Title */}
+            {/* Product Slug */}
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 size="small"
-                label="Meta Title"
+                label="Product Slug"
+                value={value.slug || ""}
+                onChange={(e) => onChange({ slug: e.target.value })}
+                placeholder="product-slug"
+                error={!!errors.slug}
+                helperText={errors.slug || "Used in product URL and canonical SEO links"}
+                sx={fieldSx}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="SEO Title"
                 value={value.meta_title || ""}
                 onChange={(e) => onChange({ meta_title: e.target.value })}
                 placeholder="Leave blank to use product name"
@@ -331,14 +346,14 @@ function StepDiscountSeo({ value, onChange, errors = {} }) {
                 size="small"
                 multiline
                 rows={3}
-                label="Meta Description"
+                label="SEO Description"
                 value={value.meta_description || ""}
                 onChange={(e) => onChange({ meta_description: e.target.value })}
-                placeholder="Shown in Google search results. Aim for 150–160 characters."
+                placeholder="Shown in Google search results. Aim for 150-160 characters."
                 inputProps={{ maxLength: 320 }}
                 helperText={
                   <Box component="span" sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <span>Recommended: 150–160 characters for best SEO</span>
+                    <span>Recommended: 150-160 characters for best SEO</span>
                     <span
                       style={{
                         color:
@@ -353,6 +368,27 @@ function StepDiscountSeo({ value, onChange, errors = {} }) {
                     </span>
                   </Box>
                 }
+                sx={fieldSx}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="SEO Image"
+                value={value.meta_img || ""}
+                onChange={(e) => onChange({ meta_img: e.target.value })}
+                placeholder="Image URL or media id for social sharing"
+                error={!!errors.meta_img}
+                helperText={errors.meta_img || "Used as fallback social sharing image"}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <ImageOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                    </InputAdornment>
+                  ),
+                }}
                 sx={fieldSx}
               />
             </Grid>

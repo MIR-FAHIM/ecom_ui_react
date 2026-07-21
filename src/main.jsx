@@ -7,6 +7,7 @@ import { appname } from '../src/api/config'; // adjust path as needed
 import { ProfileProvider } from './scenes/provider/profile_context';
 import { ColorModeContext, useMode } from './theme';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Set document title
 document.title = appname;
@@ -16,14 +17,16 @@ function Root() {
 
     return (
         <React.StrictMode>
-            <ProfileProvider>
-                <ColorModeContext.Provider value={colorMode}>
-                    <ThemeProvider theme={theme}>
-                        <CssBaseline />
-                        <AppRouter />
-                    </ThemeProvider>
-                </ColorModeContext.Provider>
-            </ProfileProvider>
+            <HelmetProvider>
+                <ProfileProvider>
+                    <ColorModeContext.Provider value={colorMode}>
+                        <ThemeProvider theme={theme}>
+                            <CssBaseline />
+                            <AppRouter />
+                        </ThemeProvider>
+                    </ColorModeContext.Provider>
+                </ProfileProvider>
+            </HelmetProvider>
         </React.StrictMode>
     );
 }

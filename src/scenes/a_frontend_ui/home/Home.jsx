@@ -21,6 +21,7 @@ import BannerRow from "./components/BannerRow";
 
 import BestSellingProduct from "./components/BestSellingProduct";
 import MobileHome from "./mobile_view_home/MobileHome";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -96,7 +97,7 @@ const HomeP1 = () => {
                   <TodayDealProduct
                     compact
                     title="Today Deals"
-                    onView={(product) => navigate(`/product/${product.id}`)}
+                    onView={(product) => navigate(productDetailPath(product))}
                   />
                 </Box>
               </Box>
@@ -119,20 +120,20 @@ const HomeP1 = () => {
             }}
           >
             <FeaturedProduct
-              onView={(product) => navigate(`/product/${product.id}`)}
+              onView={(product) => navigate(productDetailPath(product))}
             />
-            <TodayDealBox onView={(product) => navigate(`/product/${product.id}`)} />
+            <TodayDealBox onView={(product) => navigate(productDetailPath(product))} />
           </Box>
           <BannerRow />
-          <BestSellingProduct onView={(product) => navigate(`/product/${product.id}`)} />
+          <BestSellingProduct onView={(product) => navigate(productDetailPath(product))} />
           <CategoryWiseProductHome
-            onView={(product) => navigate(`/product/${product.id}`)}
+            onView={(product) => navigate(productDetailPath(product))}
             category_id={4}
             color={"#ecddec"}
           
           />
           <CategoryWiseProductHome
-            onView={(product) => navigate(`/product/${product.id}`)}
+            onView={(product) => navigate(productDetailPath(product))}
             category_id={5}
             color={"#f5d9e4"}
           

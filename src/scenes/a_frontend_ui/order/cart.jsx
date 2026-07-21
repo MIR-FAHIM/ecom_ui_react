@@ -30,6 +30,7 @@ import { getCartByUser, updateQuantity, deleteItem } from "../../../api/controll
 import { image_file_url } from "../../../api/config";
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../../theme";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const Cart = () => {
   const theme = useTheme();
@@ -313,7 +314,7 @@ const Cart = () => {
                             variant="square"
                             src={getPrimaryImage(it.product)}
                             sx={{ width: "100%", height: "100%" }}
-                            onClick={() => navigate(`/product/${it.product?.id}`)}
+                            onClick={() => navigate(productDetailPath(it.product))}
                           />
                         </Box>
                       </ListItemAvatar>

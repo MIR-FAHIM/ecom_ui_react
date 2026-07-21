@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller";
 import { image_file_url } from "../../../api/config";
 import { tokens } from "../../../theme";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -339,7 +340,7 @@ const SearchProduct = ({
 												setOpen(false);
 												setFocused(false);
 												saveRecentSearch(query.trim());
-												navigate(`/product/${product?.id}`);
+												navigate(productDetailPath(product));
 											}}
 											sx={{
 												display: "flex",

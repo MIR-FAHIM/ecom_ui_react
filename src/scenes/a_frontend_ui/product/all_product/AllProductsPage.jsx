@@ -20,6 +20,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import SmartProductCard from "../../home/components/ProductCard";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 const PER_PAGE = 24;
@@ -220,7 +221,7 @@ const AllProductsPage = () => {
 								<SmartProductCard
 									key={product.id}
 									product={product}
-									onView={() => navigate(`/product/${product.id}`)}
+									onView={() => navigate(productDetailPath(product))}
 								/>
 							))}
 						</Box>

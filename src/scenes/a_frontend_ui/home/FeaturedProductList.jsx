@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getFeaturedProduct } from "../../../api/controller/admin_controller/product/product_controller";
 import FeaturedTitle from "./components/FeaturedTitle";
 import SmartProductCard from "./components/ProductCard";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -87,7 +88,7 @@ const FeaturedProductList = () => {
 								<SmartProductCard
 									key={product.id}
 									product={product}
-									onView={() => navigate(`/product/${product.id}`)}
+									onView={() => navigate(productDetailPath(product))}
 								/>
 							))
 						)}

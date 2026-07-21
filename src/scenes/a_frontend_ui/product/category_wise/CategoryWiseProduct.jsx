@@ -19,6 +19,7 @@ import { getCategoryWiseProduct } from "../../../../api/controller/admin_control
 import { getProductCategoryDetails, getCategoryChildren} from "../../../../api/controller/admin_controller/product/product_setting_controller";
 import SmartProductCard from "../../home/components/ProductCard";
 import { tokens } from "../../../../theme";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -340,7 +341,7 @@ const CategoryWiseProduct = () => {
 										item xs={12} sm={6} md={2} lg={3}>
 											<SmartProductCard
 												product={product}
-												onView={(p) => navigate(`/product/${p?.id}`)}
+												onView={(p) => navigate(productDetailPath(p))}
 											/>
 										</Grid>
 									))}

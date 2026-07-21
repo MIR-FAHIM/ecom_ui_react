@@ -35,6 +35,7 @@ const DEFAULT_GENERAL = {
 	slug: "",
 	category_id: "",
 	brand_id: "",
+	shop_id: "",
 	user_id: "",
 	added_by: 1,
 	description: "",
@@ -60,6 +61,7 @@ const DEFAULT_GENERAL = {
 	short_description: "",
 	meta_title: "",
 	meta_description: "",
+	meta_img: "",
 };
 
 function EditProduct() {
@@ -114,7 +116,7 @@ function EditProduct() {
 			const [cRes, bRes, vRes] = await Promise.all([
 				getCategory(),
 				getBrand(),
-				getAllShops(),
+				getAllShops({ page: 1, per_page: 100 }),
 			]);
 
 			setCategories(normalizeList(cRes));
@@ -224,7 +226,8 @@ function EditProduct() {
 				slug: product?.slug ?? "",
 				category_id: product?.category_id ?? "",
 				brand_id: product?.brand_id ?? "",
-				user_id: product?.user_id ?? localStorage.getItem("userId") ?? "",
+				shop_id: product?.shop_id ?? product?.shop?.id ?? "",
+				user_id: product?.user_id ?? product?.shop?.user_id ?? localStorage.getItem("userId") ?? "",
 				added_by: product?.added_by ?? localStorage.getItem("userId") ?? 1,
 				description: product?.description ?? "",
 				unit_price: product?.unit_price ?? "",
@@ -244,6 +247,7 @@ function EditProduct() {
 				short_description: product?.short_description ?? "",
 				meta_title: product?.meta_title ?? "",
 				meta_description: product?.meta_description ?? "",
+				meta_img: product?.meta_img ?? product?.meta_image ?? product?.seo?.image ?? "",
 				// Discount — loaded directly from product columns
 				discount_type: product?.discount_type === "amount" ? "flat" : (product?.discount_type ?? "flat"),
 				discount_value: product?.discount ? product.discount : "",
@@ -375,6 +379,7 @@ function EditProduct() {
 			if (!general.name || !general.name.trim()) nextErrors.name = "Product name is required";
 			if (!general.slug || !general.slug.trim()) nextErrors.slug = "Slug is required";
 			if (!general.category_id) nextErrors.category_id = "Category is required";
+			if (!general.shop_id) nextErrors.shop_id = "Shop is required";
 			if (parentCategoryId && subCategories.length > 0 && !subCategoryId) {
 				nextErrors.category_id = "Sub category is required";
 			}
@@ -417,6 +422,7 @@ function EditProduct() {
 		slug: 0,
 		category_id: 0,
 		brand_id: 0,
+		shop_id: 0,
 		user_id: 0,
 		added_by: 0,
 		unit_price: 0,
@@ -432,6 +438,7 @@ function EditProduct() {
 		short_description: 1,
 		meta_title: 1,
 		meta_description: 1,
+		meta_img: 1,
 		photos: 3,
 		thumbnail_img: 3,
 		images: 3,
@@ -483,12 +490,17 @@ function EditProduct() {
 			setSuccessMessage("");
 
 			const productFormData = new FormData();
+			const selectedShop = shops.find((shop) => String(shop?.id) === String(general.shop_id));
+			const selectedShopId = selectedShop?.id ?? general.shop_id;
+			const selectedShopUserId = selectedShop?.user_id ?? general.user_id;
+
 			productFormData.append("name", general.name);
 			productFormData.append("slug", general.slug);
 			productFormData.append("category_id", general.category_id);
 			if (general.brand_id) productFormData.append("brand_id", general.brand_id);
+			if (selectedShopId) productFormData.append("shop_id", selectedShopId);
 			productFormData.append("added_by", general.added_by ?? 1);
-			productFormData.append("user_id", general.user_id);
+			productFormData.append("user_id", selectedShopUserId);
 			productFormData.append("description", general.description || "");
 			productFormData.append("unit_price", general.unit_price);
 			if (general.purchase_price) productFormData.append("purchase_price", general.purchase_price);
@@ -504,8 +516,9 @@ function EditProduct() {
 			productFormData.append("unit", general.unit || "");
 			if (general.weight) productFormData.append("weight", general.weight);
 			if (general.short_description) productFormData.append("short_description", general.short_description);
-			if (general.meta_title) productFormData.append("meta_title", general.meta_title);
-			if (general.meta_description) productFormData.append("meta_description", general.meta_description);
+			productFormData.append("meta_title", general.meta_title || "");
+			productFormData.append("meta_description", general.meta_description || "");
+			productFormData.append("meta_img", general.meta_img || "");
 			// Discount fields sent directly on product
 			if (general.discount_value && parseFloat(general.discount_value) > 0) {
 				productFormData.append("discount", general.discount_value);

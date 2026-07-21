@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { getRelatedProducts, getSellerFeaturedByProduct } from "../../../../api/controller/admin_controller/product/product_varient_controller";
 import { image_file_url } from "../../../../api/config";
 import { tokens } from "../../../../theme";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -137,7 +138,7 @@ const RelatedProduct = ({ productId }) => {
 							return (
 								<Box
 									key={p?.id}
-									onClick={() => navigate(`/product/${p?.id}`)}
+									onClick={() => navigate(productDetailPath(p))}
 									sx={{
 										display: "flex",
 										gap: 1,

@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getProduct } from "../../../api/controller/admin_controller/product/product_controller";
 import FeaturedTitle from "../home/components/FeaturedTitle";
 import SmartProductCard from "../home/components/ProductCard";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -129,7 +130,7 @@ const SearchedProductList = () => {
                                 <SmartProductCard
                                     key={product.id}
                                     product={product}
-                                    onView={() => navigate(`/product/${product.id}`)}
+                                    onView={() => navigate(productDetailPath(product))}
                                 />
                             ))
                         )}

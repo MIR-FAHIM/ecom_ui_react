@@ -4,6 +4,7 @@ import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
 import { getFeaturedProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import { image_file_url } from "../../../../api/config";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -31,7 +32,7 @@ function FeaturedCard({ product }) {
 
   return (
     <Box
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={() => navigate(productDetailPath(product))}
       sx={{
         flexShrink: 0,
         width: 120,

@@ -18,6 +18,7 @@ import { tokens } from "../../../theme";
 import { getShopDetails, getShopProduct } from "../../../api/controller/admin_controller/shop/shop_controller.jsx";
 import ProductCard from "../home/components/ProductCard.jsx";
 import GeneralInfoBar from "./components/GeneralInfoBar";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -187,7 +188,7 @@ const ShopProducts = () => {
 											<ProductCard
 												product={product}
 												onView={(p) => {
-													if (p?.id) navigate(`/product/${p.id}`);
+													if (p?.id || p?.slug) navigate(productDetailPath(p));
 												}}
 											/>
 										</Grid>

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   Box,
   Button,
@@ -68,9 +69,14 @@ const buildImageUrl = (fileOrUrl) => {
   return `${base}/${path}`;
 };
 
+const stripHtml = (value) => {
+  if (value == null) return "";
+  return String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+};
+
 const ProductDetail = () => {
   const theme = useTheme();
-  const { id } = useParams();
+  const { idOrSlug: productIdentifier } = useParams();
   const navigate = useNavigate();
 
   const colors = tokens(theme.palette.mode);
@@ -114,7 +120,7 @@ const ProductDetail = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await getProductDetails(id);
+        const res = await getProductDetails(productIdentifier);
 
         // Your API: { status, message, data: {...product} }
         const p = res?.data?.data ?? res?.data ?? res;
@@ -133,7 +139,7 @@ const ProductDetail = () => {
       }
     };
     load();
-  }, [id]);
+  }, [productIdentifier]);
 
   // Images for thumbnails:
   // Your details response currently: images: [] and primary_image has file_name
@@ -155,6 +161,14 @@ const ProductDetail = () => {
   }, [selectedImage, product?.primary_image?.file_name, images]);
 
   const mainImage = useMemo(() => buildImageUrl(mainImagePath) || "/assets/images/placeholder.png", [mainImagePath]);
+  const seo = product?.seo || {};
+  const seoTitle = seo.title || product?.name || "Product";
+  const seoDescription = stripHtml(seo.description || product?.description || product?.short_description || "");
+  const seoImage = seo.image || product?.thumbnail_url || product?.meta_img || mainImage;
+  const seoUrl = seo.url || (typeof window !== "undefined" ? window.location.href : "");
+  const seoCanonical = seo.canonical || seo.url || seoUrl;
+  const seoKeywords = Array.isArray(seo.keywords) ? seo.keywords.filter(Boolean).join(", ") : "";
+  const seoSchema = seo.schema && typeof seo.schema === "object" ? seo.schema : null;
 
   // Pricing: use final_sale_price for main price
   const unitPrice = useMemo(() => Number(product?.unit_price ?? 0), [product?.unit_price]);
@@ -409,6 +423,28 @@ const ProductDetail = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 6 }}>
+      <Helmet>
+        <title>{seoTitle}</title>
+        {seoDescription ? <meta name="description" content={seoDescription} /> : null}
+        {seoKeywords ? <meta name="keywords" content={seoKeywords} /> : null}
+        {seoCanonical ? <link rel="canonical" href={seoCanonical} /> : null}
+
+        <meta property="og:title" content={seoTitle} />
+        {seoDescription ? <meta property="og:description" content={seoDescription} /> : null}
+        {seoImage ? <meta property="og:image" content={seoImage} /> : null}
+        {seoUrl ? <meta property="og:url" content={seoUrl} /> : null}
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        {seoDescription ? <meta name="twitter:description" content={seoDescription} /> : null}
+        {seoImage ? <meta name="twitter:image" content={seoImage} /> : null}
+
+        {seoSchema ? (
+          <script type="application/ld+json">
+            {JSON.stringify(seoSchema)}
+          </script>
+        ) : null}
+      </Helmet>
       {/* Breadcrumb / Back bar */}
       <Box sx={{ bgcolor: surface, borderBottom: `1px solid ${divider}` }}>
         <Container>

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { getBanner } from "../../../../api/controller/admin_controller/media/banner_controller";
 import { useNavigate } from "react-router-dom";
 import { image_file_url } from "../../../../api/config";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 export default function Hero() {
   const theme = useTheme();
@@ -108,7 +109,10 @@ export default function Hero() {
     if (current?.related_category_id) {
       navigate(`/category/${current.related_category_id}`);
     } else if (current?.related_product_id) {
-      navigate(`/product/${current.related_product_id}`);
+      navigate(productDetailPath({
+        id: current.related_product_id,
+        slug: current.related_product_slug || current.related_product?.slug,
+      }));
     }
   };
 

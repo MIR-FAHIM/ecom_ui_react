@@ -4,6 +4,7 @@ import GridViewIcon from "@mui/icons-material/GridView";
 import { useNavigate } from "react-router-dom";
 import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import { image_file_url } from "../../../../api/config";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -33,7 +34,7 @@ function MiniProductCard({ product }) {
 
   return (
     <Box
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={() => navigate(productDetailPath(product))}
       sx={{
         bgcolor: theme.palette.background.paper,
         borderRadius: 2,

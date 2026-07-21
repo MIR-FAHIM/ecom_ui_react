@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import SmartProductCard from "../home/components/ProductCard";
 import { getUserWish } from "../../../api/controller/admin_controller/wishlist/wish_controller";
 import { getProductDetails } from "../../../api/controller/admin_controller/product/product_controller";
+import { productDetailPath } from "../../../utils/productRoute";
 
 const Wish = () => {
   const theme = useTheme();
@@ -112,7 +113,7 @@ const Wish = () => {
               <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
                 <SmartProductCard
                   product={product}
-                  onView={() => navigate(`/product/${product.id}`)}
+                  onView={() => navigate(productDetailPath(product))}
                 />
               </Grid>
             ))}

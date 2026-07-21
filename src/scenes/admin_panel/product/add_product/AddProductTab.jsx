@@ -138,6 +138,7 @@ function AddProductTab() {
   short_description: "",
   meta_title: "",
   meta_description: "",
+  meta_img: "",
 });
 
   const [attributes, setAttributes] = useState([]);
@@ -349,8 +350,9 @@ productFormData.append("stock_visibility_state", general.stock_visibility_state 
 productFormData.append("unit", general.unit || "");
 if (general.weight) productFormData.append("weight", general.weight);
 if (general.short_description) productFormData.append("short_description", general.short_description);
-if (general.meta_title) productFormData.append("meta_title", general.meta_title);
-if (general.meta_description) productFormData.append("meta_description", general.meta_description);
+productFormData.append("meta_title", general.meta_title || "");
+productFormData.append("meta_description", general.meta_description || "");
+productFormData.append("meta_img", general.meta_img || "");
 if (general.discount_value && parseFloat(general.discount_value) > 0) {
   productFormData.append("discount", general.discount_value);
   productFormData.append("discount_type", general.discount_type === "flat" ? "amount" : "percent");

@@ -107,10 +107,10 @@ export const getTodayDealProduct = async (params = {}) => {
 
 
 
-export const getProductDetails = async (id) => {
+export const getProductDetails = async (identifier) => {
 
   try {
-    const response = await axiosInstance.get(`/api/products/details/${id}`,
+    const response = await axiosInstance.get(`/api/products/details/${encodeURIComponent(identifier)}`,
       // {
       //   headers: {
       //     // 'token': localStorage.getItem("authToken"), // Add the token in Authorization header
