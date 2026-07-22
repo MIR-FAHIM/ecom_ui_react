@@ -19,6 +19,24 @@ export const getProduct = async (params = {}) => {
 };
 
 
+export const getAdminProduct = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/admin/list`, {
+      params,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+
+    // Return API payload (status/message/data) so callers can inspect response.status and response.data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getAdminProduct:", error);
+    return { status: 'error', message: error.message, data: null };
+  }
+};
+
+
 
 export const getStockOutProduct = async (params = {}) => {
   try {

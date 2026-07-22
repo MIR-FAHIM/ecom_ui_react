@@ -51,6 +51,7 @@ const DEFAULT_GENERAL = {
 	stock_visibility_state: 1,
 	unit: "",
 	weight: "",
+	max_resell_price: "",
 	// Discount
 	discount_type: "flat",
 	discount_value: "",
@@ -211,6 +212,7 @@ function EditProductSeller() {
 					product?.stock_visibility_state === "quantity" ? 1 : (product?.stock_visibility_state ?? 1),
 				unit: product?.unit ?? "",
 				weight: product?.weight ?? "",
+				max_resell_price: product?.max_resell_price ?? "",
 				short_description: product?.short_description ?? "",
 				meta_title: product?.meta_title ?? "",
 				meta_description: product?.meta_description ?? "",
@@ -355,6 +357,7 @@ function EditProductSeller() {
 			productFormData.append("stock_visibility_state", general.stock_visibility_state ? 1 : 0);
 			productFormData.append("unit", general.unit || "");
 			if (general.weight) productFormData.append("weight", general.weight);
+			productFormData.append("max_resell_price", general.max_resell_price || "");
 			if (general.short_description) productFormData.append("short_description", general.short_description);
 			if (general.meta_title) productFormData.append("meta_title", general.meta_title);
 			if (general.meta_description) productFormData.append("meta_description", general.meta_description);

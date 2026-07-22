@@ -205,6 +205,17 @@ function StepGeneral({
         />
       </Grid>
 
+      <Grid item xs={12} md={3}>
+        <TextField
+          fullWidth
+          size="small"
+          label="Max Resell Price"
+          type="number"
+          value={value.max_resell_price || ""}
+          onChange={(e) => onChange({ max_resell_price: e.target.value })}
+        />
+      </Grid>
+
       <Grid item xs={12}>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
           Description

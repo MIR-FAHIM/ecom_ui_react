@@ -49,7 +49,7 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import { tokens } from "../../../theme";
 import { image_file_url } from "../../../api/config/index.jsx";
 import {
-  getProduct,
+  getAdminProduct,
   deleteProduct,
   duplicateProduct,
 } from "../../../api/controller/admin_controller/product/product_controller.jsx";
@@ -204,7 +204,7 @@ const AllProducts = () => {
         else if (statusFilter === "todays_deal") params.todays_deal  = 1;
         else if (statusFilter === "stock_out")   params.stock_out    = 1;
 
-        const res = await getProduct(params);
+        const res = await getAdminProduct(params);
         const payload = res?.data ?? res;
         setProducts(Array.isArray(payload?.data) ? payload.data : []);
         setTotalProducts(payload?.total ?? payload?.meta?.total ?? payload?.pagination?.total ?? 0);
