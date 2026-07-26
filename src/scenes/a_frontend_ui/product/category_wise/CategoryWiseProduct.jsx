@@ -20,6 +20,7 @@ import { getProductCategoryDetails, getCategoryChildren} from "../../../../api/c
 import SmartProductCard from "../../home/components/ProductCard";
 import { tokens } from "../../../../theme";
 import { productDetailPath } from "../../../../utils/productRoute";
+import CategoryWiseProductPhnView from "./CategoryWiseProductPhnView";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 

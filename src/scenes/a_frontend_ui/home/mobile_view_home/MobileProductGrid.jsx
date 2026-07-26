@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import { image_file_url } from "../../../../api/config";
 import { productDetailPath } from "../../../../utils/productRoute";
+import { getProductPricing } from "../../../../utils/productPricing";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -26,11 +27,7 @@ const resolveImage = (product) => {
 function MiniProductCard({ product }) {
   const navigate = useNavigate();
   const theme = useTheme();
-  const price = Number(product?.unit_price ?? product?.price ?? 0);
-  const salePrice = Number(product?.sale_price ?? 0);
-  const hasSale = salePrice > 0 && salePrice < price;
-  const discount = hasSale ? Math.round(((price - salePrice) / price) * 100) : 0;
-  const displayPrice = hasSale ? salePrice : price;
+  const { price, displayPrice, hasSale, discountLabel } = getProductPricing(product);
 
   return (
     <Box
@@ -53,9 +50,9 @@ function MiniProductCard({ product }) {
           sx={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block" }}
           onError={(e) => { e.target.src = "https://via.placeholder.com/200x200?text=No+Image"; }}
         />
-        {discount > 0 && (
+        {discountLabel && (
           <Chip
-            label={`-${discount}%`}
+            label={discountLabel}
             size="small"
             sx={{
               position: "absolute",

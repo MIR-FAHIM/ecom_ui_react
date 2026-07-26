@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getFeaturedProduct } from "../../../../api/controller/admin_controller/product/product_controller";
 import { image_file_url } from "../../../../api/config";
 import { productDetailPath } from "../../../../utils/productRoute";
+import { getProductPricing } from "../../../../utils/productPricing";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -26,9 +27,7 @@ const resolveImage = (product) => {
 function FeaturedCard({ product }) {
   const navigate = useNavigate();
   const theme = useTheme();
-  const price = Number(product?.unit_price ?? product?.price ?? 0);
-  const salePrice = Number(product?.sale_price ?? 0);
-  const hasSale = salePrice > 0 && salePrice < price;
+  const { price, displayPrice, hasSale, discountLabel } = getProductPricing(product);
 
   return (
     <Box
@@ -50,6 +49,7 @@ function FeaturedCard({ product }) {
           mb: 0.8,
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           bgcolor: theme.palette.background.paper,
+          position: "relative",
         }}
       >
         <Box
@@ -59,6 +59,23 @@ function FeaturedCard({ product }) {
           sx={{ width: "100%", height: "100%", objectFit: "cover" }}
           onError={(e) => { e.target.src = "https://via.placeholder.com/200x200?text=No+Image"; }}
         />
+        {discountLabel && (
+          <Chip
+            label={discountLabel}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 6,
+              left: 6,
+              height: 20,
+              fontSize: 10,
+              fontWeight: 800,
+              bgcolor: "#ff4444",
+              color: "#fff",
+              "& .MuiChip-label": { px: 0.6 },
+            }}
+          />
+        )}
       </Box>
       <Typography
         variant="caption"
@@ -77,8 +94,16 @@ function FeaturedCard({ product }) {
         {product?.name}
       </Typography>
       <Typography variant="caption" sx={{ fontWeight: 800, fontSize: 12, color: "primary.main" }}>
-        {formatMoney(hasSale ? salePrice : price)}
+        {formatMoney(displayPrice)}
       </Typography>
+      {hasSale && (
+        <Typography
+          variant="caption"
+          sx={{ textDecoration: "line-through", color: "text.disabled", ml: 0.5, fontSize: 10 }}
+        >
+          {formatMoney(price)}
+        </Typography>
+      )}
     </Box>
   );
 }
