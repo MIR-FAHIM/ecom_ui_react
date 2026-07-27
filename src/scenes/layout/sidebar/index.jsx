@@ -34,6 +34,7 @@ import {
   FormatListBulleted,
   CheckCircleOutline,
   LoginOutlined,
+  CategoryOutlined,
 } from "@mui/icons-material";
 import logo from "../../../assets/images/logo.png";
 import { ToggledContext } from "../../../App";
@@ -70,6 +71,7 @@ const NAV_GROUPS = [
           { title: "Inactive",       path: "/ecom/product/inactive",   icon: <WarningAmberOutlined fontSize="small" /> },
           { title: "Stock Out",      path: "/ecom/product/stock-out",  icon: <WarningAmberOutlined fontSize="small" /> },
           { title: "Attribute",      path: "/ecom/product/attribute",  icon: <TuneOutlined         fontSize="small" /> },
+          { title: "Add Category",   path: "/ecom/category/add",       icon: <CategoryOutlined     fontSize="small" /> },
         ],
       },
       {

@@ -11,6 +11,16 @@ export const getCategoryWithAllChildren = async () => {
     return { status: 'error', data: [] };
   }
 }
+
+export const createCategory = async (data) => {
+  try {
+    const response = await axiosInstance.post(`/api/categories/create`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating category:", error);
+    throw error;
+  }
+}
 export const getCategoryChildren = async () => {
   try {
     const response = await axiosInstance.get(`/api/categories/children`);

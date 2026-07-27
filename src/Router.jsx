@@ -38,6 +38,7 @@ import AllCustomers from "./scenes/admin_panel/customer/AllCustomers";
 import TodayReport from "./scenes/admin_panel/report/TodayReport";
 import MonthWiseReport from "./scenes/admin_panel/report/MonthWiseReport";
 import LoginSuccessLogs from "./scenes/admin_panel/report/LoginSuccessLogs";
+import AddCategory from "./scenes/admin_panel/category/AddCategory";
 import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
 import DeliveryManDetail from "./scenes/admin_panel/delivery/DeliveryManDetail";
 import RelatedProductAdd from "./scenes/admin_panel/product/add_product/components/RelatedProductAdd";
@@ -181,6 +182,7 @@ const AppRouter = () => {
           <Route path="/ecom/product/attribute" element={<Attribute />} />
           <Route path="/ecom/product/edit/:id" element={<EditProduct />} />
           <Route path="related-product-add" element={<RelatedProductAdd />} />
+          <Route path="/ecom/category/add" element={<AddCategory />} />
           {/* Order Routes */}
           <Route path="/ecom/order/all" element={<AllOrdersEcom />} />
           <Route path="/ecom/order/completed" element={<CompletedOrders />} />
