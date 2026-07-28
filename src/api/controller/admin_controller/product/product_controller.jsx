@@ -18,6 +18,20 @@ export const getProduct = async (params = {}) => {
   }
 };
 
+export const getProductsByBrand = async (brandId, params = {}) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/brand/${brandId}`, { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching getProductsByBrand:", error);
+    return {
+      status: 'error',
+      message: error?.response?.data?.message || error.message,
+      data: null,
+    };
+  }
+};
+
 
 export const getAdminProduct = async (params = {}) => {
   try {

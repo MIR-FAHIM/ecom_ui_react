@@ -35,7 +35,9 @@ const ProductDetailImage = ({
 			<Box
 				sx={{
 					position: "relative",
-					height: { xs: 360, md: 480 },
+					width: "100%",
+					aspectRatio: "1 / 1",
+					maxHeight: { xs: 380, md: 560 },
 					background:
 						theme.palette.mode === "dark"
 							? "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))"
@@ -43,7 +45,6 @@ const ProductDetailImage = ({
 					display: "grid",
 					placeItems: "center",
 					overflow: "hidden",
-					p: 2,
 				}}
 			>
 				<Box
@@ -56,10 +57,11 @@ const ProductDetailImage = ({
 						e.currentTarget.src = "/assets/images/placeholder.png";
 					}}
 					sx={{
-						width: "auto",
-						height: "auto",
+						width: "100%",
+						height: "100%",
 						maxWidth: "100%",
 						maxHeight: "100%",
+						boxSizing: "border-box",
 						objectFit: "contain",
 						objectPosition: "center",
 						transform: `scale(${Math.min(zoom, 1)})`,
@@ -67,7 +69,7 @@ const ProductDetailImage = ({
 						transition: "transform 180ms ease",
 						filter: "saturate(1.06)",
 						display: "block",
-						p: 0,
+						p: { xs: 1.5, md: 2 },
 					}}
 				/>
 

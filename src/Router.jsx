@@ -39,6 +39,7 @@ import TodayReport from "./scenes/admin_panel/report/TodayReport";
 import MonthWiseReport from "./scenes/admin_panel/report/MonthWiseReport";
 import LoginSuccessLogs from "./scenes/admin_panel/report/LoginSuccessLogs";
 import AddCategory from "./scenes/admin_panel/category/AddCategory";
+import BrandManagement from "./scenes/admin_panel/brand/BrandManagement";
 import AddDeliveryMan from "./scenes/admin_panel/delivery/AddDeliveryMan";
 import DeliveryManDetail from "./scenes/admin_panel/delivery/DeliveryManDetail";
 import RelatedProductAdd from "./scenes/admin_panel/product/add_product/components/RelatedProductAdd";
@@ -61,6 +62,7 @@ import ProductDetail from "./scenes/a_frontend_ui/product/ProductDetail";
 import CategoryWiseProduct from "./scenes/a_frontend_ui/product/category_wise/CategoryWiseProduct";
 import Cart from "./scenes/a_frontend_ui/order/cart";
 import Brand from "./scenes/a_frontend_ui/brand/brand";
+import BrandProductsPage from "./scenes/a_frontend_ui/brand/BrandProductsPage";
 import AllCategory from "./scenes/a_frontend_ui/category/AllCategory";
 
 
@@ -157,6 +159,7 @@ const AppRouter = () => {
           <Route path="product-review" element={<ProductReview />} />
           <Route path="seller/add" element={<AddShop />} />
           <Route path="brands" element={<Brand />} />
+          <Route path="brands/:brandId/products" element={<BrandProductsPage />} />
           <Route path="categories" element={<AllCategory />} />
           <Route path="categories/home" element={<CategoryWiseProductHome />} />
           <Route path="search" element={<SearchedProductList />} />
@@ -183,6 +186,7 @@ const AppRouter = () => {
           <Route path="/ecom/product/edit/:id" element={<EditProduct />} />
           <Route path="related-product-add" element={<RelatedProductAdd />} />
           <Route path="/ecom/category/add" element={<AddCategory />} />
+          <Route path="/ecom/brand/manage" element={<BrandManagement />} />
           {/* Order Routes */}
           <Route path="/ecom/order/all" element={<AllOrdersEcom />} />
           <Route path="/ecom/order/completed" element={<CompletedOrders />} />

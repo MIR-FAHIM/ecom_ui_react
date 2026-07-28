@@ -41,6 +41,7 @@ const PAGE_TITLES = {
   "/ecom/product/stock-out":         "Stock Out Products",
   "/ecom/product/attribute":         "Attributes",
   "/ecom/category/add":              "Add Category",
+  "/ecom/brand/manage":              "Brand Management",
   "/ecom/order/all":                 "All Orders",
   "/ecom/order/completed":           "Completed Orders",
   "/ecom/seller/add":                "Add Seller",
