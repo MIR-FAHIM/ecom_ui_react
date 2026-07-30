@@ -30,6 +30,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ColorModeContext } from "../../../theme";
 import { ToggledContext } from "../../../App";
 import { getUserDetail } from "../../../api/controller/admin_controller/user_controller";
+import { hasCustomerSite } from "../../../api/config";
+import { getProjectText } from "../../../config/projectSettings";
 
 const PAGE_TITLES = {
   "/admin":                          "Dashboard",
@@ -73,7 +75,7 @@ const Navbar = () => {
   const [adminName, setAdminName]  = useState("Admin");
   const [adminEmail, setAdminEmail] = useState("admin@example.com");
 
-  const pageTitle = PAGE_TITLES[location.pathname] ?? "Admin Panel";
+  const pageTitle = getProjectText(PAGE_TITLES[location.pathname] ?? "Admin Panel");
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -152,7 +154,7 @@ const Navbar = () => {
 
       {/* ── Right: actions */}
       <Box display="flex" alignItems="center" gap={0.5}>
-        {!isMobile && (
+        {hasCustomerSite && !isMobile && (
           <Button
             size="small"
             variant="outlined"
@@ -175,7 +177,7 @@ const Navbar = () => {
           </Button>
         )}
 
-        {isMobile && (
+        {hasCustomerSite && isMobile && (
           <Tooltip title="See Customer Website">
             <IconButton size="small" onClick={handleVisitCustomerSite} sx={{ color: "text.secondary" }}>
               <LaunchOutlined fontSize="small" />

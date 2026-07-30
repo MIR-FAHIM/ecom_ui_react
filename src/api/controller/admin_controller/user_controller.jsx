@@ -95,6 +95,62 @@ export const getAllCustomers = async (params = {}) => {
     throw error; // Rethrow the error for further handling in your component
   }
 }
+
+export const updateUser = async (id, data) => {
+  try {
+    const response = await axiosInstance.put(`/api/users/update/${id}`, data, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};
+
+export const banUser = async (id) => {
+  try {
+    const response = await axiosInstance.patch(`/api/users/ban/${id}`, {}, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error banning user:", error);
+    throw error;
+  }
+};
+
+export const unbanUser = async (id) => {
+  try {
+    const response = await axiosInstance.patch(`/api/users/unban/${id}`, {}, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error unbanning user:", error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/api/users/delete/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+};
 export const getDeliveryMen = async (params = {}) => {
   try {
     const response = await axiosInstance.get(`/api/users/delivery-men`, {

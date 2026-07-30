@@ -23,6 +23,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import LoginIcon from "@mui/icons-material/Login";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import { loginController } from "../../api/controller/admin_controller/user_controller";
+import { appname } from "../../api/config";
 
 const AdminLogin = () => {
 	const theme = useTheme();
@@ -149,7 +150,7 @@ const AdminLogin = () => {
 								fontWeight={800}
 								sx={{ fontFamily: '"Playfair Display", "Georgia", serif' }}
 							>
-								Admin portal
+								{appname} Admin
 							</Typography>
 							<Typography variant="body2" sx={{ opacity: 0.9 }}>
 								Secure access to analytics and operations

@@ -37,9 +37,10 @@ import {
   CategoryOutlined,
   LocalOfferOutlined,
 } from "@mui/icons-material";
-import logo from "../../../assets/images/logo.png";
+import defaultLogo from "../../../assets/images/logo.png";
 import { ToggledContext } from "../../../App";
-import { appname } from "../../../api/config/index";
+import { appClient, appLogo, appname } from "../../../api/config/index";
+import { getProjectText } from "../../../config/projectSettings";
 
 // Always-dark sidebar palette
 const S = {
@@ -157,10 +158,14 @@ const NAV_GROUPS = [
   },
 ];
 
+const brandLogo = appLogo || (appClient === "myzoo" ? defaultLogo : "");
+
 // ── Flat nav item (no children)
 function NavItem({ item, collapsed, isActive, onClick }) {
+  const title = getProjectText(item.title);
+
   return (
-    <Tooltip title={collapsed ? item.title : ""} placement="right" arrow>
+    <Tooltip title={collapsed ? title : ""} placement="right" arrow>
       <Box
         onClick={onClick}
         sx={{
@@ -184,7 +189,7 @@ function NavItem({ item, collapsed, isActive, onClick }) {
         </Box>
         {!collapsed && (
           <Typography sx={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: "inherit", flex: 1, lineHeight: 1.4 }}>
-            {item.title}
+            {title}
           </Typography>
         )}
         {!collapsed && isActive && (
@@ -197,9 +202,11 @@ function NavItem({ item, collapsed, isActive, onClick }) {
 
 // ── Group header that expands/collapses
 function GroupItem({ item, collapsed, isOpen, hasActive, onToggle, children }) {
+  const title = getProjectText(item.title);
+
   return (
     <Box>
-      <Tooltip title={collapsed ? item.title : ""} placement="right" arrow>
+      <Tooltip title={collapsed ? title : ""} placement="right" arrow>
         <Box
           onClick={onToggle}
           sx={{
@@ -223,7 +230,7 @@ function GroupItem({ item, collapsed, isOpen, hasActive, onToggle, children }) {
           {!collapsed && (
             <>
               <Typography sx={{ fontSize: 13, fontWeight: hasActive ? 600 : 500, color: "inherit", flex: 1, lineHeight: 1.4 }}>
-                {item.title}
+                {title}
               </Typography>
               <Box sx={{ color: S.groupLbl, display: "flex" }}>
                 {isOpen ? <ExpandLess sx={{ fontSize: 16 }} /> : <ExpandMore sx={{ fontSize: 16 }} />}
@@ -246,6 +253,8 @@ function GroupItem({ item, collapsed, isOpen, hasActive, onToggle, children }) {
 
 // ── Child item inside group
 function ChildItem({ item, isActive, onClick }) {
+  const title = getProjectText(item.title);
+
   return (
     <Box
       onClick={onClick}
@@ -267,7 +276,7 @@ function ChildItem({ item, isActive, onClick }) {
         {item.icon}
       </Box>
       <Typography sx={{ fontSize: 12.5, fontWeight: isActive ? 600 : 400, color: "inherit", lineHeight: 1.4 }}>
-        {item.title}
+        {title}
       </Typography>
     </Box>
   );
@@ -317,7 +326,13 @@ const SideBar = () => {
                 flexShrink: 0,
               }}
             >
-              <img src={logo} alt="logo" style={{ width: 20, height: 20, objectFit: "contain", filter: "brightness(10)" }} />
+              {brandLogo ? (
+                <img src={brandLogo} alt="logo" style={{ width: 20, height: 20, objectFit: "contain", filter: "brightness(10)" }} />
+              ) : (
+                <Typography sx={{ color: "#fff", fontSize: 14, fontWeight: 800, lineHeight: 1 }}>
+                  {appname.charAt(0).toUpperCase()}
+                </Typography>
+              )}
             </Box>
             <Typography variant="h6" sx={{ fontWeight: 700, color: "#f1f5f9", fontSize: 15, letterSpacing: "-0.01em" }}>
               {appname}

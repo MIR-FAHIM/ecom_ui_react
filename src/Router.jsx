@@ -10,8 +10,9 @@ function ScrollToTop() {
   }, [pathname]);
   return null;
 }
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import App from "./App";
+import { hasCustomerSite, hasSellerPanel } from "./api/config";
 import Dashboard from "./scenes/admin_panel/dashboard";
 import AdminProfile from "./scenes/admin_panel/profile";
 import Login from "./scenes/auth/login";
@@ -117,61 +118,72 @@ const AppRouter = () => {
     <Router>
       <ScrollToTop />
       <Routes>
-        <Route path="/login" element={<Login />}></Route>
         <Route path="/admin-login" element={<AdminLogin />}></Route>
-        <Route path="/seller-login" element={<SellerLogin />}></Route>
-        <Route path="/login-otp" element={<LoginOtp />}></Route>
-        <Route path="/register" element={<Register />}></Route>
-        <Route path="/seller-register" element={<SellerRegister />}></Route>
+        {hasCustomerSite && (
+          <>
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/login-otp" element={<LoginOtp />}></Route>
+            <Route path="/register" element={<Register />}></Route>
+          </>
+        )}
+        {hasSellerPanel && (
+          <>
+            <Route path="/seller-login" element={<SellerLogin />}></Route>
+            <Route path="/seller-register" element={<SellerRegister />}></Route>
+          </>
+        )}
         {/* Public / storefront routes */}
-        <Route path="/" element={<FrontendLayout />}>
-          <Route index element={<HomeP1 />} />
-          <Route path="home" element={<HomeP1 />} />
+        {hasCustomerSite && (
+          <Route path="/" element={<FrontendLayout />}>
+            <Route index element={<HomeP1 />} />
+            <Route path="home" element={<HomeP1 />} />
 
-          <Route path="featured-products" element={<FeaturedProductList />} />
+            <Route path="featured-products" element={<FeaturedProductList />} />
 
-          <Route path="profile" element={<Profile />} />
+            <Route path="profile" element={<Profile />} />
 
-          <Route path="product/:idOrSlug" element={<ProductDetail />} />
-          <Route path="shop/:id" element={<ShopProducts />} />
-          <Route path="shops" element={<ShopList />} />
-          <Route path="category/:id" element={<CategoryWiseProduct />} />
-          <Route path="cart" element={<Cart />} />
-          <Route path="orders" element={<UserOrder />} />
-          <Route path="order/:id" element={<UserOrderDetails />} />
-          <Route path="checkout" element={<ProceedOrder />} />
-          <Route path="order-success" element={<OrderSuccessPage />} />
-          <Route path="payment-success" element={<PaymentSuccessPage />} />
-          <Route path="payment-failed" element={<PaymentFailedPage />} />
-          <Route path="payment-cancelled" element={<PaymentCancelledPage />} />
-          <Route path="payments/aamarpay/success" element={<PaymentSuccessPage />} />
-          <Route path="payments/aamarpay/fail" element={<PaymentFailedPage />} />
-          <Route path="payments/aamarpay/cancel" element={<PaymentCancelledPage />} />
-          <Route path="privacy" element={<Privacy />} />
-          <Route path="terms" element={<Terms />} />
-          <Route path="blogs" element={<Blogs />} />
-          <Route path="flash-sale" element={<FlashSale />} />
-          <Route path="about" element={<About />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="proceed-order" element={<ProceedOrder />} />
-          <Route path="wish" element={<Wish />} />
-          <Route path="related-product" element={<RelatedProduct />} />
-          <Route path="product-review" element={<ProductReview />} />
-          <Route path="seller/add" element={<AddShop />} />
-          <Route path="brands" element={<Brand />} />
-          <Route path="brands/:brandId/products" element={<BrandProductsPage />} />
-          <Route path="categories" element={<AllCategory />} />
-          <Route path="categories/home" element={<CategoryWiseProductHome />} />
-          <Route path="search" element={<SearchedProductList />} />
-          <Route path="all-products" element={<AllProductsPage />} />
-          <Route path="today-deals" element={<TodayDealsPage />} />
+            <Route path="product/:idOrSlug" element={<ProductDetail />} />
+            <Route path="shop/:id" element={<ShopProducts />} />
+            <Route path="shops" element={<ShopList />} />
+            <Route path="category/:id" element={<CategoryWiseProduct />} />
+            <Route path="cart" element={<Cart />} />
+            <Route path="orders" element={<UserOrder />} />
+            <Route path="order/:id" element={<UserOrderDetails />} />
+            <Route path="checkout" element={<ProceedOrder />} />
+            <Route path="order-success" element={<OrderSuccessPage />} />
+            <Route path="payment-success" element={<PaymentSuccessPage />} />
+            <Route path="payment-failed" element={<PaymentFailedPage />} />
+            <Route path="payment-cancelled" element={<PaymentCancelledPage />} />
+            <Route path="payments/aamarpay/success" element={<PaymentSuccessPage />} />
+            <Route path="payments/aamarpay/fail" element={<PaymentFailedPage />} />
+            <Route path="payments/aamarpay/cancel" element={<PaymentCancelledPage />} />
+            <Route path="privacy" element={<Privacy />} />
+            <Route path="terms" element={<Terms />} />
+            <Route path="blogs" element={<Blogs />} />
+            <Route path="flash-sale" element={<FlashSale />} />
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="proceed-order" element={<ProceedOrder />} />
+            <Route path="wish" element={<Wish />} />
+            <Route path="related-product" element={<RelatedProduct />} />
+            <Route path="product-review" element={<ProductReview />} />
+            <Route path="seller/add" element={<AddShop />} />
+            <Route path="brands" element={<Brand />} />
+            <Route path="brands/:brandId/products" element={<BrandProductsPage />} />
+            <Route path="categories" element={<AllCategory />} />
+            <Route path="categories/home" element={<CategoryWiseProductHome />} />
+            <Route path="search" element={<SearchedProductList />} />
+            <Route path="all-products" element={<AllProductsPage />} />
+            <Route path="today-deals" element={<TodayDealsPage />} />
 
-        </Route>
+          </Route>
+        )}
 
 
 
         <Route path="/" element={<RequireAdmin><App /></RequireAdmin>}>
 
+          {!hasCustomerSite && <Route index element={<Navigate to="/admin" replace />} />}
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/pos" element={<PosManagement />} />
@@ -229,21 +241,24 @@ const AppRouter = () => {
 
         </Route>
 
-        <Route path="/seller" element={<RequireSeller><SellerLayout /></RequireSeller>}>
-          <Route path="dashboard" element={<SellerDashboard />} />
-          <Route path="products" element={<SellerPanelProducts />} />
-          <Route path="shops" element={<SellerShopList />} />
-          <Route path="shops/add" element={<AddShop />} />
-          <Route path="shops/products" element={<SellerShopProduct />} />
-          <Route path="accounting" element={<SellerBankAccount />} />
-          <Route path="add/product" element={<AddProductTabSeller />} />
-          <Route path="edit/product/:id" element={<EditProductSeller />} />
-          <Route path="orders" element={<OrderShop />} />
-          <Route path="pos" element={<PosManagementSeller />} />
-          <Route path="orders/:id" element={<SellerOrderDetails />} />
-          <Route path="accounting/settled-amount-history" element={<SettledAmountHistory />} />
+        {hasSellerPanel && (
+          <Route path="/seller" element={<RequireSeller><SellerLayout /></RequireSeller>}>
+            <Route path="dashboard" element={<SellerDashboard />} />
+            <Route path="products" element={<SellerPanelProducts />} />
+            <Route path="shops" element={<SellerShopList />} />
+            <Route path="shops/add" element={<AddShop />} />
+            <Route path="shops/products" element={<SellerShopProduct />} />
+            <Route path="accounting" element={<SellerBankAccount />} />
+            <Route path="add/product" element={<AddProductTabSeller />} />
+            <Route path="edit/product/:id" element={<EditProductSeller />} />
+            <Route path="orders" element={<OrderShop />} />
+            <Route path="pos" element={<PosManagementSeller />} />
+            <Route path="orders/:id" element={<SellerOrderDetails />} />
+            <Route path="accounting/settled-amount-history" element={<SettledAmountHistory />} />
 
-        </Route>
+          </Route>
+        )}
+        {!hasCustomerSite && <Route path="*" element={<Navigate to="/admin" replace />} />}
       </Routes>
     </Router>
   );
