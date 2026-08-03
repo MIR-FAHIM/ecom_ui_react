@@ -239,8 +239,7 @@ const AppRouter = () => {
           <Route path="/ecom/banner/add" element={<AddBanner />} />
           <Route path="/ecom/media/all" element={<AllMedia />} />
 
-        </Route>
-
+        </Route>`r`n
         {hasSellerPanel && (
           <Route path="/seller" element={<RequireSeller><SellerLayout /></RequireSeller>}>
             <Route path="dashboard" element={<SellerDashboard />} />

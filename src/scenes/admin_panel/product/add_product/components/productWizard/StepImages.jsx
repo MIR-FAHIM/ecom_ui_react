@@ -170,22 +170,27 @@ function StepImages({ value = [], onChange, onPrimary, error = "", productId, de
   const handleMediaSelect = (itemOrItems) => {
     if (!itemOrItems) return;
     const items = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
-    items.forEach((it) => {
-      const next = [
-        ...value,
-        {
+    const existingKeys = new Set(value.map(getImageKey).filter(Boolean));
+    const hasPrimary = value.some((img) => img.is_primary);
+    const selectedImages = items
+      .filter((it) => it?.id && !existingKeys.has(String(it.id)))
+      .map((it, idx) => {
+        existingKeys.add(String(it.id));
+        return {
           file: null,
           media_id: it.id,
           upload_id: it.id,
           filename: it.file_original_name || it.file_name,
           file_name: it.file_name || "",
           url: it.url || null,
-          is_primary: value.length === 0 || !value.some((v) => v.is_primary),
+          is_primary: !hasPrimary && value.length === 0 && idx === 0,
           existing: false,
-        },
-      ];
-      updateImages(next);
-    });
+        };
+      });
+
+    if (selectedImages.length) {
+      updateImages([...value, ...selectedImages]);
+    }
   };
 
   const handleRemoveClick = (img, idx) => {

@@ -22,11 +22,40 @@ import {
   InputAdornment,
   Tooltip,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Snackbar,
+  Alert,
+  CircularProgress,
+  Stack,
 } from "@mui/material";
-import { Visibility, Refresh, Search } from "@mui/icons-material";
-import { getDeliveryMen } from "../../../api/controller/admin_controller/user_controller.jsx";
+import { Edit, Visibility, Refresh, Search } from "@mui/icons-material";
+import { getDeliveryMen, getUserDetail, updateUser } from "../../../api/controller/admin_controller/user_controller.jsx";
 import { tokens } from "../../../theme";
 
+
+const initialEditForm = {
+  name: "",
+  email: "",
+  mobile: "",
+  optional_phone: "",
+  address: "",
+  zone: "",
+  district: "",
+  area: "",
+  lat: "",
+  lon: "",
+  password: "",
+  confirm_password: "",
+};
+
+const normalizeUser = (response, fallback = {}) => response?.data?.user || response?.data || response?.user || response || fallback;
+const readErrorPayload = (error) => ({
+  message: error?.response?.data?.message || error?.message || "Delivery man update failed",
+  errors: error?.response?.data?.errors || error?.errors || {},
+});
 const AllDeliveryMans = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -41,6 +70,13 @@ const AllDeliveryMans = () => {
 
   // client-side search (within current page)
   const [searchQuery, setSearchQuery] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [editForm, setEditForm] = useState(initialEditForm);
+  const [editErrors, setEditErrors] = useState({});
+  const [snack, setSnack] = useState({ open: false, message: "", severity: "success" });
 
   const fetchDeliveryMen = async (pageZeroBased = page, perPage = rowsPerPage) => {
     setLoading(true);
@@ -111,6 +147,100 @@ const AllDeliveryMans = () => {
     fetchDeliveryMen(0, next);
   };
 
+
+  const fillEditForm = (user) => {
+    setEditForm({
+      name: user?.name || "",
+      email: user?.email || "",
+      mobile: user?.mobile || user?.phone || "",
+      optional_phone: user?.optional_phone || "",
+      address: user?.address || "",
+      zone: user?.zone || "",
+      district: user?.district || "",
+      area: user?.area || "",
+      lat: user?.lat ?? "",
+      lon: user?.lon ?? "",
+      password: "",
+      confirm_password: "",
+    });
+  };
+
+  const setEditField = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+    setEditErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleEdit = async (deliveryMan) => {
+    if (!deliveryMan?.id) return;
+    setEditTarget(deliveryMan);
+    fillEditForm(deliveryMan);
+    setEditErrors({});
+    setEditOpen(true);
+    setEditLoading(true);
+    try {
+      const response = await getUserDetail(deliveryMan.id);
+      fillEditForm(normalizeUser(response, deliveryMan));
+    } catch (error) {
+      setSnack({ open: true, message: error?.response?.data?.message || "Delivery man details fetch failed", severity: "error" });
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const buildEditPayload = () => {
+    const payload = {
+      name: editForm.name.trim(),
+      email: editForm.email.trim(),
+      mobile: editForm.mobile.trim(),
+      optional_phone: editForm.optional_phone.trim(),
+      address: editForm.address.trim(),
+      zone: editForm.zone.trim(),
+      district: editForm.district.trim(),
+      area: editForm.area.trim(),
+      lat: editForm.lat === "" ? "" : Number(editForm.lat),
+      lon: editForm.lon === "" ? "" : Number(editForm.lon),
+    };
+    if (editForm.password) payload.password = editForm.password;
+    return payload;
+  };
+
+  const validateEditPassword = () => {
+    if (!editForm.password && !editForm.confirm_password) return true;
+    if (editForm.password.length < 6) {
+      setEditErrors((prev) => ({ ...prev, password: ["Password must be at least 6 characters."] }));
+      return false;
+    }
+    if (editForm.password !== editForm.confirm_password) {
+      setEditErrors((prev) => ({ ...prev, confirm_password: ["Password and confirm password do not match."] }));
+      return false;
+    }
+    return true;
+  };
+
+  const handleEditSubmit = async (event) => {
+    event.preventDefault();
+    if (!editTarget?.id || !validateEditPassword()) return;
+    setEditSaving(true);
+    setEditErrors({});
+    try {
+      const response = await updateUser(editTarget.id, buildEditPayload());
+      if (response?.status === "failed") {
+        setEditErrors(response?.errors || {});
+        setSnack({ open: true, message: response?.message || "Delivery man update failed", severity: "error" });
+        return;
+      }
+      setSnack({ open: true, message: "Delivery man updated successfully", severity: "success" });
+      setEditOpen(false);
+      setEditTarget(null);
+      fetchDeliveryMen(page, rowsPerPage);
+    } catch (error) {
+      const parsed = readErrorPayload(error);
+      setEditErrors(parsed.errors);
+      setSnack({ open: true, message: parsed.message, severity: "error" });
+    } finally {
+      setEditSaving(false);
+    }
+  };
   const handleView = (deliveryManId) => {
     if (!deliveryManId) return;
     navigate(`/ecom/delivery/detail/${deliveryManId}`);
@@ -288,7 +418,17 @@ const AllDeliveryMans = () => {
                       <TableCell>{renderStatusChip(deliveryMan?.banned)}</TableCell>
 
                       <TableCell align="center">
-                        <Tooltip title="View">
+
+                        <Tooltip title="Edit">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEdit(deliveryMan)}
+                            sx={{ color: colors.blueAccent[400] }}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+<Tooltip title="View">
                           <IconButton
                             size="small"
                             onClick={() => handleView(deliveryMan?.id)}
@@ -323,7 +463,47 @@ const AllDeliveryMans = () => {
           />
         </CardContent>
       </Card>
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="md">
+        <DialogTitle>Edit Delivery Man</DialogTitle>
+        <Box component="form" onSubmit={handleEditSubmit}>
+          <DialogContent dividers>
+            {editLoading ? (
+              <Stack alignItems="center" sx={{ py: 6 }}><CircularProgress /></Stack>
+            ) : (
+              <Stack spacing={3}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}><TextField label="Name" value={editForm.name} onChange={(e) => setEditField("name", e.target.value)} error={Boolean(editErrors?.name)} helperText={editErrors?.name?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={6}><TextField label="Email" type="email" value={editForm.email} onChange={(e) => setEditField("email", e.target.value)} error={Boolean(editErrors?.email)} helperText={editErrors?.email?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={6}><TextField label="Mobile" value={editForm.mobile} onChange={(e) => setEditField("mobile", e.target.value)} error={Boolean(editErrors?.mobile)} helperText={editErrors?.mobile?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={6}><TextField label="Optional Phone" value={editForm.optional_phone} onChange={(e) => setEditField("optional_phone", e.target.value)} error={Boolean(editErrors?.optional_phone)} helperText={editErrors?.optional_phone?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12}><TextField label="Address" value={editForm.address} onChange={(e) => setEditField("address", e.target.value)} error={Boolean(editErrors?.address)} helperText={editErrors?.address?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={4}><TextField label="Zone" value={editForm.zone} onChange={(e) => setEditField("zone", e.target.value)} error={Boolean(editErrors?.zone)} helperText={editErrors?.zone?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={4}><TextField label="District" value={editForm.district} onChange={(e) => setEditField("district", e.target.value)} error={Boolean(editErrors?.district)} helperText={editErrors?.district?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={4}><TextField label="Area" value={editForm.area} onChange={(e) => setEditField("area", e.target.value)} error={Boolean(editErrors?.area)} helperText={editErrors?.area?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={6}><TextField label="Latitude" type="number" value={editForm.lat} onChange={(e) => setEditField("lat", e.target.value)} error={Boolean(editErrors?.lat)} helperText={editErrors?.lat?.[0] || ""} fullWidth size="small" /></Grid>
+                  <Grid item xs={12} md={6}><TextField label="Longitude" type="number" value={editForm.lon} onChange={(e) => setEditField("lon", e.target.value)} error={Boolean(editErrors?.lon)} helperText={editErrors?.lon?.[0] || ""} fullWidth size="small" /></Grid>
+                </Grid>
+                <Divider />
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5 }}>Password</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}><TextField label="New Password" type="password" value={editForm.password} onChange={(e) => setEditField("password", e.target.value)} error={Boolean(editErrors?.password)} helperText={editErrors?.password?.[0] || "Leave blank to keep current password"} fullWidth size="small" /></Grid>
+                    <Grid item xs={12} md={6}><TextField label="Confirm Password" type="password" value={editForm.confirm_password} onChange={(e) => setEditField("confirm_password", e.target.value)} error={Boolean(editErrors?.confirm_password)} helperText={editErrors?.confirm_password?.[0] || ""} fullWidth size="small" /></Grid>
+                  </Grid>
+                </Box>
+              </Stack>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ px: 3, py: 2 }}>
+            <Button onClick={() => setEditOpen(false)} disabled={editSaving}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={editLoading || editSaving} startIcon={editSaving ? <CircularProgress size={16} color="inherit" /> : null}>{editSaving ? "Saving..." : "Save Changes"}</Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
 
+      <Snackbar open={snack.open} autoHideDuration={3500} onClose={() => setSnack((prev) => ({ ...prev, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        <Alert severity={snack.severity} onClose={() => setSnack((prev) => ({ ...prev, open: false }))}>{snack.message}</Alert>
+      </Snackbar>
     </Box>
   );
 };

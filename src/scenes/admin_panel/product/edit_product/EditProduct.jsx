@@ -532,12 +532,6 @@ function EditProduct() {
 				productFormData.append("discount_type", "");
 			}
 
-			const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
-			mediaPhotos.forEach((mid) => productFormData.append("photos[]", mid));
-
-			const primaryMedia = images.find((i) => i.is_primary && i.media_id);
-			if (primaryMedia) productFormData.append("thumbnail_img", primaryMedia.media_id);
-
 			const updateRes = await updateProduct(id, productFormData);
 			if (isFailedResponse(updateRes)) {
 				showApiFailure(updateRes);
@@ -545,11 +539,20 @@ function EditProduct() {
 			}
 
 			const imagesToUpload = images
-				.filter((img) => img.file)
-				.map((img) => ({ file: img.file, is_primary: img.is_primary }));
+				.filter((img) => img.file || ((img.media_id || img.upload_id) && !img.existing))
+				.map((img) => ({
+					file: img.file || null,
+					media_id: img.media_id,
+					upload_id: img.upload_id ?? img.media_id,
+					is_primary: img.is_primary,
+				}));
 
 			if (imagesToUpload.length > 0) {
-				await uploadProductImages(id, imagesToUpload);
+				const imageResponse = await uploadProductImages(id, imagesToUpload);
+				if (isFailedResponse(imageResponse)) {
+					showApiFailure(imageResponse, "Product image upload failed");
+					return;
+				}
 			}
 
 			if (attributes && attributes.length > 0) {

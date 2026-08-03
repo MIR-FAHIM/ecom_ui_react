@@ -226,14 +226,18 @@ export const getProductWithVariants = async (id) => {
 }
 export const uploadProductImages = async (productId, images) => {
   try {
-    // images should be an array of FormData entries with image and is_primary
     const formData = new FormData();
 
     images.forEach((img, index) => {
       if (img.file) {
         formData.append(`images[${index}][image]`, img.file);
-        formData.append(`images[${index}][is_primary]`, img.is_primary ? '1' : '0');
       }
+      const uploadId = img.upload_id ?? img.media_id ?? img.id ?? null;
+      if (uploadId) {
+        formData.append(`images[${index}][upload_id]`, uploadId);
+        formData.append(`images[${index}][media_id]`, uploadId);
+      }
+      formData.append(`images[${index}][is_primary]`, img.is_primary ? '1' : '0');
     });
 
     const response = await axiosInstance.post(
@@ -250,7 +254,7 @@ export const uploadProductImages = async (productId, images) => {
     return response.data;
   } catch (error) {
     console.error('Error uploading product images:', error);
-    return { status: 'error', message: error.message };
+    return error?.response?.data || { status: 'error', message: error.message };
   }
 };
 export const getAllVarients = async () => {

@@ -130,7 +130,7 @@ const Navbar = () => {
         zIndex: 10,
       }}
     >
-      {/* ── Left: hamburger + page title */}
+      {/* â”€â”€ Left: hamburger + page title */}
       <Box display="flex" alignItems="center" gap={1.5}>
         {isMobile && (
           <IconButton size="small" onClick={() => setToggled(!toggled)} sx={{ color: "text.secondary" }}>
@@ -152,7 +152,7 @@ const Navbar = () => {
         </Box>
       </Box>
 
-      {/* ── Right: actions */}
+      {/* â”€â”€ Right: actions */}
       <Box display="flex" alignItems="center" gap={0.5}>
         {hasCustomerSite && !isMobile && (
           <Button
@@ -308,4 +308,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

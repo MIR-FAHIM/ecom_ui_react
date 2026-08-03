@@ -362,14 +362,6 @@ if (general.discount_value && parseFloat(general.discount_value) > 0) {
     productFormData.append("discount_end_date", Math.floor(new Date(general.discount_end_date).getTime() / 1000));
 }
 
-      // attach media library images as photo ids
-      const mediaPhotos = images.filter((i) => i.media_id).map((i) => i.media_id);
-      mediaPhotos.forEach((id) => productFormData.append("photos[]", id));
-
-      // set thumbnail_img if primary is a media item
-      const primaryMedia = images.find((i) => i.is_primary && i.media_id);
-      if (primaryMedia) productFormData.append("thumbnail_img", primaryMedia.media_id);
-
       // legacy price/stock fields removed; using unit_price/current_stock instead
 
       const productResponse = await createProduct(productFormData);
@@ -384,11 +376,22 @@ if (general.discount_value && parseFloat(general.discount_value) > 0) {
       // Step 2: Upload images (only those with a file to upload)
       // Step 2: Upload images (only those with a file to upload)
       const imagesToUpload = images
-        .filter((img) => img.file)
-        .map((img) => ({ file: img.file, is_primary: img.is_primary }));
+        .filter((img) => img.file || img.media_id || img.upload_id)
+        .map((img) => ({
+          file: img.file || null,
+          media_id: img.media_id,
+          upload_id: img.upload_id ?? img.media_id,
+          is_primary: img.is_primary,
+        }));
 
       if (imagesToUpload.length > 0) {
-        await uploadProductImages(productId, imagesToUpload);
+        const imageResponse = await uploadProductImages(productId, imagesToUpload);
+        const imageStatus = String(imageResponse?.status || "").toLowerCase();
+        if (imageStatus === "failed" || imageStatus === "error" || imageResponse?.success === false) {
+          setErrorMessage(imageResponse?.message || "Product image upload failed");
+          setLoading(false);
+          return;
+        }
       }
 
       // Step 3: Attach attributes to product (if any)
