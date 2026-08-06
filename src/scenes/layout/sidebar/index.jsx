@@ -167,6 +167,8 @@ function NavItem({ item, collapsed, isActive, onClick }) {
   return (
     <Tooltip title={collapsed ? title : ""} placement="right" arrow>
       <Box
+        component="a"
+        href={item.path}
         onClick={onClick}
         sx={{
           display: "flex",
@@ -177,6 +179,7 @@ function NavItem({ item, collapsed, isActive, onClick }) {
           mx: "8px",
           borderRadius: "8px",
           cursor: "pointer",
+          textDecoration: "none",
           background: isActive ? S.accentBg : "transparent",
           border: `1px solid ${isActive ? "rgba(99,102,241,0.25)" : "transparent"}`,
           color: isActive ? S.activeTxt : S.muted,
@@ -257,6 +260,8 @@ function ChildItem({ item, isActive, onClick }) {
 
   return (
     <Box
+      component="a"
+      href={item.path}
       onClick={onClick}
       sx={{
         display: "flex",
@@ -266,6 +271,7 @@ function ChildItem({ item, isActive, onClick }) {
         py: "7px",
         borderRadius: "6px",
         cursor: "pointer",
+        textDecoration: "none",
         background: isActive ? S.accentBg : "transparent",
         color: isActive ? S.activeTxt : S.muted,
         transition: "all 0.15s ease",
@@ -293,6 +299,12 @@ const SideBar = () => {
   const isActive    = (path) => location.pathname === path;
   const hasActive   = (children) => children?.some((c) => location.pathname === c.path);
   const toggleGroup = (key) => setOpenGroup((prev) => (prev === key ? null : key));
+  const handleLinkClick = (event, path) => {
+    if (!path) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    navigate(path);
+  };
 
   return (
     <Sidebar
@@ -380,7 +392,7 @@ const SideBar = () => {
                       key={ci}
                       item={child}
                       isActive={isActive(child.path)}
-                      onClick={() => navigate(child.path)}
+                      onClick={(event) => handleLinkClick(event, child.path)}
                     />
                   ))}
                 </GroupItem>
@@ -390,7 +402,7 @@ const SideBar = () => {
                   item={item}
                   collapsed={collapsed}
                   isActive={isActive(item.path)}
-                  onClick={() => navigate(item.path)}
+                  onClick={(event) => handleLinkClick(event, item.path)}
                 />
               )
             )}

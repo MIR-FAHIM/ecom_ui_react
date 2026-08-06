@@ -73,6 +73,7 @@ import Privacy from "./scenes/a_frontend_ui/pages/Privacy";
 import Terms from "./scenes/a_frontend_ui/pages/Terms";
 import About from "./scenes/a_frontend_ui/pages/About";
 import Contact from "./scenes/a_frontend_ui/pages/Contact";
+import DateInvitation from "./scenes/a_frontend_ui/pages/DateInvitation";
 import ProceedOrder from "./scenes/a_frontend_ui/order/ProceedOrder";
 import OrderSuccessPage from "./scenes/a_frontend_ui/order/order_success_page";
 import PaymentSuccessPage from "./scenes/a_frontend_ui/order/PaymentSuccessPage";
@@ -119,6 +120,7 @@ const AppRouter = () => {
       <ScrollToTop />
       <Routes>
         <Route path="/admin-login" element={<AdminLogin />}></Route>
+        <Route path="/date-invitation" element={<DateInvitation />}></Route>
         {hasCustomerSite && (
           <>
             <Route path="/login" element={<Login />}></Route>

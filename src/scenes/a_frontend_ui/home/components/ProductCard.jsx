@@ -28,6 +28,7 @@ import { tokens } from "../../../../theme.js";
 import { addCart, getCartByUser } from "../../../../api/controller/admin_controller/order/cart_controller.jsx";
 import { getUserWish, addWish, deleteWish } from "../../../../api/controller/admin_controller/wishlist/wish_controller.jsx";
 import { useNavigate } from "react-router-dom";
+import { productDetailPath } from "../../../../utils/productRoute";
 
 const safeArray = (x) => (Array.isArray(x) ? x : []);
 
@@ -148,6 +149,7 @@ export default function SmartProductCard({
   const subInk = colors.gray[300];
 
   const accent = theme.palette.mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[100];
+  const detailHref = useMemo(() => productDetailPath(product), [product]);
 
   const money = (n) =>
     new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(Number(n || 0));
@@ -394,9 +396,16 @@ export default function SmartProductCard({
     }
   }, [onAddToCart, product, product?.id, userId]);
 
+  const handleCardLinkClick = useCallback((e) => {
+    if (!detailHref) return;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (onView) onView(product);
+    else navigate(detailHref);
+  }, [detailHref, navigate, onView, product]);
+
   return (
     <Card
-      onClick={() => onView?.(product)}
       sx={{
         borderRadius: 2,
         overflow: "hidden",
@@ -414,7 +423,22 @@ export default function SmartProductCard({
         },
       }}
     >
-      {/* ── Image section ── */}
+      {/* â”€â”€ Image section â”€â”€ */}
+      {detailHref && (
+        <Box
+          component="a"
+          href={detailHref}
+          aria-label={`View ${product?.name || "product"}`}
+          onClick={handleCardLinkClick}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        />
+      )}
       <Box sx={{ position: "relative", overflow: "hidden" }}>
         <Box
           sx={{
@@ -462,7 +486,7 @@ export default function SmartProductCard({
           ) : null}
         </Box>
 
-        {/* Action icons — hidden, slide in from right on hover */}
+        {/* Action icons â€” hidden, slide in from right on hover */}
         <Stack
           className="pc-actions"
           spacing={0.8}
@@ -470,6 +494,7 @@ export default function SmartProductCard({
             position: "absolute",
             right: 8,
             top: 8,
+            zIndex: 3,
             opacity: 0,
             transform: "translateX(12px)",
             transition: "opacity 200ms ease, transform 200ms ease",
@@ -510,7 +535,7 @@ export default function SmartProductCard({
           )}
         </Stack>
 
-        {/* Add to cart bar — slides up from bottom on hover */}
+        {/* Add to cart bar â€” slides up from bottom on hover */}
         {!fromSeller && (
           <Box
             className="pc-cart-bar"
@@ -519,6 +544,7 @@ export default function SmartProductCard({
               bottom: 0,
               left: 0,
               right: 0,
+              zIndex: 3,
               opacity: 0,
               transform: "translateY(100%)",
               transition: "opacity 220ms ease, transform 220ms ease",
@@ -553,7 +579,7 @@ export default function SmartProductCard({
         )}
       </Box>
 
-      {/* ── Info section ── */}
+      {/* â”€â”€ Info section â”€â”€ */}
       <CardContent sx={{ p: 1.5, pt: 1.2, pb: "12px !important" }}>
         <Stack spacing={0.7}>
           <Typography
@@ -592,7 +618,7 @@ export default function SmartProductCard({
                   component="button"
                   type="button"
                   onClick={(e) => { e.stopPropagation(); navigate(`/shop/${product.shop.id}`); }}
-                  sx={{ fontSize: 11, fontWeight: 700, color: accent, textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
+                  sx={{ position: "relative", zIndex: 3, fontSize: 11, fontWeight: 700, color: accent, textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
                 >
                   {product.shop?.shop_name || product.shop?.name || "View shop"}
                 </Link>
